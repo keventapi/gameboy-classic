@@ -1,4 +1,4 @@
-# 🧠 Estrutura de Memória – Game Boy Emulator
+# Estrutura de Memória – Game Boy Emulator
 
 ## 📁 `gameboy/memory/ram.py`
 
