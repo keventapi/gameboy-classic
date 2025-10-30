@@ -51,3 +51,7 @@ O `MBC` é um chip dentro do cartucho do jogo que define o comportamento de leit
 * **Funcionalidades Extras (Futuras Implementações):**
     * **MBC3:** Possui um Real-Time Clock (RTC).
     * **MBC5:** Pode incluir funcionalidades extras, como leitor infravermelho.
+
+    ## Referências
+
+[GBCPUman v1.01](https://dn721904.ca.archive.org/0/items/gbcpuman_v1.01/GBCPUman.pdf)
