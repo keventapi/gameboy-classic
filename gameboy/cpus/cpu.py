@@ -22,8 +22,8 @@ class Cpu:
 
     def step(self):
         opcode = self.fetch()
-        instruction, operator, cycle = self.decode(opcode)
-        value = self.execute(instruction, operator, cycle)
+        decoded = self.decode(opcode)
+        value = self.execute(decoded, opcode)
         if value is None:
             return -1
         return value
@@ -44,12 +44,13 @@ class Cpu:
 
     def fetch(self):
         pc = self.registers["pc"]
-        opcode = self.memory.read(pc)
+        opcode = self.memory.read(pc) & 0xFF
         self.registers["pc"] += 1
         return opcode
 
     def decode(self, opcode):
         pass
 
-    def execute(self, instruction, operator, cycle):
+
+    def execute(self, decoded, opcode):
         pass
