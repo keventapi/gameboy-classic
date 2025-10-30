@@ -20,6 +20,12 @@ class MBC:
     def check_output(self):
         return self.mode == 1 and len(self.rom) <= 512 * 1024 and len(self.ram) <= 8 * 1024
 
+    def handle_mdc1_output(self, value):
+        # MBC1 4/32 mode output: atualiza os dois bits menos significativos
+        # como pinos de saída (pinos 6 e 7 do cartucho) se a ROM ≤ 4Mbit e RAM ≤ 8KB
+        self.mbc1_output_pins[0] = value & 0x01
+        self.mbc1_output_pins[1] = (value >> 1) & 0x01
+
     def handle_write(self, addrs, value):
         if self.mbc_version == 1:
             self.write_mbc1(addrs, value)
@@ -54,10 +60,7 @@ class MBC:
             self.select_rom_bank(bank)
 
         if 0x4000 <= addrs < 0x6000 and self.check_output():
-            # MBC1 4/32 mode output: atualiza os dois bits menos significativos
-            # como pinos de saída (pinos 6 e 7 do cartucho) se a ROM ≤ 4Mbit e RAM ≤ 8KB
-            self.mbc1_output_pins[0] = value & 0x01
-            self.mbc1_output_pins[1] = (value >> 1) & 0x01
+            self.handle_mdc1_output(value)
 
         if 0x6000 <= addrs < 0x8000:
             self.mode = value & 1
