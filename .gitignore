@@ -1,0 +1,30 @@
+# arquivos de cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# ambientes virtuais
+venv/
+.env/
+
+# arquivos temporários de IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# logs e dumps
+*.log
+*.tmp
+
+# arquivos de build/teste
+build/
+dist/
+*.egg-info/
+
+# roms e saves
+*.gb
+*.sav
+
+# screenshots ou saídas da PPU
+output/
