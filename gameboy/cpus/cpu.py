@@ -113,6 +113,12 @@ class Cpu:
             n = (opcode >> 3) & 0b111
             return "LD n nn", self.registers_map[n]
 
+        #ld r1 r2 8bits
+        if (opcode >> 6) == 0b01:
+            n1 = (opcode >> 3) & 0b111
+            n2 = opcode & 0b111
+            return "LD r1 r2", self.registers_map[n1], self.registers_map[n2]
+
     def execute(self, decoded):
         """
         Executa a instrução decodificada e aplica seus efeitos sobre os registradores.
@@ -126,4 +132,15 @@ class Cpu:
         if decoded[0] == "LD n nn":
             nn = self.fetch()
             self.registers[decoded[1]] = nn
+            return None
+
+        elif decoded[0] == "LD r1 r2":
+            if decoded[1] == "HL":
+                HL = (self.registers["H"] << 8) | self.registers["L"]
+                self.memory.write(HL, self.registers[decoded[1]])
+            elif decoded[2] == "HL":
+                HL = (self.registers["H"] << 8) | self.registers["L"]
+                self.registers[decoded[1]] = self.memory.read(HL)
+            else:
+                self.registers[decoded[2]] = self.registers[decoded[1]]
             return None
