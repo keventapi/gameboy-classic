@@ -17,7 +17,6 @@ class Cpu:
                           "B": 0,"C": 0,
                           "D": 0, "E": 0,
                           "H": 0, "L": 0}
-
         self.limit = 0xFFFE
 
     def step(self):
@@ -49,14 +48,15 @@ class Cpu:
         return opcode
 
     def decode(self, opcode):
-        if 0x06 <= opcode <= 0x2E:
+        #LD n  nn
+        if opcode in (0x06,0x0E, 0x16, 0x1E, 0x26, 0x2E):
             n = (opcode >> 3) & 0b111
-            return "LD", self.registers_map[n]
+            return "LD n nn", self.registers_map[n]
 
 
 
     def execute(self, decoded, opcode):
-        if decoded[0] == "LD" and (0x06 <= opcode <= 0x2E):
+        if decoded[0] == "LD n nn":
             nn = self.fetch()
             self.registers[decoded[1]] = nn
             return
