@@ -49,8 +49,14 @@ class Cpu:
         return opcode
 
     def decode(self, opcode):
-        pass
+        if 0x06 <= opcode <= 0x2E:
+            n = (opcode >> 3) & 0b111
+            return "LD", self.registers_map[n]
+
 
 
     def execute(self, decoded, opcode):
-        pass
+        if decoded[0] == "LD" and (0x06 <= opcode <= 0x2E):
+            nn = self.fetch()
+            self.registers[decoded[1]] = nn
+            return
