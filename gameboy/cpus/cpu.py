@@ -119,6 +119,15 @@ class Cpu:
             n2 = opcode & 0b111
             return "LD r1 r2", self.registers_map[n1], self.registers_map[n2]
 
+        if opcode in (0x0A, 0x1A, 0xFA, 0x3E):
+            ld_exception_map = {
+                0b00001010: "BC",
+                0b11011110: "DE",
+                0b11111010: "nn",
+                0b00111110: "#"
+            }
+            return "LD r1 r2", "A", ld_exception_map[opcode]
+
     def execute(self, decoded):
         """
         Executa a instrução decodificada e aplica seus efeitos sobre os registradores.
@@ -135,12 +144,31 @@ class Cpu:
             return None
 
         elif decoded[0] == "LD r1 r2":
-            if decoded[1] == "HL":
-                HL = (self.registers["H"] << 8) | self.registers["L"]
-                self.memory.write(HL, self.registers[decoded[1]])
-            elif decoded[2] == "HL":
-                HL = (self.registers["H"] << 8) | self.registers["L"]
-                self.registers[decoded[1]] = self.memory.read(HL)
+            #caso r1 de 16 bits
+            if len(decoded[1]) > 1:
+                if decoded[1] == "nn":
+                    nn = (self.fetch() << 8) | self.fetch()
+                    self.memory.write(nn, self.registers[decoded[2]])
+                    return None
+
+                reg16 = (self.registers[decoded[1][0]] << 8) | self.registers[decoded[1][1]]
+                self.memory.write(reg16, self.registers[decoded[2]])
+
+            #caso r2 de 16 bits
+            elif len(decoded[2]) > 1:
+                if decoded[2] == "nn":
+                    nn =  self.fetch() | (self.fetch() << 8)
+                    self.registers[decoded[1]] = nn
+                    return None
+
+                reg16 = (self.registers[decoded[2][0]] << 8) | self.registers[decoded[2][1]]
+                self.registers[decoded[1]] = self.memory.read(reg16)
+
             else:
+                if decoded[2] == "#":
+                    n = self.fetch()
+                    self.registers[decoded[1]] = n
+                    return None
+
                 self.registers[decoded[2]] = self.registers[decoded[1]]
             return None
