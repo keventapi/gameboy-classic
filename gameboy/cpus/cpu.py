@@ -1,4 +1,6 @@
 from instructionmixin import InstructionMixin
+
+
 class Cpu(InstructionMixin):
     def __init__(self, working_ram, cartridge):
         """
@@ -12,10 +14,8 @@ class Cpu(InstructionMixin):
         limit → Limite superior da pilha (stack)
         """
 
-
         self.memory = working_ram
         self.cartridge = cartridge
-
         self.pc = 0x100
 
         # SP, PC e F não são acessíveis diretamente via opcode;
@@ -110,12 +110,12 @@ class Cpu(InstructionMixin):
         :return: Tupla contendo o nome da instrução e seus parâmetros.
         """
 
-        #LD n  nn
-        if opcode in (0x06,0x0E, 0x16, 0x1E, 0x26, 0x2E):
+        # LD n nn
+        if opcode in (0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E):
             n = (opcode >> 3) & 0b111
             return "LD n nn", self.registers_map[n]
 
-        #ld r1 r2 8bits
+        # LD r1 r2 8bits
         elif (opcode >> 6) == 0b01:
             n1 = (opcode >> 3) & 0b111
             n2 = opcode & 0b111
@@ -137,6 +137,8 @@ class Cpu(InstructionMixin):
             return "LD A (C)"
         elif opcode == 0xE2:
             return "LD (C) A"
+        elif opcode == 0x3A:
+            return "LDD A HL"
 
     def execute(self, decoded):
         """
@@ -156,3 +158,12 @@ class Cpu(InstructionMixin):
 
         elif decoded[0] in ("LD (C) A", "LD A (C)"):
             return self.ld_a_FF00_C(decoded)
+        
+        elif decoded[0] == "LDD A HL":
+            src = (self.registers["H"] << 8) | self.registers["L"] 
+            self.registers["A"] = self.memory.read(src)
+            src -= 1
+            src = src & 0xFFFF
+            self.registers["H"] = (src >> 8) & 0xFF
+            self.registers["L"] = src & 0xFF
+        
