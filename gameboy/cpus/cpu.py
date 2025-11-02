@@ -29,7 +29,7 @@ class Cpu(InstructionMixin):
 
         self.registers = {"pc": 0x100, "sp": 0xFFFE,
                           "A": 0, "F": 0,
-                          "B": 0,"C": 0,
+                          "B": 0, "C": 0,
                           "D": 0, "E": 0,
                           "H": 0, "L": 0}
 
@@ -61,7 +61,7 @@ class Cpu(InstructionMixin):
         :param value: Valor de 8 bits a ser colocado na pilha.
         :raises Exception: Caso o endereço resultante ultrapasse os limites válidos de stack (overflow).
         """
-        if 0xC000 <= self.registers["sp"] -1 <= self.limit:
+        if 0xC000 <= self.registers["sp"] - 1 <= self.limit:
             self.registers["sp"] -= 1
             self.memory.write(self.registers["sp"], value)
         else:
@@ -78,7 +78,7 @@ class Cpu(InstructionMixin):
         :return: Valor de 8 bits desempilhado.
         :raises Exception: Caso o endereço exceda os limites válidos da stack (underflow).
         """
-        if 0xC000 <= self.registers["sp"]+1 <= self.limit:
+        if 0xC000 <= self.registers["sp"] + 1 <= self.limit:
             value = self.memory.read(self.registers["sp"])
             self.registers["sp"] += 1
             return value
@@ -158,7 +158,7 @@ class Cpu(InstructionMixin):
 
         elif decoded[0] in ("LD (C) A", "LD A (C)"):
             return self.ld_a_FF00_C(decoded)
-        
+            
         elif decoded[0] == "LDD A HL":
             src = (self.registers["H"] << 8) | self.registers["L"] 
             self.registers["A"] = self.memory.read(src)
@@ -166,4 +166,3 @@ class Cpu(InstructionMixin):
             src = src & 0xFFFF
             self.registers["H"] = (src >> 8) & 0xFF
             self.registers["L"] = src & 0xFF
-        
