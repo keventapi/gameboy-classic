@@ -2,10 +2,9 @@ from instructionmixin import InstructionMixin
 
 
 class Cpu(InstructionMixin):
-    def __init__(self, working_ram, cartridge):
+    def __init__(self, mmu):
         """
-        :param working_ram: Objeto criado a partir da RAM (em gameboy/memory/ram.py)
-        :param cartridge: Objeto criado a partir do cartridge (em gameboy/memory/cartridge.py)
+        :param mmu: em ./mmu responsabilizado 
 
         pc → Endereço inicial fiel ao hardware, onde o program counter começa (0x0100)
         registers_map → Mapeamento mais intuitivo dos registradores, facilitando o debugging
@@ -14,8 +13,7 @@ class Cpu(InstructionMixin):
         limit → Limite superior da pilha (stack)
         """
 
-        self.memory = working_ram
-        self.cartridge = cartridge
+        self.mmu = mmu
         self.pc = 0x100
 
         # SP, PC e F não são acessíveis diretamente via opcode;
@@ -63,7 +61,7 @@ class Cpu(InstructionMixin):
         """
         if 0xC000 <= self.registers["sp"] - 1 <= self.limit:
             self.registers["sp"] -= 1
-            self.memory.write(self.registers["sp"], value)
+            self.mmu.write(self.registers["sp"], value)
         else:
             raise Exception("stack overflow")
 
@@ -79,7 +77,7 @@ class Cpu(InstructionMixin):
         :raises Exception: Caso o endereço exceda os limites válidos da stack (underflow).
         """
         if 0xC000 <= self.registers["sp"] + 1 <= self.limit:
-            value = self.memory.read(self.registers["sp"])
+            value = self.mmu.read(self.registers["sp"])
             self.registers["sp"] += 1
             return value
         raise Exception("stack underflow")
@@ -94,7 +92,7 @@ class Cpu(InstructionMixin):
         :return: Opcode de 8 bits lido da memória.
         """
         pc = self.registers["pc"]
-        opcode = self.memory.read(pc) & 0xFF
+        opcode = self.mmu.read(pc) & 0xFF
         self.registers["pc"] += 1
         return opcode
 

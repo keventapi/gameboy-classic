@@ -82,7 +82,7 @@ class MBC:
         if 0x0000 <= addrs < 0x1FFF and (addrs & 0x0100) == 0:
             self.ram_enabled = not self.ram_enabled
 
-        elif 0x2000<= addrs < 0x4000 and (addrs & 0x0100) != 0:
+        elif 0x2000 <= addrs < 0x4000 and (addrs & 0x0100) != 0:
             bank = value & 0x0F
             self.select_rom_bank(bank)
 
@@ -97,7 +97,7 @@ class MBC:
 
         
         if 0x4000 <= addrs < 0x6000:
-            return #precisa da implementação do rtc (clock)
+            return  # precisa da implementação do rtc (clock)
         
         if 0x0000 <= addrs < 0x2000:
             self.ram_enabled = (value & 0b1111) == 0b1010
