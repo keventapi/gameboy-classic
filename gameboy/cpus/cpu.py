@@ -139,6 +139,8 @@ class Cpu(InstructionMixin):
             return "LD (C) A"
         elif opcode == 0x3A:
             return "LDD A HL"
+        elif opcode == 0x32:
+            return "LDD HL A"
 
     def execute(self, decoded):
         """
@@ -159,10 +161,5 @@ class Cpu(InstructionMixin):
         elif decoded[0] in ("LD (C) A", "LD A (C)"):
             return self.ld_a_FF00_C(decoded)
             
-        elif decoded[0] == "LDD A HL":
-            src = (self.registers["H"] << 8) | self.registers["L"] 
-            self.registers["A"] = self.memory.read(src)
-            src -= 1
-            src = src & 0xFFFF
-            self.registers["H"] = (src >> 8) & 0xFF
-            self.registers["L"] = src & 0xFF
+        elif decoded[0] in ("LDD A HL", "LDD HL A"):
+            return self.ldd_x_yz(decoded)

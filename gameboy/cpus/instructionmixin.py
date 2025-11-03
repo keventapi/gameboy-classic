@@ -39,3 +39,22 @@ class InstructionMixin:
             self.registers["A"] = self.memory.read(0xFF00 + self.registers["C"])
         else:
             self.memory.write(0xFF00 + self.registers["C"], self.registers["A"])
+    
+    def ldd_x_yz(self, decoded):
+        if decoded[0][6] != " ":
+            r1 = decoded[4]
+            r2 = decoded[5]
+            yz = (self.registers[r1] << 8) | self.registers[r2]
+            x = decoded[0][-1]
+            self.memory.write(yz, self.registers[x])
+        else:
+            r1 = decoded[-2]
+            r2 = decoded[-1]
+            yz = (self.registers[r1] << 8) | self.registers[r2]
+            x = decoded[4]
+            self.registers[x] = self.memory.read(yz)        
+        yz -= 1
+        yz &= 0xFFFF
+        self.registers[r1] = (yz >> 8) & 0xFF
+        self.registers[r2] = yz & 0xFF
+        return None
