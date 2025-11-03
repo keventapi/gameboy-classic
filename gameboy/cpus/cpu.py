@@ -141,6 +141,10 @@ class Cpu(InstructionMixin):
             return "LDD A HL"
         elif opcode == 0x32:
             return "LDD HL A"
+        elif opcode == 0x2A:
+            return "LDI A HL"
+        elif opcode == 0x22:
+            return "LDI HL A"
 
     def execute(self, decoded):
         """
@@ -160,6 +164,6 @@ class Cpu(InstructionMixin):
 
         elif decoded[0] in ("LD (C) A", "LD A (C)"):
             return self.ld_a_FF00_C(decoded)
-            
-        elif decoded[0] in ("LDD A HL", "LDD HL A"):
-            return self.ldd_x_yz(decoded)
+
+        elif decoded[0] in ("LDD A HL", "LDD HL A", "LDI HL A", "LDI A HL"):
+            return self.ldf_x_yz(decoded)
