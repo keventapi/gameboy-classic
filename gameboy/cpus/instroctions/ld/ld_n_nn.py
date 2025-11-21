@@ -20,4 +20,3 @@ class LD_N_NN:
         else:
             self.registers[r16[0]] = high
             self.registers[r16[1]] = low
-        
