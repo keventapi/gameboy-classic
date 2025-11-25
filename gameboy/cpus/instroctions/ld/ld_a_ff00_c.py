@@ -1,6 +1,8 @@
 class LD_A_FF00_C:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_a_ff00_c_instructions(self):
         instructions = {
@@ -15,5 +17,4 @@ class LD_A_FF00_C:
             self.registers["A"] = self.mmu.read(addrs)
         else:
             self.mmu.write(addrs, self.registers["A"])
-        
         return None

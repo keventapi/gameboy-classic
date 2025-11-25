@@ -1,6 +1,9 @@
 class LD_A_FF00_N:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.fetch = self.cpu.fetch
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_a_ff00_n_instructions(self):
         instructions = {
@@ -8,7 +11,7 @@ class LD_A_FF00_N:
             0xF0: lambda: self.execute_ld_a_ff00_n(True)
         }
         return instructions
-    
+
     def execute_ld_a_ff00_n(self, update_a):
         value = self.fetch()
         if update_a:

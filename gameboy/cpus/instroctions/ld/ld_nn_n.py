@@ -1,6 +1,9 @@
 class LD_NN_N:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.fetch = self.cpu.fetch
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_nn_n_instructions(self):
         instructions = {0x06: lambda: self.ld_n_nn("B"),
@@ -10,9 +13,8 @@ class LD_NN_N:
                         0x26: lambda: self.ld_n_nn("H"),
                         0x2E: lambda: self.ld_n_nn("L")}
         return instructions
-        
+
     def ld_n_nn(self, register):
         nn = self.fetch()
         self.registers[register] = nn
         return None
-

@@ -1,13 +1,16 @@
 class LD_NN_SP:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.fetch = self.cpu.fetch
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_nn_sp_instructions(self):
         instruction = {
             0x08: lambda: self.execute_ld_nn_sp()
         }
         return instruction
-    
+
     def execute_ld_nn_sp(self):
         low_byte_addr = self.fetch()
         high_byte_addr = self.fetch()

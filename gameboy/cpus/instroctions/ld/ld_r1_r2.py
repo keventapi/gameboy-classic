@@ -1,6 +1,8 @@
 class LD_R1_R2:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_r1_r2_instructions(self):
         instructions = {
@@ -63,7 +65,7 @@ class LD_R1_R2:
          0x36: lambda: self.execute8b_ld_r1_r2("HL", "m")
         }
         return instructions
-    
+
     def execute8b_ld_r1_r2(self, r1, r2):
         if r2 == "HL":
             hl = (self.registers["H"] << 8) | self.registers["L"]
@@ -74,4 +76,3 @@ class LD_R1_R2:
         else:
             self.registers[r1] = self.registers[r2] & 0xFF
         return None
-

@@ -1,6 +1,9 @@
 class LD_A_N:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.fetch = self.cpu.fetch
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_a_n_instructions(self):
         instruction = {
@@ -11,7 +14,7 @@ class LD_A_N:
             0x3E: lambda: self.ld_a_n("A", "#")
         }
         return instruction
-    
+
     def ld_a_n(self, r1, r2):
         if r2 == "nn":
             immediate = self.fetch() | (self.fetch() << 8)
@@ -26,4 +29,3 @@ class LD_A_N:
             immediate = (self.registers[high] << 8) | self.registers[low]
             self.registers[r1] = self.mmu.read(immediate)
             return
-        

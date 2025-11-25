@@ -1,6 +1,9 @@
 class LD_N_NN:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.fetch = self.cpu.fetch
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def ld_n_nn_instructions(self):
         instructions = {
@@ -10,7 +13,7 @@ class LD_N_NN:
             0X31: lambda: self.execute_ld_n_nn("SP")
         }
         return instructions
-    
+
     def execute_ld_n_nn(self, r16):
         low = self.fetch()
         high = self.fetch()
