@@ -1,0 +1,42 @@
+class LDACTION_A_HL:
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
+
+    def lda_a_hl_instruction(self):
+        instructions = {
+            0x3A: lambda: self.execute_ldd(True),
+            0x32: lambda: self.execute_ldd(False),
+            0x2A: lambda: self.execute_ldi(True),
+            0x22: lambda: self.execute_ldi(False)
+        }
+        return instructions
+
+    def execute_ldd(self, read_hl):
+        hl = (self.registers["H"] << 8) | self.registers["L"]
+        if read_hl:
+            self.registers["A"] = self.mmu.read(hl)
+        else:
+            self.mmu.write(hl, self.registers["A"])
+
+        hl -= 1
+        hl &= 0xFFFF
+        h = (hl >> 8) & 0xFF
+        l = hl & 0xFF
+        self.registers["H"] = h
+        self.registers["L"] = l
+
+    def execute_ldi(self, read_hl):
+        hl = (self.registers["H"] << 8) | self.registers["L"]
+        if read_hl:
+            self.registers["A"] = self.mmu.read(hl)
+        else:
+            self.mmu.write(hl, self.registers["A"])
+
+        hl += 1
+        hl &= 0xFFFF
+        h = (hl >> 8) & 0xFF
+        l = hl & 0xFF
+        self.registers["H"] = h
+        self.registers["L"] = l
