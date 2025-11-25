@@ -23,9 +23,8 @@ class LD:
         self.ld_sp_hl = LD_SP_HL(cpu)
         self.ldaction_a_hl = LDACTION_A_HL(cpu)
 
-    def get_instructions(self):
+    def get_ld_instructions(self):
         instructions = {}
-
         updater = [self.ld_a_ff00_c.ld_a_ff00_c_instructions,
                    self.ld_a_ff00_n.ld_a_ff00_n_instructions,
                    self.ld_a_n.ld_a_n_instructions,
@@ -36,6 +35,6 @@ class LD:
                    self.ld_r1_r2.ld_r1_r2_instructions,
                    self.ld_sp_hl.ld_sp_hl_instructions,
                    self.ldaction_a_hl.lda_a_hl_instruction]
-
         for i in updater:
             instructions.update(i())
+        return instructions

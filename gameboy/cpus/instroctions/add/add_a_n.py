@@ -1,6 +1,10 @@
 class ADD_A_N:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.pull8 = self.cpu.pull8
+        self.fetch = self.cpu.fetch
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def add_a_n_instructions(self):
         instructions = {
@@ -15,7 +19,7 @@ class ADD_A_N:
             0xC6: lambda: self.execute_add_a_n("#")
         }
         return instructions
-    
+
     def execute_add_a_n(self, r):
         if len(r) > 1 or r == "#":
             if r == "#":
@@ -25,27 +29,28 @@ class ADD_A_N:
                 n = self.mmu.read(addrs)
         else:
             n = self.registers[r]
-        
+
         sum = n + self.registers["A"]
 
-        #Z
+        # Z
         if sum & 0xFF == 0:
             self.registers["F"] |= 0b10000000
         else:
             self.registers["F"] &= 0b01111111
-        
-        #N
+
+        # N
         self.registers["F"] &= 0b10111111
-        #H
+
+        # H
         if ((self.registers["A"] & 0xF) + (n & 0xF)) > 0xF:
             self.registers["F"] |= 0b00100000
         else:
             self.registers["F"] &= 0b11011111
-        #C
+        # C
         if sum > 0xFF:
             self.registers["F"] |= 0b00010000
         else:
             self.registers["F"] &= 0b11101111
         self.registers["A"] = sum & 0xFF
-    
+
         self.registers["F"] &= 0xF0

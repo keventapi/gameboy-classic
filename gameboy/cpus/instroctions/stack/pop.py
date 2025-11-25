@@ -1,6 +1,9 @@
 class POP:
-    def __init__(self):
-        pass
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.pull8 = self.cpu.pull8
+        self.registers = self.cpu.registers
+        self.mmu = self.cpu.mmu
 
     def pop_instructions(self):
         instructions = {
@@ -10,7 +13,7 @@ class POP:
             0xE1: lambda: self.execute_pop("HL")
         }
         return instructions
-    
+
     def execute_pop(self, r16):
         high = r16[0]
         low = r16[1]
