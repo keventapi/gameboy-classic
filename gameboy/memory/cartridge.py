@@ -1,5 +1,7 @@
 from .switchable_memory import Switchable_RAM, Switchable_ROM
 from .MBC import MBC
+
+
 class Cartridge:
     def __init__(self, rom_bytes):
         self.rom = Switchable_ROM(rom_bytes)
@@ -9,7 +11,7 @@ class Cartridge:
         self.mbc_version = self.get_mbc(header_byte)
 
         self.mbc = MBC(self.ram, self.rom, self.mbc_version)
-    
+
     def get_mbc(self, header_byte):
         if header_byte in [0x01, 0x02, 0x03]:
             return 1
@@ -31,12 +33,12 @@ class Cartridge:
             0x01: (1, 0x0800),  # 2 KB
             0x02: (1, 0x2000),  # 8 KB
             0x03: (4, 0x2000),  # 32 KB
-            0x04: (16, 0x2000), # 128 KB
+            0x04: (16, 0x2000),  # 128 KB
             0x05: (8, 0x2000),  # 64 KB
         }
         total_banks, bank_size = size_map.get(ram_size, (1, 0x2000))
         return Switchable_RAM(total_banks, bank_size)
-    
+
     def read(self, addrs):
         return self.mbc.handle_read(addrs)
 

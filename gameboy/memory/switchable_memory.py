@@ -21,13 +21,13 @@ class Switchable_RAM:
         else:
             self.switch_bank(new_bank % len(self.banks))
 
+
 class Switchable_ROM:
     def __init__(self, rom_bytes, size=0x4000):
         self.banks = [rom_bytes[i:i+size] for i in range(0, len(rom_bytes), size)]
         self.current_bank = 1
         self.bank_size = size
         self.update_banks()
-
 
     def update_banks(self):
         for i, bank in enumerate(self.banks):
@@ -43,7 +43,7 @@ class Switchable_ROM:
     def read(self, addrs):
         if 0x0000 <= addrs < 0x4000:
             return self.banks[0][addrs]
-        
+
         elif 0x4000 <= addrs < 0x8000:
             offset = addrs - 0x4000
             return self.banks[self.current_bank][offset]
