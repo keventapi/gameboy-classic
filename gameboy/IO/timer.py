@@ -17,7 +17,7 @@ class TIMER:
         }
 
         self.counters = {
-            "DIV": 0x00,
+            "DIV": 0x0000,
             "TIMA": 0x00,
             "TMA": 0x00
         }
@@ -56,7 +56,7 @@ class TIMER:
 
     def update_div(self):
         if self.internal_counter % 4 == 0:
-            self.counters["DIV"] = (self.counters["DIV"] + 1) & 0xFFFF 
+            self.counters["DIV"] = (self.counters["DIV"] + 1) & 0xFFFF
 
     def tick(self, ticks):
         for _ in range(ticks):

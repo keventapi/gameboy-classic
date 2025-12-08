@@ -7,14 +7,15 @@ class LD_A_FF00_N:
 
     def ld_a_ff00_n_instructions(self):
         instructions = {
-            0xE0: lambda: self.execute_ld_a_ff00_n(False),
-            0xF0: lambda: self.execute_ld_a_ff00_n(True)
+            0xE0: lambda: self.execute_ld_a_ff00_n(False, 12),
+            0xF0: lambda: self.execute_ld_a_ff00_n(True, 12)
         }
         return instructions
 
-    def execute_ld_a_ff00_n(self, update_a):
+    def execute_ld_a_ff00_n(self, update_a, ticks):
         value = self.fetch()
         if update_a:
             self.registers["A"] = self.mmu.read(0xFF00 + value)
         else:
             self.mmu.write(value+0xFF00, self.registers["A"])
+        self.cpu.timer.ticks(ticks)

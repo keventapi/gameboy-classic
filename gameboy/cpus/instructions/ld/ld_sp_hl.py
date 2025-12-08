@@ -6,10 +6,11 @@ class LD_SP_HL:
 
     def ld_sp_hl_instructions(self):
         instructions = {
-            0xF9: lambda: self.execute_ld_sp_hl()
+            0xF9: lambda: self.execute_ld_sp_hl(8)
         }
         return instructions
 
-    def execute_ld_sp_hl(self):
+    def execute_ld_sp_hl(self, ticks):
         hl = (self.registers["H"] << 8) | self.registers["L"]
         self.registers["SP"] = hl
+        self.cpu.timer.tick(ticks)

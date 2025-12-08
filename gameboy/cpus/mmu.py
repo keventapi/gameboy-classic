@@ -3,13 +3,15 @@ class MMU:
         self.ram = ram
         self.mbc = mbc
         self.timer = timer
-    
+
     def read(self, addrs):
         if 0xC000 <= addrs < 0xFE00:
             return self.ram.read(addrs)
         elif 0x0000 <= addrs < 0x8000 or 0xA000 <= addrs < 0xC000:
             return self.mbc.handle_read(addrs)
-    
+        elif 0xFF04 <= addrs < 0xFF08:
+            return self.timer.read(addrs)
+
     def write(self, addrs, value):
         if 0xC000 <= addrs < 0xFE00:
             self.ram.write(addrs, value)

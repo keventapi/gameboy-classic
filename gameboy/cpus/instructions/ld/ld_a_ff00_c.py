@@ -6,15 +6,15 @@ class LD_A_FF00_C:
 
     def ld_a_ff00_c_instructions(self):
         instructions = {
-            0xF2: lambda: self.execute_ld_a_FF00_C(True),
-            0xE2: lambda: self.execute_ld_a_FF00_C(False)
+            0xF2: lambda: self.execute_ld_a_FF00_C(True, 8),
+            0xE2: lambda: self.execute_ld_a_FF00_C(False, 8)
         }
         return instructions
 
-    def execute_ld_a_FF00_C(self, read_a: bool):
+    def execute_ld_a_FF00_C(self, read_a: bool, ticks):
         addrs = 0xFF00 + self.registers["C"]
         if read_a:
             self.registers["A"] = self.mmu.read(addrs)
         else:
             self.mmu.write(addrs, self.registers["A"])
-        return None
+        self.cpu.timer.tick(ticks)

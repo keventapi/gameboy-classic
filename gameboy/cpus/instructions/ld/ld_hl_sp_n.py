@@ -1,4 +1,4 @@
-class LD_HL_SP_N:
+class LD_HL_SP_N:  # possivel refatoração na manipulação de flag
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
@@ -7,11 +7,11 @@ class LD_HL_SP_N:
 
     def ld_hl_sp_n_instructions(self):
         instructions = {
-            0xF8: lambda: self.run_ld_hl_sp_n()
+            0xF8: lambda: self.run_ld_hl_sp_n(12)
         }
         return instructions
 
-    def run_ld_hl_sp_n(self):
+    def run_ld_hl_sp_n(self, ticks):
         fetch = self.fetch()
 
         n = fetch
@@ -41,3 +41,5 @@ class LD_HL_SP_N:
 
         # zera os bits 3 a 4
         self.registers["F"] &= 0xF0
+
+        self.cpu.timer.tick(ticks)

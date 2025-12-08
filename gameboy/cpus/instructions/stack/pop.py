@@ -7,14 +7,14 @@ class POP:
 
     def pop_instructions(self):
         instructions = {
-            0xF1: lambda: self.execute_pop("AF"),
-            0xC1: lambda: self.execute_pop("BC"),
-            0xD1: lambda: self.execute_pop("DE"),
-            0xE1: lambda: self.execute_pop("HL")
+            0xF1: lambda: self.execute_pop("AF", 12),
+            0xC1: lambda: self.execute_pop("BC", 12),
+            0xD1: lambda: self.execute_pop("DE", 12),
+            0xE1: lambda: self.execute_pop("HL", 12)
         }
         return instructions
 
-    def execute_pop(self, r16):
+    def execute_pop(self, r16, ticks):
         high = r16[0]
         low = r16[1]
         if low == "F":
@@ -22,3 +22,4 @@ class POP:
         else:
             self.registers[low] = self.pull8()
         self.registers[high] = self.pull8()
+        self.cpu.timer.tick(ticks)

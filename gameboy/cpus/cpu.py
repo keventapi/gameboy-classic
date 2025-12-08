@@ -2,8 +2,9 @@ from gameboy.cpus.instruction_assembly import Instructions
 
 
 class Cpu:
-    def __init__(self, mmu):
+    def __init__(self, mmu, timer):
         self.mmu = mmu
+        self.timer = timer
         self.pc = 0x100
         self.instructions = Instructions(self)
 

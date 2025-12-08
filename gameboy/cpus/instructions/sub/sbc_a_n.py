@@ -7,18 +7,18 @@ class SBC_A_N:
 
     def sbc_a_n_intructions(self):
         instructions = {
-            0x9F: lambda: self.execute_sbc_a_n("A"),
-            0x98: lambda: self.execute_sbc_a_n("B"),
-            0x99: lambda: self.execute_sbc_a_n("C"),
-            0x9A: lambda: self.execute_sbc_a_n("D"),
-            0x9B: lambda: self.execute_sbc_a_n("E"),
-            0x9C: lambda: self.execute_sbc_a_n("H"),
-            0x9D: lambda: self.execute_sbc_a_n("L"),
-            0x9E: lambda: self.execute_sbc_a_n("HL")
+            0x9F: lambda: self.execute_sbc_a_n("A", 4),
+            0x98: lambda: self.execute_sbc_a_n("B", 4),
+            0x99: lambda: self.execute_sbc_a_n("C", 4),
+            0x9A: lambda: self.execute_sbc_a_n("D", 4),
+            0x9B: lambda: self.execute_sbc_a_n("E", 4),
+            0x9C: lambda: self.execute_sbc_a_n("H", 4),
+            0x9D: lambda: self.execute_sbc_a_n("L", 4),
+            0x9E: lambda: self.execute_sbc_a_n("HL", 8)
         }
         return instructions
 
-    def execute_sbc_a_n(self, r):
+    def execute_sbc_a_n(self, r, ticks):
         A = self.registers["A"]
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
@@ -54,3 +54,5 @@ class SBC_A_N:
 
         self.registers["A"] = sub & 0xFF
         self.registers["F"] &= 0xF0
+
+        self.cpu.timer.tick(ticks)

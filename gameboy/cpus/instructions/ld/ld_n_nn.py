@@ -7,14 +7,14 @@ class LD_N_NN:
 
     def ld_n_nn_instructions(self):
         instructions = {
-            0x01: lambda: self.execute_ld_n_nn("BC"),
-            0x11: lambda: self.execute_ld_n_nn("DE"),
-            0x21: lambda: self.execute_ld_n_nn("HL"),
-            0X31: lambda: self.execute_ld_n_nn("SP")
+            0x01: lambda: self.execute_ld_n_nn("BC", 12),
+            0x11: lambda: self.execute_ld_n_nn("DE", 12),
+            0x21: lambda: self.execute_ld_n_nn("HL", 12),
+            0X31: lambda: self.execute_ld_n_nn("SP", 12)
         }
         return instructions
 
-    def execute_ld_n_nn(self, r16):
+    def execute_ld_n_nn(self, r16, ticks):
         low = self.fetch()
         high = self.fetch()
         nn = (high << 8) | low
@@ -23,3 +23,4 @@ class LD_N_NN:
         else:
             self.registers[r16[0]] = high
             self.registers[r16[1]] = low
+        self.cpu.timer.tick(ticks)
