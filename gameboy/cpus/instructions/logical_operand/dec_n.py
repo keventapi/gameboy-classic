@@ -6,7 +6,14 @@ class DEC_N:
 
     def dec_n_instructions(self):
         instructions = {
-
+            0x3D: lambda: self.execute_dec_n("A", 4),
+            0x05: lambda: self.execute_dec_n("B", 4),
+            0x0D: lambda: self.execute_dec_n("C", 4),
+            0x15: lambda: self.execute_dec_n("D", 4),
+            0x1D: lambda: self.execute_dec_n("E", 4),
+            0x25: lambda: self.execute_dec_n("H", 4),
+            0x2D: lambda: self.execute_dec_n("L", 4),
+            0x35: lambda: self.execute_dec_n("HL", 12)
         }
         return instructions
 
