@@ -29,5 +29,5 @@ class ADD_HL_N:
         self.cpu.set_flags(Z, N, H, C)
         self.registers["H"] = (value >> 8) & 0xFF
         self.registers["L"] = value & 0xFF
-        
+
         self.cpu.timer.tick(ticks)
