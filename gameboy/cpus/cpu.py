@@ -23,6 +23,10 @@ class Cpu:
 
         self.limit = 0xFFFE
 
+    def set_flags(self, Z, N, H, C):
+        self.registers["F"] = (Z << 7) | (N << 6) | (H << 5) | (C << 4)
+        self.registers["F"] &= 0xF0
+
     def step(self):
         opcode = self.fetch()
         callback = self.decode(opcode)

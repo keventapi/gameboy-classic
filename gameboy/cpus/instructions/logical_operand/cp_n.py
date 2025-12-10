@@ -32,22 +32,10 @@ class CP_N:
             operand = self.registers[r]
             result -= operand
 
-        self.registers["F"] = 0x00
+        Z = 1 if (result & 0xFF) == 0 else 0
+        N = 1
+        H = 1 if (self.registers["A"] & 0xF) < (operand & 0xF) else 0
+        C = 1 if (self.registers["A"] & 0xFF) < (operand & 0xFF) else 0
 
-        # Z
-        if (result & 0xFF) == 0:
-            self.registers["F"] |= 0b10000000
-
-        # N
-        self.registers["F"] |= 0b01000000
-
-        # H
-        if (self.registers["A"] & 0xF) < (operand & 0xF):
-            self.registers["F"] |= 0b00100000
-
-        # C
-        if (self.registers["A"] & 0xFF) < (operand & 0xFF):
-            self.registers["F"] |= 0b00010000
-
-        self.registers["F"] &= 0xF0
+        self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)

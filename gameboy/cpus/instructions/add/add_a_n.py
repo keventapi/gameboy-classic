@@ -32,27 +32,13 @@ class ADD_A_N:
 
         sum = n + self.registers["A"]
 
-        # Z
-        if sum & 0xFF == 0:
-            self.registers["F"] |= 0b10000000
-        else:
-            self.registers["F"] &= 0b01111111
+        Z = 1 if sum & 0xFF == 0 else 0
+        N = 0
+        H = 1 if ((self.registers["A"] & 0xF) + (n & 0xF)) > 0xF else 0
+        C = 1 if sum > 0xFF else 0
 
-        # N
-        self.registers["F"] &= 0b10111111
-
-        # H
-        if ((self.registers["A"] & 0xF) + (n & 0xF)) > 0xF:
-            self.registers["F"] |= 0b00100000
-        else:
-            self.registers["F"] &= 0b11011111
-        # C
-        if sum > 0xFF:
-            self.registers["F"] |= 0b00010000
-        else:
-            self.registers["F"] &= 0b11101111
         self.registers["A"] = sum & 0xFF
 
-        self.registers["F"] &= 0xF0
+        self.cpu.set_flags(Z, N, H, C)
 
         self.cpu.timer.tick(ticks)

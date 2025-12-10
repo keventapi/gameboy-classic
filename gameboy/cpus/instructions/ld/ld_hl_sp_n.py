@@ -1,4 +1,4 @@
-class LD_HL_SP_N:  # possivel refatoração na manipulação de flag
+class LD_HL_SP_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
@@ -24,22 +24,8 @@ class LD_HL_SP_N:  # possivel refatoração na manipulação de flag
         self.registers["H"] = (addrs >> 8) & 0xFF
         self.registers["L"] = (addrs & 0xFF)
 
-        # reset Z e N
-        self.registers["F"] &= 0b00110000
+        H = 1 if ((sp & 0xF) + (fetch & 0xF)) > 0xF else 0
+        C = 1 if ((sp & 0xFF) + fetch) > 0xFF else 0
 
-        # reset H dependendo da operação
-        if ((sp & 0xF) + (fetch & 0xF)) > 0xF:
-            self.registers["F"] |= 0b00100000
-        else:
-            self.registers["F"] &= 0b11010000
-
-        # rest C dependendo da operação
-        if ((sp & 0xFF) + fetch) > 0xFF:
-            self.registers["F"] |= 0b00010000
-        else:
-            self.registers["F"] &= 0b11100000
-
-        # zera os bits 3 a 4
-        self.registers["F"] &= 0xF0
-
+        self.cpu.set_flags(0, 0, H, C)
         self.cpu.timer.tick(ticks)

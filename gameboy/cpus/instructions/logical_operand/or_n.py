@@ -30,11 +30,8 @@ class OR_N:
         else:
             result |= self.registers[r]
 
-        self.registers["F"] = 0x00
-
-        if (result & 0xFF) == 0:
-            self.registers["F"] |= 0b10000000
+        Z = 1 if (result & 0xFF) == 0 else 0
 
         self.registers["A"] = result & 0xFF
-        self.registers["F"] &= 0xF0
+        self.cpu.set_flags(Z, 0, 0, 0)
         self.cpu.timer.tick(ticks)

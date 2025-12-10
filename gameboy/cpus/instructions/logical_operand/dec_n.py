@@ -31,7 +31,5 @@ class DEC_N:
         H = 1 if ((value & 0xF) < (1 & 0xF)) else 0
         C = (self.registers["F"] >> 4) & 1
 
-        self.registers["F"] = (Z << 7) | (N << 6) | (H << 5) | (C << 4)
-        self.registers["F"] &= 0xF0
-
+        self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)

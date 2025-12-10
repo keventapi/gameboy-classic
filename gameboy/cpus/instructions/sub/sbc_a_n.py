@@ -31,28 +31,11 @@ class SBC_A_N:
 
         sub = A - (n + carry_flag)
 
-        # Z
-        if (sub & 0xFF) == 0:
-            self.registers["F"] |= 0b10000000
-        else:
-            self.registers["F"] &= 0b01111111
-
-        # N
-        self.registers["F"] |= 0b01000000
-
-        # H
-        if (A & 0xF) < ((n & 0xF) + carry_flag):
-            self.registers["F"] |= 0b00100000
-        else:
-            self.registers["F"] &= 0b11011111
-
-        # C
-        if A < (n + carry_flag):
-            self.registers["F"] |= 0b00010000
-        else:
-            self.registers["F"] &= 0b11101111
+        Z = 1 if (sub & 0xFF) == 0 else 0
+        N = 1
+        H = 1 if (A & 0xF) < ((n & 0xF) + carry_flag) else 0
+        C = 1 if (A < (n + carry_flag)) else 0
 
         self.registers["A"] = sub & 0xFF
-        self.registers["F"] &= 0xF0
-
+        self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
