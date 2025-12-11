@@ -4,6 +4,8 @@ from gameboy.cpus.instruction_assembly import Instructions
 class Cpu:
     def __init__(self, mmu, timer):
         self.is_halted = False
+        self.di_pending = False
+        self.ei_pending = False
         self.mmu = mmu
         self.timer = timer
         self.pc = 0x100
@@ -31,10 +33,22 @@ class Cpu:
     def fetch_16bit(self):
         return self.fetch() | (self.fetch() << 8)
 
+    def check_instruction_interrupt(self):
+        if self.di_pending:
+            self.timer.set_interrupt(False)
+            self.di_pending = False
+        if self.ei_pending:
+            self.timer.set_interrupt(True)
+            self.ei_pending = False
+
     def step(self):
-        opcode = self.fetch()
-        callback = self.decode(opcode)
-        callback()
+        if not self.is_halted:
+            opcode = self.fetch()
+            callback = self.decode(opcode)
+            callback()
+            self.check_instruction_interrupt()
+        else:
+            self.timer.tick(1)
 
     def push8(self, value):
         if 0xC000 <= self.registers["sp"] - 1 <= self.limit:
