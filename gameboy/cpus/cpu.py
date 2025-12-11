@@ -3,6 +3,7 @@ from gameboy.cpus.instruction_assembly import Instructions
 
 class Cpu:
     def __init__(self, mmu, timer):
+        self.is_halted = False
         self.mmu = mmu
         self.timer = timer
         self.pc = 0x100
