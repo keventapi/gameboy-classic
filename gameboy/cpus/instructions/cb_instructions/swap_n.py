@@ -1,5 +1,5 @@
 class SWAP_N:
-    def __init__(self, cpu):  # necessario dispatcher pra instruções especiais
+    def __init__(self, cpu):  # necessario dispatcher pra instruções CB
         self.cpu = cpu
         self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
