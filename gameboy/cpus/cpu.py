@@ -35,14 +35,17 @@ class Cpu:
 
     def check_instruction_interrupt(self):
         if self.di_pending:
-            self.timer.set_interrupt(False)
+            self.timer.interrupt_enabled = False
             self.di_pending = False
         if self.ei_pending:
-            self.timer.set_interrupt(True)
+            self.timer.interrupt_enabled = True
             self.ei_pending = False
 
     def step(self):
         if not self.is_halted:
+            if self.timer.interrupt_enabled and self.timer.interrupt:
+                # chama interrupt service
+                return
             opcode = self.fetch()
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
