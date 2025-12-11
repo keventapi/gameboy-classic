@@ -1,5 +1,5 @@
 class SWAP_N:
-    def __init__(self, cpu):
+    def __init__(self, cpu):  # necessario dispatcher pra instruções especiais
         self.cpu = cpu
         self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
@@ -22,9 +22,10 @@ class SWAP_N:
             addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
             value = self.mmu.read(addrs)
             result = ((value & 0xF) << 4) | (value >> 4) & 0xF
-            self.mmu.write(addrs, result & 0xFF) 
+            self.mmu.write(addrs, result & 0xFF)
         else:
-            result = ((self.registers[r] & 0xF) << 4) | ((self.registers[r] >> 4) & 0xF)
+            value = self.registers[r]
+            result = ((value & 0xF) << 4) | ((value >> 4) & 0xF)
             self.registers[r] = result & 0xFF
 
         Z = 1 if (result & 0xFF) == 0 else 0
