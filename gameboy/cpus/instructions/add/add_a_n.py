@@ -38,7 +38,5 @@ class ADD_A_N:
         C = 1 if sum > 0xFF else 0
 
         self.registers["A"] = sum & 0xFF
-
         self.cpu.set_flags(Z, N, H, C)
-
         self.cpu.timer.tick(ticks)

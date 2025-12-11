@@ -45,8 +45,11 @@ class Cpu:
         if not self.is_halted:
             opcode = self.fetch()
             callback = self.decode(opcode)
-            callback()
-            self.check_instruction_interrupt()
+            if any([self.ei_pending, self.di_pending]):
+                callback()
+                self.check_instruction_interrupt()
+            else:
+                callback()
         else:
             self.timer.tick(1)
 
