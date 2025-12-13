@@ -24,5 +24,7 @@ class JP_CC_NN:
         condiction_met = value == 1 if "N" not in condiction else value == 0
         if condiction_met:
             self.registers["pc"] = addrs
+            self.cpu.timer.tick(ticks+4)
+            return
 
         self.cpu.timer.tick(ticks)
