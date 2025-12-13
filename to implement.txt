@@ -1,1 +1,7 @@
 STOP instruction in gameboy/cpu/instructions/miscellaneous --> display to be implemented yet
+
+
+
+referencias:
+https://gekkio.fi/files/gb-docs/gbctr.pdf
+https://meganesulli.com/blog/game-boy-opcodes/
