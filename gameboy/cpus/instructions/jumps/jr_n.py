@@ -1,4 +1,3 @@
-
 class JR_N:
     def __init__(self, cpu):
         self.cpu = cpu
