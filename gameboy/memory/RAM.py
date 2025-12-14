@@ -1,4 +1,4 @@
-class Ram:
+class RAM:
     def __init__(self, size=0x2000):
         self.memory = [0] * size
 
@@ -22,7 +22,7 @@ class Ram:
         return 0xFF
 
 
-class Vram:
+class VRAM:
     def __init__(self, size=0x2000):
         self.memory = [0]*size
 

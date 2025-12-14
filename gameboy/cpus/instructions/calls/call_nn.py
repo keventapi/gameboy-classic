@@ -11,8 +11,8 @@ class CALL_NN:
         return instructions
 
     def execute_call_nn(self, ticks):
-        addrs = self.cpu.fetch16()
-        pc = self.registers["PC"]
+        addrs = self.cpu.fetch_16bit()
+        pc = self.registers["pc"]
 
         high = (pc >> 8) & 0xFF
         low = pc & 0xFF

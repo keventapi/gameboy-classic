@@ -1,5 +1,5 @@
-from sub.sub_a_n import SUB_A_N
-from sub.sbc_a_n import SBC_A_N
+from .sub.sub_a_n import SUB_A_N
+from .sub.sbc_a_n import SBC_A_N
 
 
 class SUB:

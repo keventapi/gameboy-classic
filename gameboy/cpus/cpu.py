@@ -1,7 +1,7 @@
-from gameboy.cpus.instruction_assembly import Instructions
+from .instruction_assembly import INSTRUCTIONS
 
 
-class Cpu:
+class CPU:
     def __init__(self, mmu, timer):
         self.is_halted = False
         self.di_pending = False
@@ -9,7 +9,6 @@ class Cpu:
         self.mmu = mmu
         self.timer = timer
         self.pc = 0x100
-        self.instructions = Instructions(self)
 
         self.registers_map = {
             0b000: "B", 0b001: "C",
@@ -25,6 +24,10 @@ class Cpu:
                           "H": 0, "L": 0}
 
         self.limit = 0xFFFE
+        self.assert_instructions()
+
+    def assert_instructions(self):
+        self.instructions = INSTRUCTIONS(self)
 
     def set_flags(self, Z, N, H, C):
         self.registers["F"] = (Z << 7) | (N << 6) | (H << 5) | (C << 4)
@@ -47,6 +50,7 @@ class Cpu:
                 # chama interrupt service
                 return
             opcode = self.fetch()
+            self.debug(opcode)
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
                 callback()
@@ -79,5 +83,8 @@ class Cpu:
     def decode(self, opcode):
         instruction = self.instructions.get_instruction(opcode)
         if not instruction:
-            raise NotImplementedError("não foi implementado essa instrução")
+            raise NotImplementedError(f"""INSTRUÇÃO AUSENTE!
+                                      Opcode: 0x{opcode:02X}
+                                      no Endereço:
+                                        0x{self.registers["pc"]:04X}""")
         return instruction

@@ -18,4 +18,4 @@ class LD_A_FF00_N:
             self.registers["A"] = self.mmu.read(0xFF00 + value)
         else:
             self.mmu.write(value+0xFF00, self.registers["A"])
-        self.cpu.timer.ticks(ticks)
+        self.cpu.timer.tick(ticks)

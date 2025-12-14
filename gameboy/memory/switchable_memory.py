@@ -1,4 +1,4 @@
-class Switchable_RAM:
+class SWITCHABLE_RAM:
     def __init__(self, total_banks=4, size=0x2000):
         self.banks = [[0]*size for _ in range(total_banks)]
         self.current_bank = 0
@@ -22,7 +22,7 @@ class Switchable_RAM:
             self.switch_bank(new_bank % len(self.banks))
 
 
-class Switchable_ROM:
+class SWITCHABLE_ROM:
     def __init__(self, rom_bytes, size=0x4000):
         self.banks = [rom_bytes[i:i+size] for i in range(0, len(rom_bytes), size)]
         self.current_bank = 1

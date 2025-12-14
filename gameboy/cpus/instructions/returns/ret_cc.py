@@ -1,4 +1,4 @@
-class ret_cc_CC:
+class RET_CC:
     def __init__(self, cpu):
         self.cpu = cpu
         self.registers = self.cpu.registers

@@ -1,5 +1,5 @@
-from stack.pop import POP
-from stack.push import PUSH
+from .stack.pop import POP
+from .stack.push import PUSH
 
 
 class STACK:
