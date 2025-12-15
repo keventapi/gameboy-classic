@@ -22,6 +22,22 @@ class RAM:
         return 0xFF
 
 
+class HRAM:
+    def __init__(self, size=0x7F):
+        self.memory = [0] * size
+
+    def write(self, addrs, value):
+        if 0xFF80 <= addrs < 0xFFFF:
+            offset = addrs - 0xFF80
+            self.memory[offset] = value
+
+    def read(self, addrs):
+        if 0xFF80 <= addrs < 0xFFFF:
+            offset = addrs - 0xFF80
+            return self.memory[offset]
+        return 0xFF
+
+
 class VRAM:
     def __init__(self, size=0x2000):
         self.memory = [0]*size

@@ -14,7 +14,8 @@ class SBC_A_N:
             0x9B: lambda: self.execute_sbc_a_n("E", 4),
             0x9C: lambda: self.execute_sbc_a_n("H", 4),
             0x9D: lambda: self.execute_sbc_a_n("L", 4),
-            0x9E: lambda: self.execute_sbc_a_n("HL", 8)
+            0x9E: lambda: self.execute_sbc_a_n("HL", 8),
+            0xDE: lambda: self.execute_sbc_a_n("#", 8)
         }
         return instructions
 
@@ -23,6 +24,8 @@ class SBC_A_N:
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
             n = self.mmu.read(addrs)
+        elif r == "#":
+            n = self.cpu.fetch()
         else:
             n = self.registers[r]
 

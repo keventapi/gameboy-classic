@@ -26,7 +26,6 @@ class AND_N:
             result &= self.mmu.read(addrs)
         elif r == "#":
             imediate = self.cpu.fetch()
-            print(imediate)
             result &= imediate
         else:
             result &= self.registers[r]

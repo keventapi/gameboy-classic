@@ -15,7 +15,7 @@ class CALL_CC_NN:
 
     def execute_call_cc_nn(self, condiction, ticks):
         addrs = self.cpu.fetch_16bit()
-        pc = self.registers["PC"]
+        pc = self.registers["pc"]
 
         high = (pc >> 8) & 0xFF
         low = pc & 0xFF

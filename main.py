@@ -1,9 +1,10 @@
+import time
 import loader
 from gameboy.memory.cartridge import CARTRIDGE
 from gameboy.IO.timer import TIMER
 from gameboy.cpus.cpu import CPU
 from gameboy.cpus.mmu import MMU
-from gameboy.memory.RAM import RAM, VRAM
+from gameboy.memory.RAM import RAM, VRAM, HRAM
 
 
 def load_rom(file_name):
@@ -19,11 +20,13 @@ def start():
     cartucho = CARTRIDGE(rom_bytes)
     timer = TIMER()
     vram = VRAM()
-    mmu = MMU(ram, cartucho.mbc, timer, vram)
+    hram = HRAM()
+    mmu = MMU(ram, cartucho.mbc, timer, vram, hram)
     cpu = CPU(mmu, timer)
 
     while True:
         cpu.step()
+        time.sleep(30)
 
 
 start()

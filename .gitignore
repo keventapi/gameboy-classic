@@ -28,3 +28,6 @@ dist/
 
 # screenshots ou saídas da PPU
 output/
+
+# pasta de jogos
+games/

@@ -44,13 +44,25 @@ class CPU:
             self.timer.interrupt_enabled = True
             self.ei_pending = False
 
+    def debug(self, opcode, last_state):
+        print("-"*64)
+        print(f"opcode: {opcode:02x}")
+        print(f"A: \n before: {bin(last_state["A"])} \n after {bin(self.registers["A"])}")
+        print(f"B: \n before: {bin(last_state["B"])} \n after {bin(self.registers["B"])}")
+        print(f"C: \n before: {bin(last_state["C"])} \n after {bin(self.registers["C"])}")
+        print(f"D: \n before: {bin(last_state["D"])} \n after {bin(self.registers["D"])}")
+        print(f"E: \n before: {bin(last_state["E"])} \n after {bin(self.registers["E"])}")
+        print(f"F: \n before: {bin(last_state["F"])} \n after {bin(self.registers["F"])}")
+        print(f"sp: \n before: {last_state["sp"]} \n after {self.registers["sp"]}")
+        print("-"*64)
+
     def step(self):
+        last_state = self.registers.copy()
         if not self.is_halted:
             if self.timer.interrupt_enabled and self.timer.interrupt:
                 # chama interrupt service
                 return
             opcode = self.fetch()
-            self.debug(opcode)
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
                 callback()
@@ -59,6 +71,7 @@ class CPU:
                 callback()
         else:
             self.timer.tick(1)
+        self.debug(opcode, last_state)
 
     def push8(self, value):
         if 0xC000 <= self.registers["sp"] - 1 <= self.limit:

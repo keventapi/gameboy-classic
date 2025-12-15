@@ -25,11 +25,10 @@ class CB:
         self.sra_n = SRA_N(cpu)
         self.srl_n = SRL_N(cpu)
         self.swap_n = SWAP_N(cpu)
+        self.instructions = {}
+        self.get_instruction_complement()
 
     def get_instruction_complement(self):
-        self.instruction = {
-
-        }
         updater = [self.bit_b_r.bit_b_r_instructions,
                    self.rc_n.rc_n_instructions,
                    self.res_b_r.res_b_r_intructions,
@@ -46,7 +45,7 @@ class CB:
 
     def dispatch(self):
         opcode = self.cpu.fetch()
-        callback = self.instruction.get(opcode)
+        callback = self.instructions.get(opcode)
         if callback:
             callback()
         else:
