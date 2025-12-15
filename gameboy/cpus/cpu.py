@@ -6,6 +6,8 @@ class CPU:
         self.is_halted = False
         self.di_pending = False
         self.ei_pending = False
+        self.ime = True
+
         self.mmu = mmu
         self.timer = timer
         self.pc = 0x100
@@ -38,10 +40,10 @@ class CPU:
 
     def check_instruction_interrupt(self):
         if self.di_pending:
-            self.timer.interrupt_enabled = False
+            self.ime = False
             self.di_pending = False
         if self.ei_pending:
-            self.timer.interrupt_enabled = True
+            self.ime = True
             self.ei_pending = False
 
     def debug(self, opcode, last_state):
@@ -56,12 +58,45 @@ class CPU:
         print(f"sp: \n before: {last_state["sp"]} \n after {self.registers["sp"]}")
         print("-"*64)
 
+    def reset_if(self, b):
+        value = self.mmu.read(0xFF0F)
+        new_value = value & (~(1 << b))
+        self.mmu.write(0xFF0F, new_value)
+
+    def call_isr(self):
+        b = -1
+        value_if = self.mmu.read(0xFF0F)
+        value_ie = self.mmu.read(0xFFFF)
+        for i in range(5):
+            if value_if >> i != 0 and value_ie >> i != 0:
+                b = i
+                break
+        if b != -1:
+            self.ime = False
+            addrs = 0x0040 + (b * 8)
+            high = (self.registers["pc"] >> 8) & 0xFF
+            low = self.registers["pc"] & 0xFF
+            self.push8(high)
+            self.push8(low)
+            self.registers["pc"] = addrs
+            self.reset_if(b)
+            self.timer.tick(20)
+
+    def ceck_if_ie(self):
+        value_if = self.mmu.read(0xFF0F) & 0x1F
+        value_ie = self.mmu.read(0xFFFF) & 0x1F
+        return value_if != 0 and value_ie != 0
+
     def step(self):
         last_state = self.registers.copy()
+
+        if self.ceck_if_ie():
+            self.is_halted = False
+            if self.ime:
+                self.call_isr()
+            return
+
         if not self.is_halted:
-            if self.timer.interrupt_enabled and self.timer.interrupt:
-                # chama interrupt service
-                return
             opcode = self.fetch()
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):

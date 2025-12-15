@@ -24,8 +24,6 @@ class TIMER:
 
         self.internal_counter = 0
 
-        self.interrupt_enabled = True
-
         self.interrupt = False
         self.div_state = 0
 

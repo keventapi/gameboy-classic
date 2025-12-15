@@ -18,5 +18,5 @@ class RET:
 
         self.registers["pc"] = new_pc
         if enable_interrupt:
-            self.cpu.timer.interrupt = True
+            self.cpu.ime = True
         self.cpu.timer.tick(ticks)

@@ -1,10 +1,13 @@
 class MMU:
-    def __init__(self, ram, mbc, timer, vram, hram):
+    def __init__(self, ram, mbc, timer,
+                 vram, hram, joypad, interrupt_controller):
         self.ram = ram
         self.mbc = mbc
         self.timer = timer
+        self.joypad = joypad
         self.vram = vram
         self.hram = hram
+        self.interrupt_controller = interrupt_controller
 
     def debug(self, action, addrs, value=None):
         print("-"*64)
@@ -26,6 +29,12 @@ class MMU:
             return self.vram.read(addrs)
         elif 0xFF80 <= addrs < 0xFFFF:
             return self.hram.read(addrs)
+        elif addrs == 0xFF00:
+            return self.joypad.read()
+        elif addrs == 0xFF0F:
+            return self.interrupt_controller.read_if()
+        elif addrs == 0xFFFF:
+            return self.interrupt_controller.read_ie()
         else:
             return 0xFF
 
@@ -41,3 +50,9 @@ class MMU:
             self.vram.write(addrs, value)
         elif 0xFF80 <= addrs < 0xFFFF:
             self.hram.write(addrs, value)
+        elif addrs == 0xFF00:
+            self.joypad.write(value)
+        elif addrs == 0xFF0F:
+            self.interrupt_controller.write_if(value)
+        elif addrs == 0xFFFF:
+            self.interrupt_controller.write_ie(value)
