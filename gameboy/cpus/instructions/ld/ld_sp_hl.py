@@ -14,3 +14,4 @@ class LD_SP_HL:
         hl = (self.registers["H"] << 8) | self.registers["L"]
         self.registers["SP"] = hl
         self.cpu.timer.tick(ticks)
+        return ticks

@@ -22,3 +22,4 @@ class CALL_NN:
 
         self.registers["pc"] = addrs
         self.cpu.timer.tick(ticks)
+        return ticks

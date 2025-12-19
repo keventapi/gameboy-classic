@@ -35,3 +35,4 @@ class OR_N:
         self.registers["A"] = result & 0xFF
         self.cpu.set_flags(Z, 0, 0, 0)
         self.cpu.timer.tick(ticks)
+        return ticks

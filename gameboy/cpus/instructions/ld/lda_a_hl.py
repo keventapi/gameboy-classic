@@ -27,6 +27,7 @@ class LDACTION_A_HL:
         self.registers["H"] = h
         self.registers["L"] = l
         self.cpu.timer.tick(ticks)
+        return ticks
 
     def execute_ldi(self, read_hl, ticks):
         hl = (self.registers["H"] << 8) | self.registers["L"]
@@ -42,3 +43,4 @@ class LDACTION_A_HL:
         self.registers["H"] = h
         self.registers["L"] = l
         self.cpu.timer.tick(ticks)
+        return ticks

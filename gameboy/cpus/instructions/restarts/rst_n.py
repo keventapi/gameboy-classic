@@ -28,3 +28,4 @@ class RST_N:
 
         self.registers["pc"] = n & 0xFFFF
         self.cpu.timer.tick(ticks)
+        return ticks

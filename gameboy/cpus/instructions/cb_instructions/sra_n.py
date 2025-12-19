@@ -38,3 +38,4 @@ class SRA_N:
             self.registers[r] = value
 
         self.cpu.timer.tick(ticks)
+        return ticks

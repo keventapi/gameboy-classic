@@ -40,3 +40,4 @@ class ADD_A_N:
         self.registers["A"] = sum & 0xFF
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
+        return ticks

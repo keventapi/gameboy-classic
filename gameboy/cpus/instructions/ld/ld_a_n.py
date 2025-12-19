@@ -13,7 +13,6 @@ class LD_A_N:
             0x3E: lambda: self.ld_a_n("A", "#", 8),
             0x02: lambda: self.ld_n_a("BC", "A", 8),
             0x12: lambda: self.ld_n_a("DE", "A", 8),
-            0x77: lambda: self.ld_n_a("HL", "A", 8),
             0xEA: lambda: self.ld_n_a("nn", "A", 16)
         }
         return instruction
@@ -27,6 +26,7 @@ class LD_A_N:
             immediate = (self.registers[high] << 8) | self.registers[low]
             self.mmu.write(immediate, self.registers[r2])
         self.cpu.timer.tick(ticks)
+        return ticks
 
     def ld_a_n(self, r1, r2, ticks):
         if r2 == "nn":
@@ -40,3 +40,4 @@ class LD_A_N:
             immediate = (self.registers[high] << 8) | self.registers[low]
             self.registers[r1] = self.mmu.read(immediate)
         self.cpu.timer.tick(ticks)
+        return ticks

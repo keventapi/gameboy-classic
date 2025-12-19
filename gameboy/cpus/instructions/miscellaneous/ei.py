@@ -10,3 +10,5 @@ class EI:
 
     def execute_ei(self, ticks):
         self.cpu.ei_pending = True
+        self.cpu.timer.tick(ticks)
+        return ticks

@@ -7,7 +7,7 @@ class JP_NN:
     def jp_nn_instructions(self):
         instructions = {
             0xC3: lambda: self.execute_jp_nn("#", 16),
-            0xE9: lambda: self.execute_jp_nn("HL", 8)
+            0xE9: lambda: self.execute_jp_nn("HL", 4)
         }
         return instructions
 
@@ -18,3 +18,4 @@ class JP_NN:
             addrs = (self.registers["H"] << 8) | self.registers["L"]
         self.registers["pc"] = addrs
         self.cpu.timer.tick(ticks)
+        return ticks

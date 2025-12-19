@@ -27,5 +27,6 @@ class RET_CC:
             new_pc = (high << 8) | low
             self.registers["pc"] = new_pc
             self.cpu.timer.tick(ticks+12)
-            return
+            return ticks + 12
         self.cpu.timer.tick(ticks)
+        return ticks

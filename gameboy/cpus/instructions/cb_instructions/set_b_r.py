@@ -88,3 +88,4 @@ class SET_B_R:
             self.registers[r] = value
 
         self.cpu.timer.tick(ticks)
+        return ticks

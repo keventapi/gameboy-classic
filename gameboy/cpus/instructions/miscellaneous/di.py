@@ -9,4 +9,6 @@ class DI:
         return instructions
 
     def execute_di(self, ticks):
-        self.cpu.di_pending = True
+        self.cpu.ime = False
+        self.cpu.timer.tick(ticks)
+        return ticks

@@ -29,3 +29,4 @@ class LD_HL_SP_N:
 
         self.cpu.set_flags(0, 0, H, C)
         self.cpu.timer.tick(ticks)
+        return ticks

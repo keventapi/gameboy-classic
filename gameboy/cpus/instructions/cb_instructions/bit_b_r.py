@@ -13,14 +13,14 @@ class BIT_B_R:
             0x43: lambda: self.execute_bit_b_r(0, "E", 8),
             0x44: lambda: self.execute_bit_b_r(0, "H", 8),
             0x45: lambda: self.execute_bit_b_r(0, "L", 8),
-            0x46: lambda: self.execute_bit_b_r(0, "HL", 16),
+            0x46: lambda: self.execute_bit_b_r(0, "HL", 12),
             0x48: lambda: self.execute_bit_b_r(1, "B", 8),
             0x49: lambda: self.execute_bit_b_r(1, "C", 8),
             0x4A: lambda: self.execute_bit_b_r(1, "D", 8),
             0x4B: lambda: self.execute_bit_b_r(1, "E", 8),
             0x4C: lambda: self.execute_bit_b_r(1, "H", 8),
             0x4D: lambda: self.execute_bit_b_r(1, "L", 8),
-            0x4E: lambda: self.execute_bit_b_r(1, "HL", 16),
+            0x4E: lambda: self.execute_bit_b_r(1, "HL", 12),
             0x4F: lambda: self.execute_bit_b_r(1, "A", 8),
             0x50: lambda: self.execute_bit_b_r(2, "B", 8),
             0x51: lambda: self.execute_bit_b_r(2, "C", 8),
@@ -28,7 +28,7 @@ class BIT_B_R:
             0x53: lambda: self.execute_bit_b_r(2, "E", 8),
             0x54: lambda: self.execute_bit_b_r(2, "H", 8),
             0x55: lambda: self.execute_bit_b_r(2, "L", 8),
-            0x56: lambda: self.execute_bit_b_r(2, "HL", 16),
+            0x56: lambda: self.execute_bit_b_r(2, "HL", 12),
             0x57: lambda: self.execute_bit_b_r(2, "A", 8),
             0x58: lambda: self.execute_bit_b_r(3, "B", 8),
             0x59: lambda: self.execute_bit_b_r(3, "C", 8),
@@ -36,7 +36,7 @@ class BIT_B_R:
             0x5B: lambda: self.execute_bit_b_r(3, "E", 8),
             0x5C: lambda: self.execute_bit_b_r(3, "H", 8),
             0x5D: lambda: self.execute_bit_b_r(3, "L", 8),
-            0x5E: lambda: self.execute_bit_b_r(3, "HL", 16),
+            0x5E: lambda: self.execute_bit_b_r(3, "HL", 12),
             0x5F: lambda: self.execute_bit_b_r(3, "A", 8),
             0x60: lambda: self.execute_bit_b_r(4, "B", 8),
             0x61: lambda: self.execute_bit_b_r(4, "C", 8),
@@ -44,7 +44,7 @@ class BIT_B_R:
             0x63: lambda: self.execute_bit_b_r(4, "E", 8),
             0x64: lambda: self.execute_bit_b_r(4, "H", 8),
             0x65: lambda: self.execute_bit_b_r(4, "L", 8),
-            0x66: lambda: self.execute_bit_b_r(4, "HL", 16),
+            0x66: lambda: self.execute_bit_b_r(4, "HL", 12),
             0x67: lambda: self.execute_bit_b_r(4, "A", 8),
             0x68: lambda: self.execute_bit_b_r(5, "B", 8),
             0x69: lambda: self.execute_bit_b_r(5, "C", 8),
@@ -52,7 +52,7 @@ class BIT_B_R:
             0x6B: lambda: self.execute_bit_b_r(5, "E", 8),
             0x6C: lambda: self.execute_bit_b_r(5, "H", 8),
             0x6D: lambda: self.execute_bit_b_r(5, "L", 8),
-            0x6E: lambda: self.execute_bit_b_r(5, "HL", 16),
+            0x6E: lambda: self.execute_bit_b_r(5, "HL", 12),
             0x6F: lambda: self.execute_bit_b_r(5, "A", 8),
             0x70: lambda: self.execute_bit_b_r(6, "B", 8),
             0x71: lambda: self.execute_bit_b_r(6, "C", 8),
@@ -60,7 +60,7 @@ class BIT_B_R:
             0x73: lambda: self.execute_bit_b_r(6, "E", 8),
             0x74: lambda: self.execute_bit_b_r(6, "H", 8),
             0x75: lambda: self.execute_bit_b_r(6, "L", 8),
-            0x76: lambda: self.execute_bit_b_r(6, "HL", 16),
+            0x76: lambda: self.execute_bit_b_r(6, "HL", 12),
             0x77: lambda: self.execute_bit_b_r(6, "A", 8),
             0x78: lambda: self.execute_bit_b_r(7, "B", 8),
             0x79: lambda: self.execute_bit_b_r(7, "C", 8),
@@ -68,7 +68,7 @@ class BIT_B_R:
             0x7B: lambda: self.execute_bit_b_r(7, "E", 8),
             0x7C: lambda: self.execute_bit_b_r(7, "H", 8),
             0x7D: lambda: self.execute_bit_b_r(7, "L", 8),
-            0x7E: lambda: self.execute_bit_b_r(7, "HL", 16),
+            0x7E: lambda: self.execute_bit_b_r(7, "HL", 12),
             0x7F: lambda: self.execute_bit_b_r(7, "A", 8)
         }
         return instructions
@@ -90,3 +90,4 @@ class BIT_B_R:
         self.cpu.set_flags(Z, N, H, C)
 
         self.cpu.timer.tick(ticks)
+        return ticks

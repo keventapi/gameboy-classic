@@ -17,5 +17,6 @@ class LD_A_FF00_N:
         if update_a:
             self.registers["A"] = self.mmu.read(0xFF00 + value)
         else:
-            self.mmu.write(value+0xFF00, self.registers["A"])
+            self.mmu.write((value+0xFF00) & 0xFFFF, self.registers["A"])
         self.cpu.timer.tick(ticks)
+        return ticks

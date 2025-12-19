@@ -95,3 +95,4 @@ class LD_R1_R2:
         else:
             self.registers[r1] = self.registers[r2] & 0xFF
         self.cpu.timer.tick(ticks)
+        return ticks

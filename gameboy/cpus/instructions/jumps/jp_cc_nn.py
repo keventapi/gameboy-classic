@@ -25,6 +25,7 @@ class JP_CC_NN:
         if condiction_met:
             self.registers["pc"] = addrs
             self.cpu.timer.tick(ticks+4)
-            return
+            return ticks + 4
 
         self.cpu.timer.tick(ticks)
+        return ticks

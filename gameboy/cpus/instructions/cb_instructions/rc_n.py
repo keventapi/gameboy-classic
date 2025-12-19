@@ -37,3 +37,4 @@ class RC_N:
         else:
             self.registers[r] = value
         self.cpu.timer.tick(ticks)
+        return ticks

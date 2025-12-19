@@ -1,7 +1,6 @@
 class SUB_A_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
         self.fetch = self.cpu.fetch
 
@@ -20,14 +19,14 @@ class SUB_A_N:
         return instructions
 
     def execute_sub_a_n(self, r, ticks):
-        A = self.registers["A"]
+        A = self.cpu.registers["A"]
         if r == "HL":
-            addrs = (self.registers["H"] << 8) | self.registers["L"]
+            addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             n = self.mmu.read(addrs)
         elif r == "#":
             n = self.fetch()
         else:
-            n = self.registers[r]
+            n = self.cpu.registers[r]
 
         n &= 0xFF
         sub = A - n
@@ -37,6 +36,7 @@ class SUB_A_N:
         H = 1 if (A & 0xF) < (n & 0xF) else 0
         C = 1 if A < n else 0
 
-        self.registers["A"] = sub & 0xFF
+        self.cpu.registers["A"] = sub & 0xFF
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
+        return ticks

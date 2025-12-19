@@ -24,3 +24,4 @@ class LD_N_NN:
             self.registers[r16[0]] = high
             self.registers[r16[1]] = low
         self.cpu.timer.tick(ticks)
+        return ticks

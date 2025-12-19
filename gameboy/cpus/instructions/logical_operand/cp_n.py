@@ -39,3 +39,4 @@ class CP_N:
 
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
+        return ticks

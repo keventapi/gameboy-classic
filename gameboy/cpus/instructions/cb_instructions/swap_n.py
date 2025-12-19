@@ -31,3 +31,4 @@ class SWAP_N:
         Z = 1 if (result & 0xFF) == 0 else 0
         self.cpu.set_flags(Z, 0, 0, 0)
         self.cpu.timer.tick(ticks)
+        return ticks

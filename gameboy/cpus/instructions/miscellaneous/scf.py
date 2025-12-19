@@ -1,4 +1,4 @@
-class SCF:
+class SCF:  # Flags podem ser otimizadas para nn precisar tocar no Z
     def __init__(self, cpu):
         self.cpu = cpu
         self.registers = self.cpu.registers
@@ -17,3 +17,4 @@ class SCF:
         C = 1
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
+        return ticks

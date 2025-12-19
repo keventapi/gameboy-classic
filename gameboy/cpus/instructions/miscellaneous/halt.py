@@ -11,3 +11,4 @@ class HALT:
     def execute_halt(self, ticks):
         self.cpu.is_halted = True
         self.cpu.timer.tick(ticks)
+        return ticks

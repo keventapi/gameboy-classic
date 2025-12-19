@@ -20,3 +20,4 @@ class RRCA:
         self.cpu.set_flags(Z, N, H, C)
         self.registers["A"] = A & 0xFF
         self.cpu.timer.tick(ticks)
+        return ticks

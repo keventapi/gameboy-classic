@@ -23,3 +23,4 @@ class POP:
             self.registers[low] = self.pull8()
         self.registers[high] = self.pull8()
         self.cpu.timer.tick(ticks)
+        return ticks

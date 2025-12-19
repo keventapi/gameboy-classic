@@ -19,8 +19,9 @@ class ADD_SP_N:
         src = self.registers["SP"]
         Z = 0
         N = 0
-        H = 1 if (src & 0xF) + (signed_offset & 0xF) > 0xF else 0
+        H = 1 if (src & 0xF) + (imediate & 0xF) > 0xF else 0
         C = 1 if (src & 0xFF) + imediate > 0xFF else 0
         self.cpu.set_flags(Z, N, H, C)
         self.registers["SP"] = (src + signed_offset) & 0xFFFF
         self.cpu.timer.tick(ticks)
+        return ticks

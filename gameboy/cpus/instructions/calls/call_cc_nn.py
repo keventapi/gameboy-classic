@@ -33,5 +33,6 @@ class CALL_CC_NN:
 
             self.registers["pc"] = addrs
             self.cpu.timer.tick(ticks*2)
-            return
+            return ticks * 2
         self.cpu.timer.tick(ticks)
+        return ticks

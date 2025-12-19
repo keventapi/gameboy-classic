@@ -35,3 +35,4 @@ class XOR_N:
         self.cpu.set_flags(Z, 0, 0, 0)
         self.registers["A"] = result & 0xFF
         self.cpu.timer.tick(ticks)
+        return ticks

@@ -31,3 +31,4 @@ class ADD_HL_N:
         self.registers["L"] = value & 0xFF
 
         self.cpu.timer.tick(ticks)
+        return ticks

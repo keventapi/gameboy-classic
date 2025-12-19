@@ -19,5 +19,6 @@ class LD_NN_SP:
         low_sp = sp_value & 0xFF
         high_sp = (sp_value >> 8) & 0xFF
         self.mmu.write(nn, low_sp)
-        self.mmu.write(nn+1, high_sp)
+        self.mmu.write((nn+1) & 0xFFFF, high_sp)
         self.cpu.timer.tick(ticks)
+        return ticks

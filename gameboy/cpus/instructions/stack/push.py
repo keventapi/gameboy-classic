@@ -20,3 +20,4 @@ class PUSH:
         self.push8(self.registers[high])
         self.push8(self.registers[low])
         self.cpu.timer.tick(ticks)
+        return ticks

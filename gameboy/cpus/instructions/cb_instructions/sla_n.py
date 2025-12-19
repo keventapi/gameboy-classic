@@ -37,3 +37,4 @@ class SLA_N:
             self.registers[r] = value
 
         self.cpu.timer.tick(ticks)
+        return ticks

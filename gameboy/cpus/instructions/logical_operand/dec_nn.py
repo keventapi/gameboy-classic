@@ -21,3 +21,4 @@ class DEC_NN:
             self.registers[r16[0]] = (operand >> 8) & 0xFF
             self.registers[r16[1]] = operand & 0xFF
         self.cpu.timer.tick(ticks)
+        return ticks

@@ -1,4 +1,4 @@
-class RLCA:  # divergencia na documentação, Z flag pode precisar ser refeita
+class RLCA:
     def __init__(self, cpu):
         self.cpu = cpu
         self.registers = self.cpu.registers
@@ -20,3 +20,4 @@ class RLCA:  # divergencia na documentação, Z flag pode precisar ser refeita
         self.cpu.set_flags(Z, N, H, C)
         self.registers["A"] = value
         self.cpu.timer.tick(ticks)
+        return ticks

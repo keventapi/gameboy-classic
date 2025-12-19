@@ -32,13 +32,14 @@ class SBC_A_N:
         n &= 0xFF
         carry_flag = (self.registers["F"] >> 4) & 1
 
-        sub = A - (n + carry_flag)
+        sub = A - n - carry_flag
 
         Z = 1 if (sub & 0xFF) == 0 else 0
         N = 1
-        H = 1 if (A & 0xF) < ((n & 0xF) + carry_flag) else 0
-        C = 1 if (A < (n + carry_flag)) else 0
+        H = 1 if (A & 0xF) - (n & 0xF) - carry_flag < 0 else 0
+        C = 1 if sub < 0 else 0
 
         self.registers["A"] = sub & 0xFF
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
+        return ticks

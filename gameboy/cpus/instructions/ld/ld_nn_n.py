@@ -18,3 +18,4 @@ class LD_NN_N:
         nn = self.fetch()
         self.registers[register] = nn
         self.cpu.timer.tick(ticks)
+        return ticks

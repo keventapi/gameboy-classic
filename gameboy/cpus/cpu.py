@@ -49,12 +49,12 @@ class CPU:
     def debug(self, opcode, last_state):
         print("-"*64)
         print(f"opcode: {opcode:02x}")
-        print(f"A: \n before: {bin(last_state["A"])} \n after {bin(self.registers["A"])}")
-        print(f"B: \n before: {bin(last_state["B"])} \n after {bin(self.registers["B"])}")
-        print(f"C: \n before: {bin(last_state["C"])} \n after {bin(self.registers["C"])}")
-        print(f"D: \n before: {bin(last_state["D"])} \n after {bin(self.registers["D"])}")
-        print(f"E: \n before: {bin(last_state["E"])} \n after {bin(self.registers["E"])}")
-        print(f"F: \n before: {bin(last_state["F"])} \n after {bin(self.registers["F"])}")
+        print(f"A: \n before: 0x{last_state["A"]:02x} \n after 0x{self.registers["A"]:02x}")
+        print(f"B: \n before: 0x{last_state["B"]:02x} \n after 0x{self.registers["B"]:02x}")
+        print(f"C: \n before: 0x{last_state["C"]:02x} \n after 0x{self.registers["C"]:02x}")
+        print(f"D: \n before: 0x{last_state["D"]:02x} \n after 0x{self.registers["D"]:02x}")
+        print(f"E: \n before: 0x{last_state["E"]:02x} \n after 0x{self.registers["E"]:02x}")
+        print(f"F: \n before: {last_state["F"]:08b} \n after {self.registers["F"]:08b}")
         print(f"sp: \n before: {last_state["sp"]} \n after {self.registers["sp"]}")
         print("-"*64)
 
@@ -92,21 +92,24 @@ class CPU:
 
         if self.ceck_if_ie():
             self.is_halted = False
+            ticks = 0
             if self.ime:
-                self.call_isr()
-            return
+                ticks = self.call_isr()
+            return ticks
 
         if not self.is_halted:
             opcode = self.fetch()
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
-                callback()
+                ticks = callback()
                 self.check_instruction_interrupt()
             else:
-                callback()
+                ticks = callback()
         else:
-            self.timer.tick(1)
+            self.timer.tick(4)
+            ticks = 4
         self.debug(opcode, last_state)
+        return ticks
 
     def push8(self, value):
         if 0xC000 <= self.registers["sp"] - 1 <= self.limit:

@@ -20,3 +20,4 @@ class RET:
         if enable_interrupt:
             self.cpu.ime = True
         self.cpu.timer.tick(ticks)
+        return ticks

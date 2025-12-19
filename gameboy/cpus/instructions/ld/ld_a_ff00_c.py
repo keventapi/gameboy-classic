@@ -16,5 +16,6 @@ class LD_A_FF00_C:
         if read_a:
             self.registers["A"] = self.mmu.read(addrs)
         else:
-            self.mmu.write(addrs, self.registers["A"])
+            self.mmu.write(addrs & 0xFFFF, self.registers["A"])
         self.cpu.timer.tick(ticks)
+        return ticks

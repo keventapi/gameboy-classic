@@ -29,6 +29,7 @@ class JR_CC_N:
                 n -= 0x100
             self.registers["pc"] += n
             self.cpu.timer.tick(ticks+4)
-            return
+            return ticks + 4
 
         self.cpu.timer.tick(ticks)
+        return ticks

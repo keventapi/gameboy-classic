@@ -36,3 +36,4 @@ class AND_N:
         self.cpu.set_flags(Z, 0, H, 0)
         self.registers["A"] = result & 0xFF
         self.cpu.timer.tick(ticks)
+        return ticks
