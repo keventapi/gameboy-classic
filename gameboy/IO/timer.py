@@ -77,7 +77,7 @@ class TIMER:
     def read(self, addrs):
         offset = addrs - self.offset_const
         if offset == 0:
-            return (self.counters[0] >> 8)
+            return (self.counters[0] >> 8) & 0xFF
         if offset == 3:
             return self.TAC & 0xFF
         return self.counters[offset] & 0xFF

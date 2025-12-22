@@ -62,10 +62,12 @@ hram = HRAM()
 mmu = MMU(ram, cartucho.mbc, timer,
           hram, joypad, interrupt_controller,
           ppu)
+ppu.mmu = mmu
 cpu = CPU(mmu, timer)
 
 
 while rodando:
+    start_time = time.perf_counter()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
@@ -78,6 +80,10 @@ while rodando:
     if ppu.start_render:
         renderizar(ppu.display_buffer, screen)
         ppu.start_render = False
-
+        elapsed = time.perf_counter() - start_time
+        sleep_time = (1/60.0) - elapsed
+        if sleep_time > 0:
+            print(sleep_time)
+            time.sleep(sleep_time)
 
 pygame.quit()

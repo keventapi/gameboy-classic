@@ -11,10 +11,7 @@ class MMU:
         self.interrupt_controller = interrupt_controller
 
     def debug(self, action, addrs, value=None):
-        if addrs == 0x0038:
-            import sys
-            sys.exit()
-        if addrs == 0xFF0F or addrs == 0xFFFF:
+        if (addrs == 0xFF0F or addrs == 0xFFFF) and action == "read":
             return
         print("-"*64)
         print(f"action: {action}")

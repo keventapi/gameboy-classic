@@ -68,7 +68,7 @@ class CPU:
         value_if = self.mmu.read(0xFF0F)
         value_ie = self.mmu.read(0xFFFF)
         for i in range(5):
-            if value_if >> i != 0 and value_ie >> i != 0:
+            if ((value_if >> i) & 1) & 1 and ((value_ie >> i) & 1) != 0:
                 b = i
                 break
         if b != -1:
@@ -81,21 +81,17 @@ class CPU:
             self.registers["pc"] = addrs
             self.reset_if(b)
             self.timer.tick(20)
+            return 20
+        return 4
 
     def ceck_if_ie(self):
         value_if = self.mmu.read(0xFF0F) & 0x1F
         value_ie = self.mmu.read(0xFFFF) & 0x1F
-        return value_if != 0 and value_ie != 0
+        #print(f"if: {value_if:08b} \n ie:{value_ie:08b} \n ime: {self.ime}")
+        return (value_if & value_ie & 0x1F) != 0
 
     def step(self):
         last_state = self.registers.copy()
-
-        if self.ceck_if_ie():
-            self.is_halted = False
-            ticks = 0
-            if self.ime:
-                ticks = self.call_isr()
-            return ticks
 
         if not self.is_halted:
             opcode = self.fetch()
@@ -108,7 +104,15 @@ class CPU:
         else:
             self.timer.tick(4)
             ticks = 4
-        self.debug(opcode, last_state)
+        #self.debug(opcode, last_state)
+
+        if self.ceck_if_ie():
+            self.is_halted = False
+            ticks_add = 4
+            if self.ime:
+                ticks_add = self.call_isr()
+            return ticks + ticks_add
+
         return ticks
 
     def push8(self, value):

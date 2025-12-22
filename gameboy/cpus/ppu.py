@@ -24,33 +24,31 @@ class PPU:
 
         self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
         self.start_render = False
+        self.stat_line = False
 
-    def trigger_mode_interruption(self, mode):  # fix necessario depois implementar por mudança de borda 0 / 1
+    def update_stat_interrupt(self):
         stat = self.registers[1]
-        should_interrupt = False
-        if mode == 1:
-            self.interrupter.request_interrupt(0)
+        mode = self.get_mode()
+        ly = self.registers[4]
+        lyc = self.registers[5]
 
-        if mode == 0 and (stat & (1 << 3)):
-            should_interrupt = True
-        elif mode == 1 and (stat & (1 << 4)):
-            should_interrupt = True
-        elif mode == 2 and (stat & (1 << 5)):
-            should_interrupt = True
+        lyc_int = (stat & (1 << 6)) and (ly == lyc)
+        mode0_int = (stat & (1 << 3)) and (mode == 0)
+        mode1_int = (stat & (1 << 4)) and (mode == 1)
+        mode2_int = (stat & (1 << 5)) and (mode == 2)
 
-        if should_interrupt:
+        current_signal = lyc_int or mode0_int or mode1_int or mode2_int
+
+        if current_signal and not self.stat_line:
             self.interrupter.request_interrupt(1)
 
-    def trigger_lyc_ly_interruption(self):
-        if ((self.registers[1] >> 6) & 1) == 1:
-            self.interrupter.request_interrupt(1)
+        self.stat_line = current_signal
 
     def set_mode(self, mode):
         current = self.registers[1] & 0x03
         if current == mode:
             return
         self.registers[1] = (self.registers[1] & 0xFC) | (mode & 0x03)
-        self.trigger_mode_interruption(mode)
 
     def reset_ppu_state(self):
         self.registers[4] = 0x00
@@ -69,7 +67,7 @@ class PPU:
 
         if lyc == ly:
             self.set_stat_checkflag(True)
-            self.trigger_lyc_ly_interruption()
+            self.update_stat_interrupt()
         else:
             self.set_stat_checkflag(False)
 
@@ -78,7 +76,6 @@ class PPU:
 
         if self.registers[4] > 153:
             self.registers[4] = 0
-
         self.handle_ly_lyc_collision()
 
     def render_scanline(self):
@@ -124,8 +121,8 @@ class PPU:
         if lcd_mode:
             self.counter += cycles
 
-            if self.registers[4] == 144:
-                self.start_render = True
+            old_mode = self.get_mode()
+            old_ly = self.registers[4]
 
             if self.registers[4] < 144:
                 if self.counter < 80:
@@ -141,6 +138,12 @@ class PPU:
             if self.counter >= 456:
                 self.counter -= 456
                 self.increment_ly()
+
+            if self.registers[4] == 144 and old_ly == 143:
+                self.interrupter.request_interrupt(0)
+                self.start_render = True
+            
+            self.update_stat_interrupt()
 
     def write(self, addrs, value):
         offset = addrs - self.offset_constant
@@ -166,6 +169,12 @@ class PPU:
         elif offset == 5:
             self.registers[offset] = value
             self.handle_ly_lyc_collision()
+        elif offset == 6:
+            src_addrs = value << 8
+
+            for i in range(160):
+                data = self.mmu.read(src_addrs + i)
+                self.write_oam(0xFE00 + i, data)
         else:
             self.registers[offset] = value
 
