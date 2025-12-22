@@ -112,18 +112,16 @@ class CPU:
         return ticks
 
     def push8(self, value):
-        if 0xC000 <= self.registers["sp"] - 1 <= self.limit:
-            self.registers["sp"] -= 1
-            self.mmu.write(self.registers["sp"], value)
-        else:
-            raise Exception("stack overflow")
+        self.registers["sp"] -= 1
+        self.registers["sp"] &= 0xFFFF
+        self.mmu.write(self.registers["sp"], value)
 
     def pull8(self):
-        if 0xC000 <= self.registers["sp"] + 1 <= self.limit:
-            value = self.mmu.read(self.registers["sp"])
-            self.registers["sp"] += 1
-            return value
-        raise Exception("stack underflow")
+        value = self.mmu.read(self.registers["sp"])
+        self.registers["sp"] += 1
+        self.registers["sp"] &= 0xFFFF
+        return value
+
 
     def fetch(self):
         pc = self.registers["pc"]

@@ -19,7 +19,7 @@ class SUB_A_N:
         return instructions
 
     def execute_sub_a_n(self, r, ticks):
-        A = self.cpu.registers["A"]
+        A = self.cpu.registers["A"] & 0xFF
         if r == "HL":
             addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             n = self.mmu.read(addrs)

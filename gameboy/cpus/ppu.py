@@ -1,99 +1,139 @@
 class PPU:
-    def __init__(self, vram, interrupter):
+    def __init__(self, vram, interrupter, oam):
         self.vram = vram
         self.interrupter = interrupter
-        self.registers_map = {
-            0xFF40: "LCDC",
-            0xFF41: "STAT",
-            0xFF42: "SCY",
-            0xFF43: "SCX",
-            0xFF44: "LY",
-            0xFF45: "LYC",
-            0xFF46: "DMA",
-            0xFF47: "BGP",
-            0xFF48: "OBP0",
-            0xFF49: "OBP1",
-            0xFF4A: "WY",
-            0xFF4B: "WX"
-        }
-        self.registers = {
-            "LY": 0x00,
-            "STAT": 0x00,
-            "LYC": 0x00,
-            "LCDC": 0x91,
-            "WX": 0x00,
-            "WY": 0x00,
-            "OBP1": 0x00,
-            "OBP0": 0x00,
-            "BGP": 0x00,
-            "DMA": 0x00,
-            "SCX": 0x00,
-            "SCY": 0x00
-        }
+        self.oam = oam
+        self.offset_constant = 0xFF40
+
+        self.registers = [0x91,  # LCDC
+                            0,  # STAT
+                            0,  # SCY
+                            0,  # SCX
+                            0,  # LY
+                            0,  # LYC
+                            0,  # DMA
+                            0,  # BGP
+                            0,  # OBP0
+                            0,  # OBP1
+                            0,  # WY
+                            0   # WX
+                        ]
+
         self.counter = 0
         self.lcdc_last_state = 1
 
-    def trigger_mode_interruption(self, mode):
+        self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
+        self.start_render = False
+
+    def trigger_mode_interruption(self, mode):  # fix necessario depois implementar por mudança de borda 0 / 1
+        stat = self.registers[1]
+        should_interrupt = False
         if mode == 1:
             self.interrupter.request_interrupt(0)
-        if mode == 1 and ((self.registers["STAT"] >> 4) & 1) == 1:
-            self.interrupter.request_interrupt(1)
-        elif mode == 2 and ((self.registers["STAT"] >> 5) & 1) == 1:
-            self.interrupter.request_interrupt(1)
-        elif mode == 2 and ((self.registers["STAT"] >> 3) & 1) == 1:
-            self.interrupter.request_interrupt(1)
-        elif mode == 0 and ((self.registers["STAT"] >> 3) & 1) == 1:
+
+        if mode == 0 and (stat & (1 << 3)):
+            should_interrupt = True
+        elif mode == 1 and (stat & (1 << 4)):
+            should_interrupt = True
+        elif mode == 2 and (stat & (1 << 5)):
+            should_interrupt = True
+
+        if should_interrupt:
             self.interrupter.request_interrupt(1)
 
     def trigger_lyc_ly_interruption(self):
-        if ((self.registers["STAT"] >> 6) & 1) == 1:
+        if ((self.registers[1] >> 6) & 1) == 1:
             self.interrupter.request_interrupt(1)
 
     def set_mode(self, mode):
-        current = self.registers["STAT"] & 0x03
+        current = self.registers[1] & 0x03
         if current == mode:
             return
-        self.registers["STAT"] = (self.registers["STAT"] & 0xFC) | (mode & 0x03)
+        self.registers[1] = (self.registers[1] & 0xFC) | (mode & 0x03)
         self.trigger_mode_interruption(mode)
 
     def reset_ppu_state(self):
-        self.registers["LY"] = 0x00
+        self.registers[4] = 0x00
         self.set_mode(2)
         self.counter = 0
 
     def set_stat_checkflag(self, set):
         if set:
-            self.registers["STAT"] = self.registers["STAT"] | (1 << 2)
+            self.registers[1] = self.registers[1] | (1 << 2)
         else:
-            self.registers["STAT"] = self.registers["STAT"] & ~(1 << 2)
+            self.registers[1] = self.registers[1] & ~(1 << 2)
 
-    def increment_ly(self):
-        self.registers["LY"] += 1
-
-        if self.registers["LY"] > 153:
-            self.registers["LY"] = 0
-
-        ly = self.registers["LY"]
-        lyc = self.registers["LYC"]
+    def handle_ly_lyc_collision(self):
+        ly = self.registers[4]
+        lyc = self.registers[5]
 
         if lyc == ly:
             self.set_stat_checkflag(True)
             self.trigger_lyc_ly_interruption()
         else:
             self.set_stat_checkflag(False)
-        print(f"LY: {self.registers["LY"]}")
+
+    def increment_ly(self):
+        self.registers[4] += 1
+
+        if self.registers[4] > 153:
+            self.registers[4] = 0
+
+        self.handle_ly_lyc_collision()
+
+    def render_scanline(self):
+        is_unsigned = (self.registers[0] >> 4) & 1
+
+        background_enable = self.registers[0] & 1 # um handler para preencher linha branca caso background enable seja 0 ou lcd seja 0
+
+        tile_map = 0x9C00 if (self.registers[0] >> 3) & 1 else 0x9800
+
+        global_y = (self.registers[4] + self.registers[2]) & 0xFF
+
+        tile_row = global_y // 8
+
+        map_row_start = tile_map + (tile_row * 32)
+
+        for pixel_x in range(160):
+            global_x = (pixel_x + self.registers[3]) & 0xFF
+            tile_col = global_x // 8
+
+            addrs = map_row_start + tile_col
+            tile_id = self.vram.read(addrs)
+
+            if is_unsigned:
+                base_addrs = 0x8000 + (tile_id * 16)
+            else:
+                tile_id_signed = tile_id if tile_id < 128 else tile_id - 256
+                base_addrs = 0x9000 + (tile_id_signed * 16)
+
+            y_inside_tile = global_y % 8
+            line_addrs = base_addrs + (y_inside_tile * 2)
+
+            byte_low = self.vram.read(line_addrs)
+            byte_high = self.vram.read(line_addrs + 1)
+
+            bit_index = 7 - (global_x % 8)
+
+            pixel_color_id = ((byte_high >> bit_index) & 1) << 1
+            pixel_color_id |= (byte_low >> bit_index) & 1
+            self.display_buffer[self.registers[4]][pixel_x] = pixel_color_id
 
     def tick(self, cycles):
-        lcd_mode = (self.registers["LCDC"] >> 7) & 1
+        lcd_mode = (self.registers[0] >> 7) & 1
         if lcd_mode:
             self.counter += cycles
 
-            if self.registers["LY"] < 144:
+            if self.registers[4] == 144:
+                self.start_render = True
+
+            if self.registers[4] < 144:
                 if self.counter < 80:
                     self.set_mode(2)
                 elif self.counter < 252:
                     self.set_mode(3)
                 else:
+                    self.render_scanline()
                     self.set_mode(0)
             else:
                 self.set_mode(1)
@@ -103,36 +143,38 @@ class PPU:
                 self.increment_ly()
 
     def write(self, addrs, value):
-        name = self.registers_map[addrs]
-
-        if name == "LCDC":
-            self.registers[name] = value
+        offset = addrs - self.offset_constant
+        if offset == 0:
+            self.registers[offset] = value
             lcd_status = (value >> 7) & 1
             if lcd_status == 0 and self.lcdc_last_state == 1:
                 self.reset_ppu_state()
             elif lcd_status == 1 and self.lcdc_last_state == 0:
-                self.registers["LY"] = 0x00
+                self.registers[4] = 0x00
                 self.set_mode(2)
                 self.counter = 0
             self.lcdc_last_state = (value >> 7) & 1
 
-        elif name == "LY":
+        elif offset == 4:
             return
 
-        elif name == "STAT":
-            current = self.registers[name] & 0x07
+        elif offset == 1:
+            current = self.registers[offset] & 0x07
             new_value = value & 0x78
-            self.registers[name] = 0x80 | new_value | current
+            self.registers[offset] = 0x80 | new_value | current
 
+        elif offset == 5:
+            self.registers[offset] = value
+            self.handle_ly_lyc_collision()
         else:
-            self.registers[name] = value
+            self.registers[offset] = value
 
     def read(self, addrs):
-        name = self.registers_map[addrs]
-        return self.registers[name]
+        offset = addrs - self.offset_constant
+        return self.registers[offset]
 
     def get_mode(self):
-        return self.registers["STAT"] & 0x03
+        return self.registers[1] & 0x03
 
     def read_vram(self, addrs):
         if self.get_mode() != 3:
@@ -142,3 +184,12 @@ class PPU:
     def write_vram(self, addrs, value):
         if self.get_mode() != 3:
             self.vram.write(addrs, value)
+
+    def read_oam(self, addrs):
+        if self.get_mode() < 2:
+            return self.oam.read(addrs)
+        return 0xFF
+
+    def write_oam(self, addrs, value):
+        if self.get_mode() < 2:
+            self.oam.write(addrs, value)

@@ -14,7 +14,7 @@ class RRA:
         flag = self.registers["F"]
         old_C = (flag >> 4) & 1
         bit0 = value & 1
-        value = (value >> 1) | (old_C << 7)
+        value = ((value & 0xFF) >> 1) | (old_C << 7)
         value &= 0xFF
         C = bit0
         Z = 0

@@ -11,6 +11,11 @@ class MMU:
         self.interrupt_controller = interrupt_controller
 
     def debug(self, action, addrs, value=None):
+        if addrs == 0x0038:
+            import sys
+            sys.exit()
+        if addrs == 0xFF0F or addrs == 0xFFFF:
+            return
         print("-"*64)
         print(f"action: {action}")
         print(f"addrs: {addrs:04x}")
@@ -38,6 +43,8 @@ class MMU:
             return self.interrupt_controller.read_ie()
         elif 0xFF40 <= addrs < 0xFF4C:
             return self.ppu.read(addrs)
+        elif 0xFE00 <= addrs < 0xFEA0:
+            return self.ppu.read_oam(addrs)
         else:
             return 0xFF
 
@@ -61,3 +68,5 @@ class MMU:
             self.interrupt_controller.write_ie(value)
         elif 0xFF40 <= addrs < 0xFF4C:
             self.ppu.write(addrs, value)
+        elif 0xFE00 <= addrs < 0xFEA0:
+            self.ppu.write_oam(addrs, value)

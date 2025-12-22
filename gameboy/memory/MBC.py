@@ -44,6 +44,8 @@ class MBC:
             return self.read_mbc3(addrs)
         elif self.mbc_version == 5:
             return self.read_mbc5(addrs)
+        elif self.mbc_version == 0:
+            return self.rom.read(addrs)
         return 0xFF
 
     def write_mbc1(self, addrs, value):
