@@ -4,7 +4,7 @@ class DI:
 
     def instructions_di(self):
         instructions = {
-            0xF3: lambda: self.execute_di(4)
+            0xF3: (self.execute_di, (4))
         }
         return instructions
 

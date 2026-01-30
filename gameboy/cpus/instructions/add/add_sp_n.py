@@ -6,7 +6,7 @@ class ADD_SP_N:
 
     def instructions_add_sp_n(self):
         instructions = {
-            0xE8: lambda: self.execute_add_sp_n(16)
+            0xE8: (self.execute_add_sp_n, (16))
         }
         return instructions
 

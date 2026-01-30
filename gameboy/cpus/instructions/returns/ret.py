@@ -6,8 +6,8 @@ class RET:
 
     def ret_instructions(self):
         instructions = {
-            0xC9: lambda: self.execute_ret(False, 16),
-            0xD9: lambda: self.execute_ret(True, 16)
+            0xC9: (self.execute_ret, (False, 16)),
+            0xD9: (self.execute_ret, (True, 16))
         }
         return instructions
 

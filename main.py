@@ -26,10 +26,10 @@ clock = pygame.time.Clock()
 
 
 PALETA = {
-    0: (155, 188, 15),  
+    0: (155, 188, 15),
     1: (139, 172, 15),
     2: (48, 98, 48),
-    3: (15, 56, 15)     
+    3: (15, 56, 15)
 }
 
 
@@ -41,7 +41,8 @@ def renderizar(buffer, screen):
             color_id = buffer[y][x]
             surface.set_at((x, y), PALETA[color_id])
 
-    scaled_surface = pygame.transform.scale(surface, (160 * escala, 144 * escala))
+    scaled_surface = pygame.transform.scale(surface, (160 * escala,
+                                                      144 * escala))
     screen.blit(scaled_surface, (0, 0))
     pygame.display.flip()
 
@@ -52,38 +53,58 @@ game = loader.choose_game()
 rom_bytes = load_rom(game)
 ram = RAM()
 cartucho = CARTRIDGE(rom_bytes)
-timer = TIMER()
-joypad = JOYPAD()
-vram = VRAM()
 interrupt_controller = INTERRUPT_CONTROLLER()
+vram = VRAM()
 oam = OAM()
 ppu = PPU(vram, interrupt_controller, oam)
+timer = TIMER(ppu)
+joypad = JOYPAD()
 hram = HRAM()
 mmu = MMU(ram, cartucho.mbc, timer,
           hram, joypad, interrupt_controller,
           ppu)
+timer.mmu = mmu
 ppu.mmu = mmu
 cpu = CPU(mmu, timer)
 
 
+def handle_key(key, bit, map):
+    jp_data = joypad.read()
+    action = (jp_data >> 5) & 1
+    dpad = (jp_data >> 4) & 1
+    if map == "action" and not action:
+        joypad.action[key] = ~(joypad.action[key])
+    if map == "move" and not dpad:
+        joypad.dpad[key] = ~(joypad.dpad[key])
+
+
+controller_map = {
+    "up": lambda: handle_key("up", 2, "move"),
+    "down": lambda: handle_key("down", 3, "move"),
+    "right": lambda: handle_key("right", 0, "move"),
+    "left": lambda: handle_key("left", 1, "move"),
+    "z": lambda: handle_key("A", 0, "action"),
+    "x": lambda: handle_key("B", 1, "action"),
+    "a": lambda: handle_key("start", 2, "action"),
+    "s": lambda: handle_key("select", 3, "action")
+}
+
 while rodando:
     start_time = time.perf_counter()
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+            key = pygame.key.name(event.key)
+            call = controller_map.get(key)
+            if call is not None:
+                call()
+
         if event.type == pygame.QUIT:
             rodando = False
 
     tick = cpu.step()
-    if tick is None:
-        tick = 4
-    ppu.tick(tick)
-
     if ppu.start_render:
         renderizar(ppu.display_buffer, screen)
         ppu.start_render = False
-        elapsed = time.perf_counter() - start_time
-        sleep_time = (1/60.0) - elapsed
-        if sleep_time > 0:
-            print(sleep_time)
-            time.sleep(sleep_time)
+
 
 pygame.quit()

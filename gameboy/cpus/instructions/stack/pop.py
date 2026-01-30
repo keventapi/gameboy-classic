@@ -7,10 +7,10 @@ class POP:
 
     def pop_instructions(self):
         instructions = {
-            0xF1: lambda: self.execute_pop("AF", 12),
-            0xC1: lambda: self.execute_pop("BC", 12),
-            0xD1: lambda: self.execute_pop("DE", 12),
-            0xE1: lambda: self.execute_pop("HL", 12)
+            0xF1: (self.execute_pop, ("AF", 12)),
+            0xC1: (self.execute_pop, ("BC", 12)),
+            0xD1: (self.execute_pop, ("DE", 12)),
+            0xE1: (self.execute_pop, ("HL", 12))
         }
         return instructions
 

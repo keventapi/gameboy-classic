@@ -7,10 +7,10 @@ class LD_N_NN:
 
     def ld_n_nn_instructions(self):
         instructions = {
-            0x01: lambda: self.execute_ld_n_nn("BC", 12),
-            0x11: lambda: self.execute_ld_n_nn("DE", 12),
-            0x21: lambda: self.execute_ld_n_nn("HL", 12),
-            0X31: lambda: self.execute_ld_n_nn("SP", 12)
+            0x01: (self.execute_ld_n_nn, ("BC", 12)),
+            0x11: (self.execute_ld_n_nn, ("DE", 12)),
+            0x21: (self.execute_ld_n_nn, ("HL", 12)),
+            0X31: (self.execute_ld_n_nn, ("SP", 12))
         }
         return instructions
 

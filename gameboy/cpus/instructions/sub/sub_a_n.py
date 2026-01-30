@@ -6,15 +6,15 @@ class SUB_A_N:
 
     def sub_a_n_instructions(self):
         instructions = {
-            0x97: lambda: self.execute_sub_a_n("A", 4),
-            0x90: lambda: self.execute_sub_a_n("B", 4),
-            0x91: lambda: self.execute_sub_a_n("C", 4),
-            0x92: lambda: self.execute_sub_a_n("D", 4),
-            0x93: lambda: self.execute_sub_a_n("E", 4),
-            0x94: lambda: self.execute_sub_a_n("H", 4),
-            0x95: lambda: self.execute_sub_a_n("L", 4),
-            0x96: lambda: self.execute_sub_a_n("HL", 8),
-            0xD6: lambda: self.execute_sub_a_n("#", 8)
+            0x97: [self.execute_sub_a_n, ("A", 4)],
+            0x90: [self.execute_sub_a_n, ("B", 4)],
+            0x91: [self.execute_sub_a_n, ("C", 4)],
+            0x92: [self.execute_sub_a_n, ("D", 4)],
+            0x93: [self.execute_sub_a_n, ("E", 4)],
+            0x94: [self.execute_sub_a_n, ("H", 4)],
+            0x95: [self.execute_sub_a_n, ("L", 4)],
+            0x96: [self.execute_sub_a_n, ("HL", 8)],
+            0xD6: [self.execute_sub_a_n, ("#", 8)]
         }
         return instructions
 
@@ -24,9 +24,9 @@ class SUB_A_N:
             addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             n = self.mmu.read(addrs)
         elif r == "#":
-            n = self.fetch()
+            n = self.fetch() & 0xFF
         else:
-            n = self.cpu.registers[r]
+            n = self.cpu.registers[r] & 0xFF
 
         n &= 0xFF
         sub = A - n

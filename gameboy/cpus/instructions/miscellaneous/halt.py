@@ -4,7 +4,7 @@ class HALT:
 
     def instructions_halt(self):
         instructions = {
-            0x76: lambda: self.execute_halt(4)
+            0x76: (self.execute_halt, (4))
         }
         return instructions
 

@@ -93,6 +93,12 @@ class CPU:
     def step(self):
         last_state = self.registers.copy()
 
+        if self.ceck_if_ie():
+            self.is_halted = False
+            if self.ime:
+                self.call_isr()
+                return
+
         if not self.is_halted:
             opcode = self.fetch()
             callback = self.decode(opcode)
@@ -106,12 +112,7 @@ class CPU:
             ticks = 4
         #self.debug(opcode, last_state)
 
-        if self.ceck_if_ie():
-            self.is_halted = False
-            ticks_add = 4
-            if self.ime:
-                ticks_add = self.call_isr()
-            return ticks + ticks_add
+        
 
         return ticks
 

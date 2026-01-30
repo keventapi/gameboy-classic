@@ -5,7 +5,7 @@ class DAA:
 
     def daa_instructions(self):
         instructions = {
-            0x27: lambda: self.execute_daa(4)
+            0x27: (self.execute_daa, (4))
         }
         return instructions
 

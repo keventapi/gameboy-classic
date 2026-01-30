@@ -4,7 +4,7 @@ class NOP:
 
     def intructions_nop(self):
         instructions = {
-            0x00: lambda: self.execute_nop(4)
+            0x00: (self.execute_nop, (4))
         }
         return instructions
 

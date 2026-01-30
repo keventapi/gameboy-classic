@@ -6,10 +6,10 @@ class LDACTION_A_HL:
 
     def lda_a_hl_instruction(self):
         instructions = {
-            0x3A: lambda: self.execute_ldd(True, 8),
-            0x32: lambda: self.execute_ldd(False, 8),
-            0x2A: lambda: self.execute_ldi(True, 8),
-            0x22: lambda: self.execute_ldi(False, 8)
+            0x3A: (self.execute_ldd, (True, 8)),
+            0x32: (self.execute_ldd, (False, 8)),
+            0x2A: (self.execute_ldi, (True, 8)),
+            0x22: (self.execute_ldi, (False, 8))
         }
         return instructions
 

@@ -5,7 +5,7 @@ class CCF:
 
     def instructions_ccf(self):
         instructions = {
-            0x3F: lambda: self.execute_ccf(4)
+            0x3F: (self.execute_ccf, (4))
         }
         return instructions
 

@@ -6,14 +6,14 @@ class SWAP_N:
 
     def instructions_swap_n(self):
         instructions = {
-            0x37: lambda: self.execute_swap_n("A", 8),
-            0x30: lambda: self.execute_swap_n("B", 8),
-            0x31: lambda: self.execute_swap_n("C", 8),
-            0x32: lambda: self.execute_swap_n("D", 8),
-            0x33: lambda: self.execute_swap_n("E", 8),
-            0x34: lambda: self.execute_swap_n("H", 8),
-            0x35: lambda: self.execute_swap_n("L", 8),
-            0x36: lambda: self.execute_swap_n("HL", 16)
+            0x37: (self.execute_swap_n, ("A", 8)),
+            0x30: (self.execute_swap_n, ("B", 8)),
+            0x31: (self.execute_swap_n, ("C", 8)),
+            0x32: (self.execute_swap_n, ("D", 8)),
+            0x33: (self.execute_swap_n, ("E", 8)),
+            0x34: (self.execute_swap_n, ("H", 8)),
+            0x35: (self.execute_swap_n, ("L", 8)),
+            0x36: (self.execute_swap_n, ("HL", 16))
         }
         return instructions
 

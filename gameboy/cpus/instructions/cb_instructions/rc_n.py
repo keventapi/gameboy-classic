@@ -6,14 +6,14 @@ class RC_N:
 
     def rc_n_instructions(self):
         instructions = {
-            0x1F: lambda: self.execute_rc_n("A", 8),
-            0x18: lambda: self.execute_rc_n("B", 8),
-            0x19: lambda: self.execute_rc_n("C", 8),
-            0x1A: lambda: self.execute_rc_n("D", 8),
-            0x1B: lambda: self.execute_rc_n("E", 8),
-            0x1C: lambda: self.execute_rc_n("H", 8),
-            0x1D: lambda: self.execute_rc_n("L", 8),
-            0x1E: lambda: self.execute_rc_n("HL", 16)
+            0x1F: (self.execute_rc_n, ("A", 8)),
+            0x18: (self.execute_rc_n, ("B", 8)),
+            0x19: (self.execute_rc_n, ("C", 8)),
+            0x1A: (self.execute_rc_n, ("D", 8)),
+            0x1B: (self.execute_rc_n, ("E", 8)),
+            0x1C: (self.execute_rc_n, ("H", 8)),
+            0x1D: (self.execute_rc_n, ("L", 8)),
+            0x1E: (self.execute_rc_n, ("HL", 16))
         }
         return instructions
 

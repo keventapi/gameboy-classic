@@ -1,5 +1,7 @@
 class TIMER:
-    def __init__(self):
+    def __init__(self, ppu):
+        self.ppu = ppu
+
         self.TAC = 0
         self.frequency_selector = 0
         self.timer_status = 1
@@ -45,15 +47,23 @@ class TIMER:
             self.interrupt = True
             self.reload_state = 4
 
-    def update_div(self):
-        if self.internal_counter % 4 == 0:
-            self.counters[0] = (self.counters[0] + 1) & 0xFFFF
+    def dma_handler(self):
+        if self.ppu.dma_block > 0 and self.ppu.dma_src_addrs is not None:
+            if self.ppu.dma_block > 160:
+                self.ppu.dma_block -= 1
+                return
+            data = self.mmu.read(self.ppu.dma_src_addrs + (160 - self.ppu.dma_block), True)
+            self.ppu.oam.write(0xFE00 + (160 - self.ppu.dma_block), data)
+            self.ppu.dma_block -= 1
+        elif self.ppu.dma_src_addrs is not None:
+            self.ppu.dma_src_addrs = None
 
     def tick(self, ticks):
         for _ in range(ticks):
             self.save_last_state()
+            self.dma_handler()
+            self.ppu.tick(1)
             self.internal_counter = (self.internal_counter + 1) & 0xFFFF
-            self.update_div()
             self.update_tima()
             if self.reload_state > 0:
                 self.reload_state -= 1
@@ -77,7 +87,7 @@ class TIMER:
     def read(self, addrs):
         offset = addrs - self.offset_const
         if offset == 0:
-            return (self.counters[0] >> 8) & 0xFF
+            return (self.internal_counter >> 8) & 0xFF
         if offset == 3:
             return self.TAC & 0xFF
         return self.counters[offset] & 0xFF

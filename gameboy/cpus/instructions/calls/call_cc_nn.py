@@ -6,10 +6,10 @@ class CALL_CC_NN:
 
     def call_cc_nn_instructions(self):
         instructions = {
-            0xC4: lambda: self.execute_call_cc_nn("NZ", 12),
-            0xCC: lambda: self.execute_call_cc_nn("Z", 12),
-            0xD4: lambda: self.execute_call_cc_nn("NC", 12),
-            0xDC: lambda: self.execute_call_cc_nn("C", 12)
+            0xC4: (self.execute_call_cc_nn, ("NZ", 12)),
+            0xCC: (self.execute_call_cc_nn, ("Z", 12)),
+            0xD4: (self.execute_call_cc_nn, ("NC", 12)),
+            0xDC: (self.execute_call_cc_nn, ("C", 12))
         }
         return instructions
 

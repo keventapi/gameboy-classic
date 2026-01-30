@@ -7,15 +7,15 @@ class AND_N:
 
     def and_n_instructions(self):
         instructions = {
-            0xA7: lambda: self.execute_and_n("A", 4),
-            0xA0: lambda: self.execute_and_n("B", 4),
-            0xA1: lambda: self.execute_and_n("C", 4),
-            0xA2: lambda: self.execute_and_n("D", 4),
-            0xA3: lambda: self.execute_and_n("E", 4),
-            0xA4: lambda: self.execute_and_n("H", 4),
-            0xA5: lambda: self.execute_and_n("L", 4),
-            0xA6: lambda: self.execute_and_n("HL", 8),
-            0xE6: lambda: self.execute_and_n("#", 8),
+            0xA7: (self.execute_and_n, ("A", 4)),
+            0xA0: (self.execute_and_n, ("B", 4)),
+            0xA1: (self.execute_and_n, ("C", 4)),
+            0xA2: (self.execute_and_n, ("D", 4)),
+            0xA3: (self.execute_and_n, ("E", 4)),
+            0xA4: (self.execute_and_n, ("H", 4)),
+            0xA5: (self.execute_and_n, ("L", 4)),
+            0xA6: (self.execute_and_n, ("HL", 8)),
+            0xE6: (self.execute_and_n, ("#", 8)),
         }
         return instructions
 

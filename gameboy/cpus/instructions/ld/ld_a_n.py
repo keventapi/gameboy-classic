@@ -7,13 +7,13 @@ class LD_A_N:
 
     def ld_a_n_instructions(self):
         instruction = {
-            0x0A: lambda: self.ld_a_n("A", "BC", 8),
-            0x1A: lambda: self.ld_a_n("A", "DE", 8),
-            0xFA: lambda: self.ld_a_n("A", "nn", 16),
-            0x3E: lambda: self.ld_a_n("A", "#", 8),
-            0x02: lambda: self.ld_n_a("BC", "A", 8),
-            0x12: lambda: self.ld_n_a("DE", "A", 8),
-            0xEA: lambda: self.ld_n_a("nn", "A", 16)
+            0x0A: (self.ld_a_n, ("A", "BC", 8)),
+            0x1A: (self.ld_a_n, ("A", "DE", 8)),
+            0xFA: (self.ld_a_n, ("A", "nn", 16)),
+            0x3E: (self.ld_a_n, ("A", "#", 8)),
+            0x02: (self.ld_n_a, ("BC", "A", 8)),
+            0x12: (self.ld_n_a, ("DE", "A", 8)),
+            0xEA: (self.ld_n_a, ("nn", "A", 16))
         }
         return instruction
 

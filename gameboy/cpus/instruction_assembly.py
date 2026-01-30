@@ -44,6 +44,16 @@ class INSTRUCTIONS:
                    self.shifts.shift_instructions]
         for u in updater:
             self.instructions_map.update(u())
+        self.create_instruction_list()
+
+    def create_instruction_list(self):
+        opcode = 0x00
+        self.instructions_list = []
+        while opcode <= 0xFF:
+            instruction = self.instructions_map.get(opcode)
+            self.instructions_list.append(instruction)
+            opcode += 1
+        print(self.instructions_list)
 
     def get_instruction(self, opcode):
-        return self.instructions_map.get(opcode)
+        return self.instructions_list[opcode]
