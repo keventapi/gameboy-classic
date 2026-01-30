@@ -11,16 +11,3 @@ class SHIFTS:
         self.rra = RRA(cpu)
         self.rrca = RRCA(cpu)
 
-    def shift_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.rla.rla_instructions,
-            self.rlca.rlca_instructions,
-            self.rra.rra_instructions,
-            self.rrca.rrca_instructions
-        ]
-        for u in updater:
-            instructions.update(u())
-        return instructions

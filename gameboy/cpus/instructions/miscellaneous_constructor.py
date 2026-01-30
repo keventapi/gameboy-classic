@@ -19,20 +19,22 @@ class MISCELLANEOUS:
         self.nop = NOP(cpu)
         self.scf = SCF(cpu)
 
-    def miscellaneous_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.ccf.instructions_ccf,
-            self.cpl.instructions_cpl,
-            self.daa.daa_instructions,
-            self.di.instructions_di,
-            self.ei.instructions_ei,
-            self.halt.instructions_halt,
-            self.nop.intructions_nop,
-            self.scf.instructions_scf
+        instances = [
+            self.ccf ,
+            self.cpl ,
+            self.daa ,
+            self.scf ,
+            self.di ,
+            self.ei ,
+            self.halt,
+            self.nop ,
         ]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)
+
+

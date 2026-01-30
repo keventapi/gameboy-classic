@@ -6,10 +6,10 @@ class JR_CC_N:
 
     def jr_cc_n_instructions(self):
         instructions = {
-            0x20: lambda: self.execute_jr_cc_n("NZ", 8),
-            0x28: lambda: self.execute_jr_cc_n("Z", 8),
-            0x30: lambda: self.execute_jr_cc_n("NC", 8),
-            0x38: lambda: self.execute_jr_cc_n("C", 8)
+            0x20: (self.execute_jr_cc_n, ("NZ", 8)),
+            0x28: (self.execute_jr_cc_n, ("Z", 8)),
+            0x30: (self.execute_jr_cc_n, ("NC", 8)),
+            0x38: (self.execute_jr_cc_n, ("C", 8))
         }
         return instructions
 

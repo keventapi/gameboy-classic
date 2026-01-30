@@ -6,7 +6,7 @@ class JR_N:
 
     def jr_n_instructions(self):
         instructions = {
-            0x18: lambda: self.execute_jr_n(12)
+            0x18: (self.execute_jr_n, (12))
         }
         return instructions
 

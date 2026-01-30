@@ -6,8 +6,8 @@ class JP_NN:
 
     def jp_nn_instructions(self):
         instructions = {
-            0xC3: lambda: self.execute_jp_nn("#", 16),
-            0xE9: lambda: self.execute_jp_nn("HL", 4)
+            0xC3: (self.execute_jp_nn, ("#", 16)),
+            0xE9: (self.execute_jp_nn, ("HL", 4))
         }
         return instructions
 

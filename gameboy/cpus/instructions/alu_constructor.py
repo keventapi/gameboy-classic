@@ -19,20 +19,3 @@ class ALU:
         self.or_n = OR_N(cpu)
         self.xor_n = XOR_N(cpu)
 
-    def get_alu_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.and_n.and_n_instructions,
-            self.cp_n.cp_n_instructions,
-            self.dec_n.dec_n_instructions,
-            self.dec_nn.instructions_dec_nn,
-            self.inc_n.inc_n_instructions,
-            self.inc_nn.instructions_inc_nn,
-            self.or_n.or_n_instructions,
-            self.xor_n.xor_n_instructions
-        ]
-        for u in updater:
-            instructions.update(u())
-        return instructions

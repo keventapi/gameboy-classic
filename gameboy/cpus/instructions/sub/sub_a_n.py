@@ -6,15 +6,15 @@ class SUB_A_N:
 
     def sub_a_n_instructions(self):
         instructions = {
-            0x97: [self.execute_sub_a_n, ("A", 4)],
-            0x90: [self.execute_sub_a_n, ("B", 4)],
-            0x91: [self.execute_sub_a_n, ("C", 4)],
-            0x92: [self.execute_sub_a_n, ("D", 4)],
-            0x93: [self.execute_sub_a_n, ("E", 4)],
-            0x94: [self.execute_sub_a_n, ("H", 4)],
-            0x95: [self.execute_sub_a_n, ("L", 4)],
-            0x96: [self.execute_sub_a_n, ("HL", 8)],
-            0xD6: [self.execute_sub_a_n, ("#", 8)]
+            0x97: (self.execute_sub_a_n, ("A", 4)),
+            0x90: (self.execute_sub_a_n, ("B", 4)),
+            0x91: (self.execute_sub_a_n, ("C", 4)),
+            0x92: (self.execute_sub_a_n, ("D", 4)),
+            0x93: (self.execute_sub_a_n, ("E", 4)),
+            0x94: (self.execute_sub_a_n, ("H", 4)),
+            0x95: (self.execute_sub_a_n, ("L", 4)),
+            0x96: (self.execute_sub_a_n, ("HL", 8)),
+            0xD6: (self.execute_sub_a_n, ("#", 8))
         }
         return instructions
 

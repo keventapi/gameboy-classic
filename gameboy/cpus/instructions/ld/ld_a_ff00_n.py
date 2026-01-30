@@ -7,8 +7,8 @@ class LD_A_FF00_N:
 
     def ld_a_ff00_n_instructions(self):
         instructions = {
-            0xE0: (self.execute_ld_a_ff00_n(False, 12)),
-            0xF0: (self.execute_ld_a_ff00_n(True, 12))
+            0xE0: (self.execute_ld_a_ff00_n, (False, 12)),
+            0xF0: (self.execute_ld_a_ff00_n, (True, 12))
         }
         return instructions
 

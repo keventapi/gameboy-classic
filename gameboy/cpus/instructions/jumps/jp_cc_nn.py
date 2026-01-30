@@ -6,10 +6,10 @@ class JP_CC_NN:
 
     def jp_cc_nn_instructions(self):
         instructions = {
-            0xC2: lambda: self.execute_jp_cc_nn("NZ", 12),
-            0xCA: lambda: self.execute_jp_cc_nn("Z", 12),
-            0xD2: lambda: self.execute_jp_cc_nn("NC", 12),
-            0xDA: lambda: self.execute_jp_cc_nn("C", 12)
+            0xC2: (self.execute_jp_cc_nn, ("NZ", 12)),
+            0xCA: (self.execute_jp_cc_nn, ("Z", 12)),
+            0xD2: (self.execute_jp_cc_nn, ("NC", 12)),
+            0xDA: (self.execute_jp_cc_nn, ("C", 12))
         }
         return instructions
 

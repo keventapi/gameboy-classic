@@ -1,5 +1,5 @@
 from .instruction_assembly import INSTRUCTIONS
-
+from . import instructions_agregator as instr
 
 class CPU:
     def __init__(self, mmu, timer):
@@ -7,6 +7,8 @@ class CPU:
         self.di_pending = False
         self.ei_pending = False
         self.ime = True
+
+        self.instructions_attr = [self.not_implemented] * 256
 
         self.mmu = mmu
         self.timer = timer
@@ -27,9 +29,18 @@ class CPU:
 
         self.limit = 0xFFFE
         self.assert_instructions()
+        self.handle_builder()
 
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
+
+    def not_implemented(self):
+        raise NotImplementedError("papapapa por enquanto")
+
+    def handle_builder(self):
+        for i in range(256):
+            if hasattr(instr, f"op_{i:02x}"):
+                self.instructions_attr[i] = getattr(instr, f"op_{i:02x}")
 
     def set_flags(self, Z, N, H, C):
         self.registers["F"] = (Z << 7) | (N << 6) | (H << 5) | (C << 4)
@@ -103,10 +114,10 @@ class CPU:
             opcode = self.fetch()
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
-                ticks = callback()
+                ticks = callback(self)
                 self.check_instruction_interrupt()
             else:
-                ticks = callback()
+                ticks = callback(self)
         else:
             self.timer.tick(4)
             ticks = 4
@@ -127,7 +138,6 @@ class CPU:
         self.registers["sp"] &= 0xFFFF
         return value
 
-
     def fetch(self):
         pc = self.registers["pc"]
         opcode = self.mmu.read(pc) & 0xFF
@@ -135,10 +145,5 @@ class CPU:
         return opcode
 
     def decode(self, opcode):
-        instruction = self.instructions.get_instruction(opcode)
-        if not instruction:
-            raise NotImplementedError(f"""INSTRUÇÃO AUSENTE!
-                                      Opcode: 0x{opcode:02X}
-                                      no Endereço:
-                                        0x{self.registers["pc"]:04X}""")
+        instruction = self.instructions_attr[opcode]
         return instruction
