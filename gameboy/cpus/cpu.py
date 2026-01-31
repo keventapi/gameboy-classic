@@ -86,7 +86,8 @@ class CPU:
         after {self.registers["sp"]}""")
         print(self.last_opcode, self.opcode)
         if self.last_opcode == 0x00 and self.opcode == 0xFF:
-            sys.exit()
+            #sys.exit()
+            pass
 
     def reset_if(self, b):
         value = self.mmu.read(0xFF0F)

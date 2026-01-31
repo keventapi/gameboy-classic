@@ -19,7 +19,7 @@ class LD_A_N:
 
     def ld_n_a(self, r1, r2, ticks):
         if r1 == "nn":
-            immediate = self.fetch() | (self.fetch() << 8)
+            immediate = self.cpu.fetch_16bit()
             self.mmu.write(immediate, self.registers[r2])
         else:
             high, low = r1[0], r1[1]
@@ -30,7 +30,7 @@ class LD_A_N:
 
     def ld_a_n(self, r1, r2, ticks):
         if r2 == "nn":
-            immediate = self.fetch() | (self.fetch() << 8)
+            immediate = self.cpu.fetch_16bit()
             self.registers[r1] = self.mmu.read(immediate)
         elif r2 == "#":
             immediate = self.fetch()

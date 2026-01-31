@@ -16,7 +16,7 @@ class LDACTION_A_HL:
     def execute_ldd(self, read_hl, ticks):
         hl = (self.registers["H"] << 8) | self.registers["L"]
         if read_hl:
-            self.registers["A"] = self.mmu.read(hl)
+            self.registers["A"] = self.mmu.read(hl & 0xFFFF)
         else:
             self.mmu.write(hl, self.registers["A"])
 
@@ -32,7 +32,7 @@ class LDACTION_A_HL:
     def execute_ldi(self, read_hl, ticks):
         hl = (self.registers["H"] << 8) | self.registers["L"]
         if read_hl:
-            self.registers["A"] = self.mmu.read(hl)
+            self.registers["A"] = self.mmu.read(hl & 0xFFFF)
         else:
             self.mmu.write(hl, self.registers["A"])
 
