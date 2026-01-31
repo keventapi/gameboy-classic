@@ -15,13 +15,11 @@ class LD_N_NN:
         return instructions
 
     def execute_ld_n_nn(self, r16, ticks):
-        low = self.fetch()
-        high = self.fetch()
-        nn = (high << 8) | low
+        nn = self.cpu.fetch_16bit()
         if r16 == "SP":
-            self.registers[r16] = nn
+            self.registers[r16] = nn & 0xFFFF
         else:
-            self.registers[r16[0]] = high
-            self.registers[r16[1]] = low
+            self.registers[r16[0]] = (nn >> 8) & 0xFF
+            self.registers[r16[1]] = nn & 0xFF
         self.cpu.timer.tick(ticks)
         return ticks

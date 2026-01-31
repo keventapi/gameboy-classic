@@ -16,7 +16,7 @@ class RET:
         high = self.cpu.pull8()
         new_pc = (high << 8) | low
 
-        self.registers["pc"] = new_pc
+        self.registers["pc"] = new_pc & 0xFFFF
         if enable_interrupt:
             self.cpu.ime = True
         self.cpu.timer.tick(ticks)

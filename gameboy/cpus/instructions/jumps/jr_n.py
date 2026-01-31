@@ -15,6 +15,6 @@ class JR_N:
         n = addrs
         if n >= 0x80:
             n -= 0x100
-        self.registers["pc"] += n
+        self.registers["pc"] = (self.registers["pc"] + n) & 0xFFFF
         self.cpu.timer.tick(ticks)
         return ticks

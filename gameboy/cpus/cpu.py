@@ -1,6 +1,6 @@
 from .instruction_assembly import INSTRUCTIONS
 from . import instructions_agregator as instr
-
+import sys
 
 class CPU:
     def __init__(self, mmu, timer):
@@ -31,6 +31,8 @@ class CPU:
         self.limit = 0xFFFE
         self.assert_instructions()
         self.handle_builder()
+        self.last_opcode = None
+        self.opcode = None        
 
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
@@ -82,6 +84,9 @@ class CPU:
         sp:
         before: {last_state["sp"]}
         after {self.registers["sp"]}""")
+        print(self.last_opcode, self.opcode)
+        if self.last_opcode == 0x00 and self.opcode == 0xFF:
+            sys.exit()
 
     def reset_if(self, b):
         value = self.mmu.read(0xFF0F)
@@ -125,6 +130,7 @@ class CPU:
 
         if not self.is_halted:
             opcode = self.fetch()
+            self.opcode = opcode
             self.current_opcode = opcode
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
@@ -135,7 +141,8 @@ class CPU:
         else:
             self.timer.tick(4)
             ticks = 4
-        #self.debug(opcode, last_state)
+        self.debug(opcode, last_state)
+        self.last_opcode = self.opcode
         return ticks
 
     def push8(self, value):

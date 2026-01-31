@@ -16,6 +16,6 @@ class JP_NN:
             addrs = self.cpu.fetch_16bit()
         elif r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
-        self.registers["pc"] = addrs
+        self.registers["pc"] = addrs & 0xFFFF
         self.cpu.timer.tick(ticks)
         return ticks
