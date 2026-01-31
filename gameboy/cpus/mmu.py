@@ -34,7 +34,7 @@ class MMU:
         elif 0xFF04 <= addrs < 0xFF08:
             return self.timer.read(addrs)
         elif 0x8000 <= addrs < 0xA000:
-            return self.ppu.read_ram(addrs)
+            return self.ppu.read_vram(addrs)
         elif 0xFF80 <= addrs < 0xFFFF:
             return self.hram.read(addrs)
         elif addrs == 0xFF00:

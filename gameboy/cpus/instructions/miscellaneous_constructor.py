@@ -6,7 +6,7 @@ from .miscellaneous.ei import EI
 from .miscellaneous.halt import HALT
 from .miscellaneous.nop import NOP
 from .miscellaneous.scf import SCF
-
+from .miscellaneous.stop import STOP
 
 class MISCELLANEOUS:
     def __init__(self, cpu):
@@ -18,6 +18,7 @@ class MISCELLANEOUS:
         self.halt = HALT(cpu)
         self.nop = NOP(cpu)
         self.scf = SCF(cpu)
+        self.stop = STOP(cpu)
 
         instances = [
             self.ccf ,
@@ -28,6 +29,7 @@ class MISCELLANEOUS:
             self.ei ,
             self.halt,
             self.nop ,
+            self.stop
         ]
 
         for instance in instances:

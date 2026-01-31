@@ -618,7 +618,7 @@ def op_cd(cpu):
     return cpu.instructions.call.execute_call_nn(24)
 
 def op_cb(cpu):
-    return cpu.instructions.cb.dispatch(4)
+    return cpu.instructions.cb.dispatch()
 
 def op_c2(cpu):
     return cpu.instructions.jump.execute_jp_cc_nn('NZ', 12)
@@ -730,3 +730,6 @@ def op_1f(cpu):
 
 def op_0f(cpu):
     return cpu.instructions.shifts.execute_rrca(4)
+
+def op_10(cpu):
+    return cpu.instructions.miscellaneous.execute_stop(4)

@@ -11,3 +11,16 @@ class JUMP:
         self.jr_cc_n = JR_CC_N(cpu)
         self.jr_n = JR_N(cpu)
 
+        instances = [
+            self.jp_cc_nn,
+            self.jp_nn,
+            self.jr_cc_n,
+            self.jr_n
+        ]
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

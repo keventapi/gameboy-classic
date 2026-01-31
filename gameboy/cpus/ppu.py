@@ -27,6 +27,11 @@ class PPU:
         self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
         self.start_render = False
         self.stat_line = False
+        self.last_display_reset = True
+
+    def disable_display(self):
+        mode = ~(1 << 7)
+        self.registers[0] &= mode
 
     def update_stat_interrupt(self):
         stat = self.registers[1]
@@ -57,6 +62,7 @@ class PPU:
         self.set_mode(2)
         self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
         self.counter = 0
+        self.last_display_reset = True
 
     def set_stat_checkflag(self, set):
         if set:
@@ -180,10 +186,11 @@ class PPU:
     def tick(self, cycles):
         lcd_mode = (self.registers[0] >> 7) & 1
 
-        if not lcd_mode:
+        if not lcd_mode and not self.last_display_reset:
             self.reset_ppu_state()
 
         if lcd_mode:
+            self.last_display_reset = False
             self.counter += cycles
             old_ly = self.registers[4]
 
@@ -201,7 +208,8 @@ class PPU:
                     if self.get_mode() != 3:
                         self.set_mode(3)
                 else:
-                    self.render_scanline()
+                    if self.get_mode() != 0:
+                        self.render_scanline()
                     self.set_mode(0)
 
             if self.registers[4] == 144 and old_ly == 143:
@@ -210,6 +218,7 @@ class PPU:
 
             self.update_stat_interrupt()
 
+    
     def write(self, addrs, value):
         offset = addrs - self.offset_constant
         if offset == 0:

@@ -19,3 +19,21 @@ class ALU:
         self.or_n = OR_N(cpu)
         self.xor_n = XOR_N(cpu)
 
+        instances = [
+            self.and_n,
+            self.cp_n,
+            self.dec_n,
+            self.dec_nn,
+            self.inc_n,
+            self.inc_nn,
+            self.or_n,
+            self.xor_n
+        ]
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)
+        

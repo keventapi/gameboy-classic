@@ -1,6 +1,7 @@
 from .instruction_assembly import INSTRUCTIONS
 from . import instructions_agregator as instr
 
+
 class CPU:
     def __init__(self, mmu, timer):
         self.is_halted = False
@@ -34,8 +35,8 @@ class CPU:
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
 
-    def not_implemented(self):
-        raise NotImplementedError("papapapa por enquanto")
+    def not_implemented(self, obj):
+        print(f"opcode: {obj.current_opcode:02x}")
 
     def handle_builder(self):
         for i in range(256):
@@ -59,15 +60,28 @@ class CPU:
 
     def debug(self, opcode, last_state):
         print("-"*64)
-        print(f"opcode: {opcode:02x}")
-        print(f"A: \n before: 0x{last_state["A"]:02x} \n after 0x{self.registers["A"]:02x}")
-        print(f"B: \n before: 0x{last_state["B"]:02x} \n after 0x{self.registers["B"]:02x}")
-        print(f"C: \n before: 0x{last_state["C"]:02x} \n after 0x{self.registers["C"]:02x}")
-        print(f"D: \n before: 0x{last_state["D"]:02x} \n after 0x{self.registers["D"]:02x}")
-        print(f"E: \n before: 0x{last_state["E"]:02x} \n after 0x{self.registers["E"]:02x}")
-        print(f"F: \n before: {last_state["F"]:08b} \n after {self.registers["F"]:08b}")
-        print(f"sp: \n before: {last_state["sp"]} \n after {self.registers["sp"]}")
-        print("-"*64)
+        print(f"""opcode: {opcode:02x}
+        A:
+        before: 0x{last_state["A"]:02x}
+        after 0x{self.registers["A"]:02x}
+        B:
+        before: 0x{last_state["B"]:02x}
+        after 0x{self.registers["B"]:02x}"
+        C:
+        before: 0x{last_state["C"]:02x}
+        after 0x{self.registers["C"]:02x}"
+        D:
+        before: 0x{last_state["D"]:02x}
+        after 0x{self.registers["D"]:02x}"
+        E:
+        before: 0x{last_state["E"]:02x}
+        after 0x{self.registers["E"]:02x}"
+        F:
+        before: {last_state["F"]:08b}
+        after {self.registers["F"]:08b}"
+        sp:
+        before: {last_state["sp"]}
+        after {self.registers["sp"]}""")
 
     def reset_if(self, b):
         value = self.mmu.read(0xFF0F)
@@ -98,7 +112,6 @@ class CPU:
     def ceck_if_ie(self):
         value_if = self.mmu.read(0xFF0F) & 0x1F
         value_ie = self.mmu.read(0xFFFF) & 0x1F
-        #print(f"if: {value_if:08b} \n ie:{value_ie:08b} \n ime: {self.ime}")
         return (value_if & value_ie & 0x1F) != 0
 
     def step(self):
@@ -112,6 +125,7 @@ class CPU:
 
         if not self.is_halted:
             opcode = self.fetch()
+            self.current_opcode = opcode
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
                 ticks = callback(self)
@@ -122,9 +136,6 @@ class CPU:
             self.timer.tick(4)
             ticks = 4
         #self.debug(opcode, last_state)
-
-        
-
         return ticks
 
     def push8(self, value):
