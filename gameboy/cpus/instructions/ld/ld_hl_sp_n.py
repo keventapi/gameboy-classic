@@ -7,7 +7,7 @@ class LD_HL_SP_N:
 
     def ld_hl_sp_n_instructions(self):
         instructions = {
-            0xF8: lambda: self.run_ld_hl_sp_n(12)
+            0xF8: (self.run_ld_hl_sp_n, (12))
         }
         return instructions
 

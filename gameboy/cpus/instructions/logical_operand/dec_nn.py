@@ -5,10 +5,10 @@ class DEC_NN:
 
     def instructions_dec_nn(self):
         instructions = {
-            0x0B: lambda: self.execute_dec_nn("BC", 8),
-            0x1B: lambda: self.execute_dec_nn("DE", 8),
-            0x2B: lambda: self.execute_dec_nn("HL", 8),
-            0x3B: lambda: self.execute_dec_nn("SP", 8)
+            0x0B: (self.execute_dec_nn, ("BC", 8)),
+            0x1B: (self.execute_dec_nn, ("DE", 8)),
+            0x2B: (self.execute_dec_nn, ("HL", 8)),
+            0x3B: (self.execute_dec_nn, ("SP", 8))
         }
         return instructions
 

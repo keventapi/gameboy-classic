@@ -5,6 +5,8 @@ class PPU:
         self.oam = oam
         self.offset_constant = 0xFF40
 
+        self.dma_block = 0
+        self.dma_src_addrs = None
         self.registers = [0x91,  # LCDC
                             0,  # STAT
                             0,  # SCY
@@ -25,6 +27,11 @@ class PPU:
         self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
         self.start_render = False
         self.stat_line = False
+        self.last_display_reset = True
+
+    def disable_display(self):
+        mode = ~(1 << 7)
+        self.registers[0] &= mode
 
     def update_stat_interrupt(self):
         stat = self.registers[1]
@@ -53,7 +60,9 @@ class PPU:
     def reset_ppu_state(self):
         self.registers[4] = 0x00
         self.set_mode(2)
+        self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
         self.counter = 0
+        self.last_display_reset = True
 
     def set_stat_checkflag(self, set):
         if set:
@@ -78,10 +87,15 @@ class PPU:
             self.registers[4] = 0
         self.handle_ly_lyc_collision()
 
+    def handle_white_board(self):
+        self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
+
     def render_scanline(self):
         is_unsigned = (self.registers[0] >> 4) & 1
 
-        background_enable = self.registers[0] & 1 # um handler para preencher linha branca caso background enable seja 0 ou lcd seja 0
+        background_enable = self.registers[0] & 1
+        if background_enable == 0:
+            self.handle_white_board()
 
         tile_map = 0x9C00 if (self.registers[0] >> 3) & 1 else 0x9800
 
@@ -90,6 +104,9 @@ class PPU:
         tile_row = global_y // 8
 
         map_row_start = tile_map + (tile_row * 32)
+
+        sprites = self.get_sprites()
+        sprites.sort(key=lambda s: (s[1], s[4]))
 
         for pixel_x in range(160):
             global_x = (pixel_x + self.registers[3]) & 0xFF
@@ -114,37 +131,94 @@ class PPU:
 
             pixel_color_id = ((byte_high >> bit_index) & 1) << 1
             pixel_color_id |= (byte_low >> bit_index) & 1
-            self.display_buffer[self.registers[4]][pixel_x] = pixel_color_id
+            if len(sprites) > 0:
+                for sprite in sprites:
+                    relative_x = pixel_x - (sprite[1] - 8)
+                    if 0 <= relative_x < 8:
+                        sprite_tile = 0x8000 + (sprite[2] * 16)
+                        sprite_y_tile = (self.registers[4] - (sprite[0] - 16)) % 8
+                        flip_y = (sprite[3] >> 6) & 1
+                        if flip_y:
+                            sprite_y_tile = 7 - sprite_y_tile
 
+                        addrs_line = sprite_tile + (sprite_y_tile * 2)
+
+                        sprite_low_byte = self.vram.read(addrs_line)
+                        sprite_high_byte = self.vram.read(addrs_line+1)
+                        flip_x = (sprite[3] >> 5) & 1
+                        if flip_x:
+                            sprite_color_id = ((sprite_high_byte >> (7 - relative_x)) & 1) << 1 | sprite_low_byte >> relative_x & 1
+                        else:  
+                            sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | sprite_low_byte >> relative_x & 1
+                        if sprite_color_id == 0:
+                            self.display_buffer[self.registers[4]][pixel_x] = pixel_color_id
+                            continue
+                        priority = (sprite[3] >> 7) & 1
+                        if not priority:
+                            real_pixel = sprite_color_id
+                        else:
+                            real_pixel = sprite_color_id if pixel_color_id == 0 else pixel_color_id
+                        self.display_buffer[self.registers[4]][pixel_x] = real_pixel 
+            else:
+                self.display_buffer[self.registers[4]][pixel_x] = pixel_color_id
+
+    def get_sprites(self):
+        ly = self.registers[4]
+        sprite_list = []
+        
+        for i in range(40):
+            if len(sprite_list) >= 10:
+                return sprite_list
+            base_addrs = 0xFE00 + (i * 4)
+            y_pos = self.oam.read(base_addrs)
+            if not (ly + 16 >= y_pos and ly + 16 < y_pos + 8):
+                continue
+            byte1_addrs = base_addrs + 1
+            x_pos = self.oam.read(byte1_addrs)
+            byte2_addrs = base_addrs + 2
+            tile_pointer = self.oam.read(byte2_addrs)
+            byte3_addrs = base_addrs + 3
+            attributes = self.oam.read(byte3_addrs)
+            sprite_data = [y_pos, x_pos, tile_pointer, attributes, i]
+            sprite_list.append(sprite_data)
+        return sprite_list
+    
     def tick(self, cycles):
         lcd_mode = (self.registers[0] >> 7) & 1
+
+        if not lcd_mode and not self.last_display_reset:
+            self.reset_ppu_state()
+
         if lcd_mode:
+            self.last_display_reset = False
             self.counter += cycles
-
-            old_mode = self.get_mode()
             old_ly = self.registers[4]
-
-            if self.registers[4] < 144:
-                if self.counter < 80:
-                    self.set_mode(2)
-                elif self.counter < 252:
-                    self.set_mode(3)
-                else:
-                    self.render_scanline()
-                    self.set_mode(0)
-            else:
-                self.set_mode(1)
 
             if self.counter >= 456:
                 self.counter -= 456
                 self.increment_ly()
 
+            if self.registers[4] >= 144:
+                self.set_mode(1)
+
+            else:
+                if self.counter < 80:
+                    self.set_mode(2)
+                elif self.counter < 252:
+                    if self.get_mode() != 3:
+                        self.set_mode(3)
+                else:
+                    if self.get_mode() != 0:
+                        self.render_scanline()
+                    self.set_mode(0)
+
             if self.registers[4] == 144 and old_ly == 143:
                 self.interrupter.request_interrupt(0)
                 self.start_render = True
-            
+
             self.update_stat_interrupt()
 
+    
     def write(self, addrs, value):
         offset = addrs - self.offset_constant
         if offset == 0:
@@ -170,11 +244,8 @@ class PPU:
             self.registers[offset] = value
             self.handle_ly_lyc_collision()
         elif offset == 6:
-            src_addrs = value << 8
-
-            for i in range(160):
-                data = self.mmu.read(src_addrs + i)
-                self.write_oam(0xFE00 + i, data)
+            self.dma_block = 164
+            self.dma_src_addrs = value << 8
         else:
             self.registers[offset] = value
 
@@ -186,19 +257,24 @@ class PPU:
         return self.registers[1] & 0x03
 
     def read_vram(self, addrs):
-        if self.get_mode() != 3:
+        lcd_mode = (self.registers[0] >> 7) & 1
+        if self.get_mode() != 3 or not lcd_mode:
             return self.vram.read(addrs)
         return 0xFF
 
     def write_vram(self, addrs, value):
-        if self.get_mode() != 3:
+        lcd_mode = (self.registers[0] >> 7) & 1
+        if self.get_mode() != 3 or not lcd_mode:
             self.vram.write(addrs, value)
 
     def read_oam(self, addrs):
-        if self.get_mode() < 2:
+        lcd_mode = (self.registers[0] >> 7) & 1
+        if self.get_mode() < 2 or not lcd_mode:
             return self.oam.read(addrs)
         return 0xFF
 
     def write_oam(self, addrs, value):
-        if self.get_mode() < 2:
+        lcd_mode = (self.registers[0] >> 7) & 1
+        if self.get_mode() < 2 or not lcd_mode:
             self.oam.write(addrs, value)
+

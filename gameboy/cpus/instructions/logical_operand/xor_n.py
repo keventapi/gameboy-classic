@@ -7,15 +7,15 @@ class XOR_N:
 
     def xor_n_instructions(self):
         instructions = {
-            0xAF: lambda: self.execute_xor_n("A", 4),
-            0xA8: lambda: self.execute_xor_n("B", 4),
-            0xA9: lambda: self.execute_xor_n("C", 4),
-            0xAA: lambda: self.execute_xor_n("D", 4),
-            0xAB: lambda: self.execute_xor_n("E", 4),
-            0xAC: lambda: self.execute_xor_n("H", 4),
-            0xAD: lambda: self.execute_xor_n("L", 4),
-            0xAE: lambda: self.execute_xor_n("HL", 8),
-            0xEE: lambda: self.execute_xor_n("#", 8)
+            0xAF: (self.execute_xor_n, ("A", 4)),
+            0xA8: (self.execute_xor_n, ("B", 4)),
+            0xA9: (self.execute_xor_n, ("C", 4)),
+            0xAA: (self.execute_xor_n, ("D", 4)),
+            0xAB: (self.execute_xor_n, ("E", 4)),
+            0xAC: (self.execute_xor_n, ("H", 4)),
+            0xAD: (self.execute_xor_n, ("L", 4)),
+            0xAE: (self.execute_xor_n, ("HL", 8)),
+            0xEE: (self.execute_xor_n, ("#", 8))
         }
         return instructions
 

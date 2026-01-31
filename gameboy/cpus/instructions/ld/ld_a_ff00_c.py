@@ -6,8 +6,8 @@ class LD_A_FF00_C:
 
     def ld_a_ff00_c_instructions(self):
         instructions = {
-            0xF2: lambda: self.execute_ld_a_FF00_C(True, 8),
-            0xE2: lambda: self.execute_ld_a_FF00_C(False, 8)
+            0xF2: (self.execute_ld_a_FF00_C, (True, 8)),
+            0xE2: (self.execute_ld_a_FF00_C, (False, 8))
         }
         return instructions
 

@@ -45,14 +45,14 @@ class CB:
 
     def dispatch(self):
         opcode = self.cpu.fetch()
-        callback = self.instructions.get(opcode)
-        if callback:
-            return callback()
+        callback = self.instructions[opcode]
+        if len(callback) > 0:
+            return callback[0](*callback[1])
         else:
             raise NotImplementedError("CB instruction missing")
 
     def get_cb_instructions(self):
         instructions = {
-            0xcb: lambda: self.dispatch()
+            0xcb: (self.dispatch, (4))
         }
         return instructions

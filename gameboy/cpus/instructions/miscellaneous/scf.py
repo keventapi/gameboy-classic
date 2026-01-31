@@ -5,7 +5,7 @@ class SCF:  # Flags podem ser otimizadas para nn precisar tocar no Z
 
     def instructions_scf(self):
         instructions = {
-            0x37: lambda: self.execute_scf(4)
+            0x37: (self.execute_scf, (4))
         }
         return instructions
 

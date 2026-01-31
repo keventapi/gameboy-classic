@@ -11,16 +11,16 @@ class SHIFTS:
         self.rra = RRA(cpu)
         self.rrca = RRCA(cpu)
 
-    def shift_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.rla.rla_instructions,
-            self.rlca.rlca_instructions,
-            self.rra.rra_instructions,
-            self.rrca.rrca_instructions
+        instances = [
+            self.rla,
+            self.rlca,
+            self.rra,
+            self.rrca
         ]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

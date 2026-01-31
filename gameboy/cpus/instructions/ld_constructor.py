@@ -23,18 +23,21 @@ class LD:
         self.ld_sp_hl = LD_SP_HL(cpu)
         self.ldaction_a_hl = LDACTION_A_HL(cpu)
 
-    def get_ld_instructions(self):
-        instructions = {}
-        updater = [self.ld_a_ff00_c.ld_a_ff00_c_instructions,
-                   self.ld_a_ff00_n.ld_a_ff00_n_instructions,
-                   self.ld_a_n.ld_a_n_instructions,
-                   self.ld_hl_sp_n.ld_hl_sp_n_instructions,
-                   self.ld_n_nn.ld_n_nn_instructions,
-                   self.ld_nn_n.ld_nn_n_instructions,
-                   self.ld_nn_sp.ld_nn_sp_instructions,
-                   self.ld_r1_r2.ld_r1_r2_instructions,
-                   self.ld_sp_hl.ld_sp_hl_instructions,
-                   self.ldaction_a_hl.lda_a_hl_instruction]
-        for i in updater:
-            instructions.update(i())
-        return instructions
+        instances = [
+            self.ld_a_ff00_c,
+            self.ld_a_ff00_n,
+            self.ld_a_n,
+            self.ld_hl_sp_n,
+            self.ld_n_nn,
+            self.ld_nn_n,
+            self.ld_nn_sp,
+            self.ld_r1_r2,
+            self.ld_sp_hl,
+            self.ldaction_a_hl
+        ]
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

@@ -6,10 +6,10 @@ class ADD_HL_N:
 
     def add_hl_n_instructions(self):
         instructions = {
-            0x09: lambda: self.execute_add_hl_n("BC", 8),
-            0x19: lambda: self.execute_add_hl_n("DE", 8),
-            0x29: lambda: self.execute_add_hl_n("HL", 8),
-            0x39: lambda: self.execute_add_hl_n("SP", 8)
+            0x09: (self.execute_add_hl_n, ("BC", 8)),
+            0x19: (self.execute_add_hl_n, ("DE", 8)),
+            0x29: (self.execute_add_hl_n, ("HL", 8)),
+            0x39: (self.execute_add_hl_n, ("SP", 8))
         }
         return instructions
 

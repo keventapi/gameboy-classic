@@ -5,10 +5,10 @@ class INC_NN:
 
     def instructions_inc_nn(self):
         instructions = {
-            0x03: lambda: self.execute_inc_nn("BC", 8),
-            0x13: lambda: self.execute_inc_nn("DE", 8),
-            0x23: lambda: self.execute_inc_nn("HL", 8),
-            0x33: lambda: self.execute_inc_nn("SP", 8),
+            0x03: (self.execute_inc_nn, ("BC", 8)),
+            0x13: (self.execute_inc_nn, ("DE", 8)),
+            0x23: (self.execute_inc_nn, ("HL", 8)),
+            0x33: (self.execute_inc_nn, ("SP", 8)),
         }
         return instructions
 

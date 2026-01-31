@@ -7,14 +7,15 @@ class RETURN:
         self.ret = RET(cpu)
         self.ret_cc = RET_CC(cpu)
 
-    def return_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.ret.ret_instructions,
-            self.ret_cc.ret_cc_instructions
+        instances = [
+            self.ret,
+            self.ret_cc
         ]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)
+

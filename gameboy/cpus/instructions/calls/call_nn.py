@@ -6,7 +6,7 @@ class CALL_NN:
 
     def call_nn_instructions(self):
         instructions = {
-            0xCD: lambda: self.execute_call_nn(24)
+            0xCD: (self.execute_call_nn, (24))
         }
         return instructions
 

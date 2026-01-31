@@ -6,10 +6,10 @@ class RET_CC:
 
     def ret_cc_instructions(self):
         instructions = {
-            0xC0: lambda: self.execute_ret_cc("NZ", 8),
-            0xC8: lambda: self.execute_ret_cc("Z", 8),
-            0xD0: lambda: self.execute_ret_cc("NC", 8),
-            0xD8: lambda: self.execute_ret_cc("C", 8)
+            0xC0: (self.execute_ret_cc, ("NZ", 8)),
+            0xC8: (self.execute_ret_cc, ("Z", 8)),
+            0xD0: (self.execute_ret_cc, ("NC", 8)),
+            0xD8: (self.execute_ret_cc, ("C", 8))
         }
         return instructions
 

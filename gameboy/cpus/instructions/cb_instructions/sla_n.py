@@ -6,14 +6,14 @@ class SLA_N:
 
     def sla_n_instructions(self):
         instructions = {
-            0x27: lambda: self.execute_sla_n("A", 8),
-            0x20: lambda: self.execute_sla_n("B", 8),
-            0x21: lambda: self.execute_sla_n("C", 8),
-            0x22: lambda: self.execute_sla_n("D", 8),
-            0x23: lambda: self.execute_sla_n("E", 8),
-            0x24: lambda: self.execute_sla_n("H", 8),
-            0x25: lambda: self.execute_sla_n("L", 8),
-            0x26: lambda: self.execute_sla_n("HL", 16)
+            0x27: (self.execute_sla_n, ("A", 8)),
+            0x20: (self.execute_sla_n, ("B", 8)),
+            0x21: (self.execute_sla_n, ("C", 8)),
+            0x22: (self.execute_sla_n, ("D", 8)),
+            0x23: (self.execute_sla_n, ("E", 8)),
+            0x24: (self.execute_sla_n, ("H", 8)),
+            0x25: (self.execute_sla_n, ("L", 8)),
+            0x26: (self.execute_sla_n, ("HL", 16))
         }
         return instructions
 

@@ -7,28 +7,28 @@ class OR_N:
 
     def or_n_instructions(self):
         instructions = {
-            0xB7: lambda: self.execute_or_n("A", 4),
-            0xB0: lambda: self.execute_or_n("B", 4),
-            0xB1: lambda: self.execute_or_n("C", 4),
-            0xB2: lambda: self.execute_or_n("D", 4),
-            0xB3: lambda: self.execute_or_n("E", 4),
-            0xB4: lambda: self.execute_or_n("H", 4),
-            0xB5: lambda: self.execute_or_n("L", 4),
-            0xB6: lambda: self.execute_or_n("HL", 8),
-            0xF6: lambda: self.execute_or_n("#", 8)
+            0xB7: (self.execute_or_n, ("A", 4)),
+            0xB0: (self.execute_or_n, ("B", 4)),
+            0xB1: (self.execute_or_n, ("C", 4)),
+            0xB2: (self.execute_or_n, ("D", 4)),
+            0xB3: (self.execute_or_n, ("E", 4)),
+            0xB4: (self.execute_or_n, ("H", 4)),
+            0xB5: (self.execute_or_n, ("L", 4)),
+            0xB6: (self.execute_or_n, ("HL", 8)),
+            0xF6: (self.execute_or_n, ("#", 8))
         }
         return instructions
 
     def execute_or_n(self, r, ticks):
-        result = self.registers["A"]
+        result = self.registers["A"] & 0xFF
         if len(r) > 1:
             addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
-            result |= self.mmu.read(addrs)
+            result |= (self.mmu.read(addrs) & 0xFF)
         elif r == "#":
-            imediate = self.fetch()
+            imediate = self.fetch() & 0xFF
             result |= imediate
         else:
-            result |= self.registers[r]
+            result |= (self.registers[r] & 0xFF)
 
         Z = 1 if (result & 0xFF) == 0 else 0
 

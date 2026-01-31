@@ -6,14 +6,14 @@ class SRA_N:
 
     def sra_n_instructions(self):
         instructions = {
-            0x2F: lambda: self.execute_sra_n("A", 8),
-            0x28: lambda: self.execute_sra_n("B", 8),
-            0x29: lambda: self.execute_sra_n("C", 8),
-            0x2A: lambda: self.execute_sra_n("D", 8),
-            0x2B: lambda: self.execute_sra_n("E", 8),
-            0x2C: lambda: self.execute_sra_n("H", 8),
-            0x2D: lambda: self.execute_sra_n("L", 8),
-            0x2E: lambda: self.execute_sra_n("HL", 16)
+            0x2F: (self.execute_sra_n, ("A", 8)),
+            0x28: (self.execute_sra_n, ("B", 8)),
+            0x29: (self.execute_sra_n, ("C", 8)),
+            0x2A: (self.execute_sra_n, ("D", 8)),
+            0x2B: (self.execute_sra_n, ("E", 8)),
+            0x2C: (self.execute_sra_n, ("H", 8)),
+            0x2D: (self.execute_sra_n, ("L", 8)),
+            0x2E: (self.execute_sra_n, ("HL", 16))
         }
         return instructions
 

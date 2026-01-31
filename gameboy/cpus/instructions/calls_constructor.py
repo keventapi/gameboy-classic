@@ -7,14 +7,14 @@ class CALL:
         self.call_cc_nn = CALL_CC_NN(cpu)
         self.call_nn = CALL_NN(cpu)
 
-    def get_call_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.call_cc_nn.call_cc_nn_instructions,
-            self.call_nn.call_nn_instructions
+        instances = [
+            self.call_cc_nn,
+            self.call_nn
         ]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

@@ -7,10 +7,14 @@ class SUB:
         self.sub_a_n = SUB_A_N(cpu)
         self.sbc_a_n = SBC_A_N(cpu)
 
-    def get_sub_instructions(self):
-        instructions = {}
-        updater = [self.sub_a_n.sub_a_n_instructions,
-                   self.sbc_a_n.sbc_a_n_intructions]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+        instances = [
+            self.sub_a_n,
+            self.sbc_a_n
+        ]
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

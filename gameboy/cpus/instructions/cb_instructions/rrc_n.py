@@ -6,14 +6,14 @@ class RRC_N:
 
     def rrc_n_instructions(self):
         instructions = {
-            0x0F: lambda: self.execute_rrc_n("A", 8),
-            0x08: lambda: self.execute_rrc_n("B", 8),
-            0x09: lambda: self.execute_rrc_n("C", 8),
-            0x0A: lambda: self.execute_rrc_n("D", 8),
-            0x0B: lambda: self.execute_rrc_n("E", 8),
-            0x0C: lambda: self.execute_rrc_n("H", 8),
-            0x0D: lambda: self.execute_rrc_n("L", 8),
-            0x0E: lambda: self.execute_rrc_n("HL", 16)
+            0x0F: (self.execute_rrc_n, ("A", 8)),
+            0x08: (self.execute_rrc_n, ("B", 8)),
+            0x09: (self.execute_rrc_n, ("C", 8)),
+            0x0A: (self.execute_rrc_n, ("D", 8)),
+            0x0B: (self.execute_rrc_n, ("E", 8)),
+            0x0C: (self.execute_rrc_n, ("H", 8)),
+            0x0D: (self.execute_rrc_n, ("L", 8)),
+            0x0E: (self.execute_rrc_n, ("HL", 16))
         }
         return instructions
 

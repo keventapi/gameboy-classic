@@ -11,6 +11,20 @@ class ADD:
         self.add_hl_n = ADD_HL_N(cpu)
         self.add_sp_n = ADD_SP_N(cpu)
 
+        instances = [
+            self.adc_a_n,
+            self.add_a_n,
+            self.add_hl_n,
+            self.add_sp_n,
+        ]
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)
+
     def get_add_instructions(self):
         instructions = {}
         updater = [self.add_a_n.add_a_n_instructions,

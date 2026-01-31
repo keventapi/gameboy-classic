@@ -6,7 +6,7 @@ from .miscellaneous.ei import EI
 from .miscellaneous.halt import HALT
 from .miscellaneous.nop import NOP
 from .miscellaneous.scf import SCF
-
+from .miscellaneous.stop import STOP
 
 class MISCELLANEOUS:
     def __init__(self, cpu):
@@ -18,21 +18,25 @@ class MISCELLANEOUS:
         self.halt = HALT(cpu)
         self.nop = NOP(cpu)
         self.scf = SCF(cpu)
+        self.stop = STOP(cpu)
 
-    def miscellaneous_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.ccf.instructions_ccf,
-            self.cpl.instructions_cpl,
-            self.daa.daa_instructions,
-            self.di.instructions_di,
-            self.ei.instructions_ei,
-            self.halt.instructions_halt,
-            self.nop.intructions_nop,
-            self.scf.instructions_scf
+        instances = [
+            self.ccf ,
+            self.cpl ,
+            self.daa ,
+            self.scf ,
+            self.di ,
+            self.ei ,
+            self.halt,
+            self.nop ,
+            self.stop
         ]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)
+
+

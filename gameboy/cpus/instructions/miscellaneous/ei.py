@@ -4,7 +4,7 @@ class EI:
 
     def instructions_ei(self):
         instructions = {
-            0xFB: lambda: self.execute_ei(4)
+            0xFB: (self.execute_ei, (4))
         }
         return instructions
 

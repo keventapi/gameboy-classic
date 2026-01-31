@@ -7,10 +7,10 @@ class PUSH:
 
     def push_instructions(self):
         instructions = {
-            0xF5: lambda: self.execute_push("AF", 16),
-            0xC5: lambda: self.execute_push("BC", 16),
-            0xD5: lambda: self.execute_push("DE", 16),
-            0xE5: lambda: self.execute_push("HL", 16)
+            0xF5: (self.execute_push, ("AF", 16)),
+            0xC5: (self.execute_push, ("BC", 16)),
+            0xD5: (self.execute_push, ("DE", 16)),
+            0xE5: (self.execute_push, ("HL", 16))
         }
         return instructions
 

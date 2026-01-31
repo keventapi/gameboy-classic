@@ -5,11 +5,13 @@ class RESTART:
     def __init__(self, cpu):
         self.rst_n = RST_N(cpu)
 
-    def restart_instructions(self):
-        instructions = {
+        instances = [
+            self.rst_n
+        ]
 
-        }
-        updater = [self.rst_n.rst_n_instructions]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

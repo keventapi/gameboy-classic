@@ -6,14 +6,14 @@ class SRL_N:
 
     def srl_n_instructions(self):
         instructions = {
-            0x3F: lambda: self.execute_srl_n("A", 8),
-            0x38: lambda: self.execute_srl_n("B", 8),
-            0x39: lambda: self.execute_srl_n("C", 8),
-            0x3A: lambda: self.execute_srl_n("D", 8),
-            0x3B: lambda: self.execute_srl_n("E", 8),
-            0x3C: lambda: self.execute_srl_n("H", 8),
-            0x3D: lambda: self.execute_srl_n("L", 8),
-            0x3E: lambda: self.execute_srl_n("HL", 16),
+            0x3F: (self.execute_srl_n, ("A", 8)),
+            0x38: (self.execute_srl_n, ("B", 8)),
+            0x39: (self.execute_srl_n, ("C", 8)),
+            0x3A: (self.execute_srl_n, ("D", 8)),
+            0x3B: (self.execute_srl_n, ("E", 8)),
+            0x3C: (self.execute_srl_n, ("H", 8)),
+            0x3D: (self.execute_srl_n, ("L", 8)),
+            0x3E: (self.execute_srl_n, ("HL", 16)),
         }
         return instructions
 

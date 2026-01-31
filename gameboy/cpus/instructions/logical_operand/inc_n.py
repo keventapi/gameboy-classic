@@ -6,14 +6,14 @@ class INC_N:
 
     def inc_n_instructions(self):
         instructions = {
-            0x3C: lambda: self.execute_inc_n("A", 4),
-            0x04: lambda: self.execute_inc_n("B", 4),
-            0x0C: lambda: self.execute_inc_n("C", 4),
-            0x14: lambda: self.execute_inc_n("D", 4),
-            0x1C: lambda: self.execute_inc_n("E", 4),
-            0x24: lambda: self.execute_inc_n("H", 4),
-            0x2C: lambda: self.execute_inc_n("L", 4),
-            0x34: lambda: self.execute_inc_n("HL", 12)
+            0x3C: (self.execute_inc_n, ("A", 4)),
+            0x04: (self.execute_inc_n, ("B", 4)),
+            0x0C: (self.execute_inc_n, ("C", 4)),
+            0x14: (self.execute_inc_n, ("D", 4)),
+            0x1C: (self.execute_inc_n, ("E", 4)),
+            0x24: (self.execute_inc_n, ("H", 4)),
+            0x2C: (self.execute_inc_n, ("L", 4)),
+            0x34: (self.execute_inc_n, ("HL", 12))
         }
         return instructions
 

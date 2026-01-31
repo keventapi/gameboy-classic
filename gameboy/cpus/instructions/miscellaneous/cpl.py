@@ -5,7 +5,7 @@ class CPL:
 
     def instructions_cpl(self):
         instructions = {
-            0x2F: lambda: self.execute_cpl(4)
+            0x2F: (self.execute_cpl, (4))
         }
         return instructions
 

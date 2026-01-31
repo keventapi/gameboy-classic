@@ -7,15 +7,15 @@ class ADC_A_N:
 
     def adc_a_n_instructions(self):
         instructions = {
-            0x8F: lambda: self.execute_adc_a_n("A", 4),
-            0x88: lambda: self.execute_adc_a_n("B", 4),
-            0x89: lambda: self.execute_adc_a_n("C", 4),
-            0x8A: lambda: self.execute_adc_a_n("D", 4),
-            0x8B: lambda: self.execute_adc_a_n("E", 4),
-            0x8C: lambda: self.execute_adc_a_n("H", 4),
-            0x8D: lambda: self.execute_adc_a_n("L", 4),
-            0x8E: lambda: self.execute_adc_a_n("HL", 8),
-            0xCE: lambda: self.execute_adc_a_n("#", 8)
+            0x8F: (self.execute_adc_a_n, ("A", 4)),
+            0x88: (self.execute_adc_a_n, ("B", 4)),
+            0x89: (self.execute_adc_a_n, ("C", 4)),
+            0x8A: (self.execute_adc_a_n, ("D", 4)),
+            0x8B: (self.execute_adc_a_n, ("E", 4)),
+            0x8C: (self.execute_adc_a_n, ("H", 4)),
+            0x8D: (self.execute_adc_a_n, ("L", 4)),
+            0x8E: (self.execute_adc_a_n, ("HL", 8)),
+            0xCE: (self.execute_adc_a_n, ("#", 8))
         }
         return instructions
 

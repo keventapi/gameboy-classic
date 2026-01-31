@@ -28,15 +28,18 @@ class CARTRIDGE:
         ram_size = rom_bytes[0x0149]
         if ram_size == 0:
             return None
-        size_map = {
-            0x00: (0, 0),       # sem RAM
-            0x01: (1, 0x0800),  # 2 KB
-            0x02: (1, 0x2000),  # 8 KB
-            0x03: (4, 0x2000),  # 32 KB
-            0x04: (16, 0x2000),  # 128 KB
-            0x05: (8, 0x2000),  # 64 KB
-        }
-        total_banks, bank_size = size_map.get(ram_size, (1, 0x2000))
+        size_map = [
+            (0, 0),       # sem RAM
+            (1, 0x0800),  # 2 KB
+            (1, 0x2000),  # 8 KB
+            (4, 0x2000),  # 32 KB
+            (16, 0x2000),  # 128 KB
+            (8, 0x2000),  # 64 KB
+        ]
+        if ram_size >= len(size_map):
+            total_banks, bank_size = 1, 0x2000
+        else:
+            total_banks, bank_size = size_map[ram_size]
         return SWITCHABLE_RAM(total_banks, bank_size)
 
     def read(self, addrs):

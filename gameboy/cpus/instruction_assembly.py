@@ -26,24 +26,3 @@ class INSTRUCTIONS:
         self.restart = RESTART(cpu)
         self.returns = RETURN(cpu)
         self.shifts = SHIFTS(cpu)
-        self.instructions_map = {}
-        self.update_instruction()
-
-    def update_instruction(self):
-        updater = [self.add.get_add_instructions,
-                   self.ld.get_ld_instructions,
-                   self.stack.get_stack_instructions,
-                   self.sub.get_sub_instructions,
-                   self.alu.get_alu_instructions,
-                   self.call.get_call_instructions,
-                   self.cb.get_cb_instructions,
-                   self.jump.get_jump_instructions,
-                   self.miscellaneous.miscellaneous_instructions,
-                   self.restart.restart_instructions,
-                   self.returns.return_instructions,
-                   self.shifts.shift_instructions]
-        for u in updater:
-            self.instructions_map.update(u())
-
-    def get_instruction(self, opcode):
-        return self.instructions_map.get(opcode)

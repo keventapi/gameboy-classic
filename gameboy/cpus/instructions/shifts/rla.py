@@ -5,7 +5,7 @@ class RLA:
 
     def rla_instructions(self):
         instructions = {
-            0x17: lambda: self.execute_rla(4)
+            0x17: (self.execute_rla, (4))
         }
         return instructions
 

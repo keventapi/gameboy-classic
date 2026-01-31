@@ -11,16 +11,16 @@ class JUMP:
         self.jr_cc_n = JR_CC_N(cpu)
         self.jr_n = JR_N(cpu)
 
-    def get_jump_instructions(self):
-        instructions = {
-
-        }
-        updater = [
-            self.jp_cc_nn.jp_cc_nn_instructions,
-            self.jp_nn.jp_nn_instructions,
-            self.jr_cc_n.jr_cc_n_instructions,
-            self.jr_n.jr_n_instructions
+        instances = [
+            self.jp_cc_nn,
+            self.jp_nn,
+            self.jr_cc_n,
+            self.jr_n
         ]
-        for u in updater:
-            instructions.update(u())
-        return instructions
+
+        for instance in instances:
+            for attr_name in dir(instance):
+                if not attr_name.startswith("__"):
+                    attr_value = getattr(instance, attr_name)
+                    if callable(attr_value):
+                        setattr(self, attr_name, attr_value)

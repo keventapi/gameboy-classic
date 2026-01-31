@@ -7,15 +7,15 @@ class CP_N:
 
     def cp_n_instructions(self):
         instructions = {
-            0xBF: lambda: self.execute_cp_n("A", 4),
-            0xB8: lambda: self.execute_cp_n("B", 4),
-            0xB9: lambda: self.execute_cp_n("C", 4),
-            0xBA: lambda: self.execute_cp_n("D", 4),
-            0xBB: lambda: self.execute_cp_n("E", 4),
-            0xBC: lambda: self.execute_cp_n("H", 4),
-            0xBD: lambda: self.execute_cp_n("L", 4),
-            0xBE: lambda: self.execute_cp_n("HL", 8),
-            0xFE: lambda: self.execute_cp_n("#", 8)
+            0xBF: (self.execute_cp_n, ("A", 4)),
+            0xB8: (self.execute_cp_n, ("B", 4)),
+            0xB9: (self.execute_cp_n, ("C", 4)),
+            0xBA: (self.execute_cp_n, ("D", 4)),
+            0xBB: (self.execute_cp_n, ("E", 4)),
+            0xBC: (self.execute_cp_n, ("H", 4)),
+            0xBD: (self.execute_cp_n, ("L", 4)),
+            0xBE: (self.execute_cp_n, ("HL", 8)),
+            0xFE: (self.execute_cp_n, ("#", 8))
         }
         return instructions
 
