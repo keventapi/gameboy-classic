@@ -22,7 +22,7 @@ class SUB_A_N:
         A = self.cpu.registers["A"] & 0xFF
         if r == "HL":
             addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
-            n = self.mmu.read(addrs)
+            n = self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             n = self.fetch() & 0xFF
         else:

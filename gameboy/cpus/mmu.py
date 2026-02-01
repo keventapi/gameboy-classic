@@ -1,3 +1,5 @@
+import sys
+
 class MMU:
     def __init__(self, ram, mbc, timer,
                  hram, joypad, interrupt_controller,
@@ -9,6 +11,8 @@ class MMU:
         self.hram = hram
         self.ppu = ppu
         self.interrupt_controller = interrupt_controller
+
+        self.just_register = [0xFF for i in range(0xFF80 - 0xFF4C)]
 
     def debug(self, action, addrs, value=None):
         if (addrs == 0xFF0F or addrs == 0xFFFF) and action == "read":
@@ -48,6 +52,12 @@ class MMU:
         elif 0xFE00 <= addrs < 0xFEA0:
             return self.ppu.read_oam(addrs)
         else:
+            if 0xFF4C <= addrs < 0xFF80:
+                print(f"fallback leitura no endereço: 0x{addrs:04x} retorno: {self.just_register[addrs - 0xFF4C]:02x}")
+                return self.just_register[addrs - 0xFF4C]
+            if addrs > 0xFFFF:
+                sys.exit()
+            
             return 0xFF
 
     def write(self, addrs, value, dma_mode=False):
@@ -76,3 +86,10 @@ class MMU:
             self.ppu.write(addrs, value)
         elif 0xFE00 <= addrs < 0xFEA0:
             self.ppu.write_oam(addrs, value)
+        else:
+            if 0xFF4C <= addrs < 0xFF80:
+                self.just_register[addrs - 0xFF4C] = value
+                print(f"fallback: escrita no endereço: 0x{addrs:04x} e valor: {value:02x}")
+            else:
+                if addrs > 0xFFFF:
+                    sys.exit()

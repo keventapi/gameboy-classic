@@ -22,7 +22,7 @@ class ADC_A_N:
     def execute_adc_a_n(self, r, ticks):
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
-            n = self.mmu.read(addrs)
+            n = self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             n = self.fetch()
         else:

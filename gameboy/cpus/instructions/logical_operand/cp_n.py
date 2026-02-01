@@ -23,7 +23,7 @@ class CP_N:
         result = self.registers["A"]
         if len(r) > 1:
             addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
-            operand = self.mmu.read(addrs)
+            operand = self.mmu.read(addrs & 0xFFFF)
             result -= operand
         elif r == "#":
             operand = self.fetch()

@@ -12,10 +12,10 @@ class LD_A_FF00_C:
         return instructions
 
     def execute_ld_a_FF00_C(self, read_a: bool, ticks):
-        addrs = 0xFF00 + self.registers["C"]
+        addrs = 0xFF00 + (self.registers["C"] & 0xFF)
         if read_a:
-            self.registers["A"] = self.mmu.read(addrs)
+            self.registers["A"] = (self.mmu.read(addrs) & 0xFF)
         else:
-            self.mmu.write(addrs & 0xFFFF, self.registers["A"])
+            self.mmu.write(addrs & 0xFFFF, self.registers["A"] & 0xFF)
         self.cpu.timer.tick(ticks)
         return ticks

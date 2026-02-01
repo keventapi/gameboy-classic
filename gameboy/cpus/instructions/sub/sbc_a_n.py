@@ -23,7 +23,7 @@ class SBC_A_N:
         A = self.registers["A"] & 0xFF
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
-            n = self.mmu.read(addrs)
+            n = self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             n = self.cpu.fetch()
         else:

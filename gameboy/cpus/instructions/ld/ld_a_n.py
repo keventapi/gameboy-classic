@@ -31,13 +31,13 @@ class LD_A_N:
     def ld_a_n(self, r1, r2, ticks):
         if r2 == "nn":
             immediate = self.cpu.fetch_16bit()
-            self.registers[r1] = self.mmu.read(immediate)
+            self.registers[r1] = self.mmu.read(immediate) & 0xFF
         elif r2 == "#":
-            immediate = self.fetch()
-            self.registers[r1] = immediate
+            immediate = self.fetch() & 0xFF
+            self.registers[r1] = immediate & 0xFF
         else:
             high, low = r2[0], r2[1]
             immediate = (self.registers[high] << 8) | self.registers[low]
-            self.registers[r1] = self.mmu.read(immediate)
+            self.registers[r1] = self.mmu.read(immediate & 0xFFFF) & 0xFF
         self.cpu.timer.tick(ticks)
         return ticks

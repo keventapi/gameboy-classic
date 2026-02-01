@@ -15,8 +15,8 @@ class LD_A_FF00_N:
     def execute_ld_a_ff00_n(self, update_a, ticks):
         value = self.fetch()
         if update_a:
-            self.registers["A"] = self.mmu.read((value+0xFF00) & 0xFFFF)
+            self.registers["A"] = self.mmu.read((value+0xFF00) & 0xFFFF) & 0xFF
         else:
-            self.mmu.write((value+0xFF00) & 0xFFFF, self.registers["A"])
+            self.mmu.write((value+0xFF00) & 0xFFFF, self.registers["A"] & 0xFF)
         self.cpu.timer.tick(ticks)
         return ticks

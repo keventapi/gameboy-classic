@@ -142,7 +142,7 @@ class CPU:
         else:
             self.timer.tick(4)
             ticks = 4
-        self.debug(opcode, last_state)
+        #self.debug(opcode, last_state)
         self.last_opcode = self.opcode
         return ticks
 
@@ -159,6 +159,7 @@ class CPU:
 
     def fetch(self):
         pc = self.registers["pc"]
+        print(f"pc bedore break:{pc:04x}")
         opcode = self.mmu.read(pc) & 0xFF
         self.registers["pc"] += 1
         return opcode

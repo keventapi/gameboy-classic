@@ -23,7 +23,7 @@ class AND_N:
         result = self.registers["A"]
         if len(r) > 1:
             addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
-            result &= self.mmu.read(addrs)
+            result &= self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             imediate = self.cpu.fetch()
             result &= imediate

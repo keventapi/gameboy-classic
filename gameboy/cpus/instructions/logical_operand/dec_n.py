@@ -20,8 +20,8 @@ class DEC_N:
     def execute_dec_n(self, r, ticks):
         if len(r) > 1:
             addrs = self.registers[r[0]] << 8 | self.registers[r[1]]
-            value = self.mmu.read(addrs)
-            self.mmu.write(addrs, (value-1) & 0xFF)
+            value = self.mmu.read(addrs & 0xFFFF)
+            self.mmu.write(addrs & 0xFFFF, (value-1) & 0xFF)
         else:
             value = self.registers[r]
             self.registers[r] = (self.registers[r] - 1) & 0xFF

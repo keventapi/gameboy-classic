@@ -53,7 +53,7 @@ class TIMER:
                 if self.ppu.dma_block > 160:
                     self.ppu.dma_block -= 1
                     return
-                data = self.mmu.read(self.ppu.dma_src_addrs + (160 - self.ppu.dma_block), True)
+                data = self.mmu.read((self.ppu.dma_src_addrs + (160 - self.ppu.dma_block) & 0xFFFF), True)
                 self.ppu.oam.write(0xFE00 + (160 - self.ppu.dma_block), data)
                 self.ppu.dma_block -= 1
         elif self.ppu.dma_src_addrs is not None:

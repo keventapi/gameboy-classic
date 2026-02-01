@@ -26,7 +26,7 @@ class ADD_A_N:
                 n = self.fetch()
             else:
                 addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
-                n = self.mmu.read(addrs)
+                n = self.mmu.read(addrs & 0xFFFF)
         else:
             n = self.registers[r]
 

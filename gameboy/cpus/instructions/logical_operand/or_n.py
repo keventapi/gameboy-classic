@@ -23,7 +23,7 @@ class OR_N:
         result = self.registers["A"] & 0xFF
         if len(r) > 1:
             addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
-            result |= (self.mmu.read(addrs) & 0xFF)
+            result |= (self.mmu.read(addrs & 0xFFFF) & 0xFF)
         elif r == "#":
             imediate = self.fetch() & 0xFF
             result |= imediate

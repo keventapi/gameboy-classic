@@ -14,11 +14,16 @@ class LD_NN_SP:
     def execute_ld_nn_sp(self, ticks):
         low_byte_addr = self.fetch()
         high_byte_addr = self.fetch()
+
         nn = ((high_byte_addr << 8) | low_byte_addr) & 0xFFFF
+
         sp_value = self.registers["SP"]
+
         low_sp = sp_value & 0xFF
         high_sp = (sp_value >> 8) & 0xFF
+
         self.mmu.write(nn, low_sp)
         self.mmu.write((nn+1) & 0xFFFF, high_sp)
+        
         self.cpu.timer.tick(ticks)
         return ticks
