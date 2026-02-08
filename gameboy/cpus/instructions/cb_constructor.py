@@ -47,7 +47,6 @@ class CB:
         opcode = self.cpu.fetch()
         callback = self.instructions[opcode]
         if len(callback) > 0:
-            print(f"executed cb: {opcode:02x}")
             return callback[0](*callback[1])
         else:
             raise NotImplementedError("CB instruction missing")

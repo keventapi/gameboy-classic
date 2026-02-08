@@ -13,8 +13,9 @@ class CCF:
         flag = self.registers["F"]
         Z = (flag >> 7) & 1
         N = 0
-        H = (flag >> 4) & 1
-        C = ((flag >> 4) ^ 1) & 1
+        H = 0
+        old_C = (flag >> 4) & 1
+        C = 1 if old_C == 0 else 0
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
         return ticks

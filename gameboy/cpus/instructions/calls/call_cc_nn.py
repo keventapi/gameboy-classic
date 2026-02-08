@@ -26,7 +26,7 @@ class CALL_CC_NN:
         else:
             value = (flags >> 4) & 1
 
-        condiction_met = (value == 1) if "N" not in condiction else value == 0
+        condiction_met = value == 1 if "N" not in condiction else value == 0
         if condiction_met:
             self.cpu.push8(high)
             self.cpu.push8(low)

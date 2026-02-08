@@ -4,6 +4,10 @@ import sys
 
 class CPU:
     def __init__(self, mmu, timer):
+        self.read_value = 0
+        self.value = 0x00
+        self.buffer_opcode = []
+        
         self.is_halted = False
         self.di_pending = False
         self.ei_pending = False
@@ -136,6 +140,7 @@ class CPU:
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
                 ticks = callback(self)
+                print(self.registers["pc"], "acabou de resolver o ei pendente")
                 self.check_instruction_interrupt()
             else:
                 ticks = callback(self)
@@ -149,18 +154,35 @@ class CPU:
     def push8(self, value):
         self.registers["sp"] -= 1
         self.registers["sp"] &= 0xFFFF
-        self.mmu.write(self.registers["sp"], value)
+        self.mmu.write(self.registers["sp"], value & 0xFF)
 
     def pull8(self):
-        value = self.mmu.read(self.registers["sp"])
+        value = self.mmu.read(self.registers["sp"]) & 0xFF
         self.registers["sp"] += 1
         self.registers["sp"] &= 0xFFFF
         return value
 
     def fetch(self):
         pc = self.registers["pc"]
-        print(f"pc bedore break:{pc:04x}")
+        if pc > 0xFFFF:
+            with open("log.txt", "a") as txt:
+                txt.writelines(self.buffer_opcode)
+                sys.exit()
         opcode = self.mmu.read(pc) & 0xFF
+
+        self.buffer_opcode.append(f"""
+------------------------------------------
+opcode: {opcode:02x}
+A: 0x{self.registers["A"]:02x}
+B: 0x{self.registers["B"]:02x}"
+C: 0x{self.registers["C"]:02x}"
+D: 0x{self.registers["D"]:02x}"
+E: 0x{self.registers["E"]:02x}"
+F: {self.registers["F"]:08b}"
+sp: {self.registers["sp"]}
+-------------------------------------------
+""")
+
         self.registers["pc"] += 1
         return opcode
 

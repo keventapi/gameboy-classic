@@ -14,6 +14,8 @@ class MMU:
 
         self.just_register = [0xFF for i in range(0xFF80 - 0xFF4C)]
 
+        self.just_fallback = [0xFF for i in range(0x0000, 0x10000)]
+
     def debug(self, action, addrs, value=None):
         if (addrs == 0xFF0F or addrs == 0xFFFF) and action == "read":
             return
@@ -55,8 +57,8 @@ class MMU:
             if 0xFF4C <= addrs < 0xFF80:
                 print(f"fallback leitura no endereço: 0x{addrs:04x} retorno: {self.just_register[addrs - 0xFF4C]:02x}")
                 return self.just_register[addrs - 0xFF4C]
-            if addrs > 0xFFFF:
-                sys.exit()
+            else:
+                return self.just_fallback[addrs]
             
             return 0xFF
 
@@ -91,5 +93,5 @@ class MMU:
                 self.just_register[addrs - 0xFF4C] = value
                 print(f"fallback: escrita no endereço: 0x{addrs:04x} e valor: {value:02x}")
             else:
-                if addrs > 0xFFFF:
-                    sys.exit()
+                self.just_fallback[addrs] = value
+

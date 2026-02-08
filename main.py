@@ -67,16 +67,23 @@ timer.mmu = mmu
 ppu.mmu = mmu
 cpu = CPU(mmu, timer)
 
+joypad.interrupter = interrupt_controller
 
 def handle_key(key, bit, map):
     jp_data = joypad.read()
+    n_value = -1
     action = (jp_data >> 5) & 1
     dpad = (jp_data >> 4) & 1
     if map == "action" and not action:
-        joypad.action[key] = ~(joypad.action[key])
+        n_value = ~(joypad.action[key])
+        joypad.action[key] = n_value
+        if n_value == 0:
+            joypad.interrupter.request_interrupt(4)
     if map == "move" and not dpad:
-        joypad.dpad[key] = ~(joypad.dpad[key])
-
+        n_value = ~(joypad.dpad[key])
+        joypad.dpad[key] = n_value 
+        if n_value == 0:
+            joypad.interrupter.request_interrupt(4)
 
 controller_map = {
     "up": lambda: handle_key("up", 2, "move"),

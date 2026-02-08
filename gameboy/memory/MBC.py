@@ -8,12 +8,16 @@ class MBC:
         self.mbc1_output_pins = [0, 0]
         self.mbc5_lower = 0
         self.mbc5_upper = 0
-        self.rom_low_bank = None
+        self.rom_low_bank = 1
 
     def select_rom_bank(self, bank):
         if bank == 0:
             bank = 1
+        
         self.rom_low_bank = bank
+        low_bit = self.mbc1_output_pins[0]
+        high_bit = self.mbc1_output_pins[1]
+        bank = (high_bit << 6) | (low_bit << 5) | bank
         self.rom.switch_bank(bank)
 
     def check_output(self):
@@ -21,9 +25,22 @@ class MBC:
                 and len(self.rom) <= 512 * 1024
                 and len(self.ram) <= 8 * 1024)
 
+    def update_bank(self):
+        low_bit = self.mbc1_output_pins[0]
+        high_bit = self.mbc1_output_pins[1]
+        bank = (high_bit << 6) | (low_bit << 5) | self.rom_low_bank
+        self.rom.switch_bank(bank)
+        if self.ram is None:
+            return
+        if self.mode == 1:
+            self.ram.switch_bank(((high_bit << 1) | low_bit))
+        else:
+            self.ram.switch_bank(0)
+
     def handle_mdc1_output(self, value):
         self.mbc1_output_pins[0] = value & 0x01
         self.mbc1_output_pins[1] = (value >> 1) & 0x01
+        self.update_bank()
 
     def handle_write(self, addrs, value):
         if self.mbc_version == 1:
@@ -54,30 +71,23 @@ class MBC:
                 self.ram.write(addrs, value)
 
         if 0x0000 <= addrs < 0x2000:
-            self.ram_enabled = (value & 0b1111) == 0b1010
+            self.ram_enabled = (value & 0xF) == 0xA
 
-        if 0x2000 <= addrs < 0x4000:
+        elif 0x2000 <= addrs < 0x4000:
             bank = value & 0x1F
-            self.select_rom_bank(bank)
+            bank = bank if bank != 0 else 1
+            self.rom_low_bank = bank
+            self.update_bank()
 
-        if 0x4000 <= addrs < 0x6000 and self.check_output():
-            self.handle_mdc1_output(value)
+        elif 0x4000 <= addrs < 0x6000:
+            self.mbc1_output_pins[0] = value & 0x01
+            self.mbc1_output_pins[1] = (value >> 1) & 0x01
+            self.update_bank()
 
-        if 0x6000 <= addrs < 0x8000:
+        elif 0x6000 <= addrs < 0x8000:
             self.mode = value & 1
-            if self.mode == 0:
-                self.ram.switch_bank(0)
+            self.update_bank()
 
-        if self.mode == 1:
-            if 0x4000 <= addrs < 0x6000:
-                bank = value & 0b11
-                self.ram.switch_bank(bank)
-
-        elif self.mode == 0:
-            if 0x4000 <= addrs < 0x6000:
-                high_bank = value & 0b11
-                bank = (high_bank << 5) | self.rom_low_bank
-                self.rom.switch_bank(bank)
 
     def write_mbc2(self, addrs, value):
         if 0x0000 <= addrs < 0x1FFF and (addrs & 0x0100) == 0:

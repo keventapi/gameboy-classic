@@ -15,7 +15,6 @@ class JOYPAD:
         }
 
     def write(self, value):
-        print(f"{value:08b}")
         self.joyp = 0xC0 | (value & 0x30)
 
     def fetch_action_output(self):
@@ -40,5 +39,4 @@ class JOYPAD:
             button_state_output &= self.fetch_dpad_output()
         if not (self.joyp & 0x10):
             button_state_output &= self.fetch_action_output()
-        print(f"{result | button_state_output:08b}")
         return result | button_state_output
