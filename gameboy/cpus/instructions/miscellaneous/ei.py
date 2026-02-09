@@ -10,6 +10,5 @@ class EI:
 
     def execute_ei(self, ticks):
         self.cpu.ei_pending = True
-        print(self.cpu.registers["pc"], "acabou de executar ei")
         self.cpu.timer.tick(ticks)
         return ticks

@@ -1,13 +1,13 @@
 from .instruction_assembly import INSTRUCTIONS
 from . import instructions_agregator as instr
-import sys
+
 
 class CPU:
     def __init__(self, mmu, timer):
         self.read_value = 0
         self.value = 0x00
         self.buffer_opcode = []
-        
+
         self.is_halted = False
         self.di_pending = False
         self.ei_pending = False
@@ -36,7 +36,7 @@ class CPU:
         self.assert_instructions()
         self.handle_builder()
         self.last_opcode = None
-        self.opcode = None        
+        self.opcode = None
 
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
@@ -89,13 +89,10 @@ class CPU:
         before: {last_state["sp"]}
         after {self.registers["sp"]}""")
         print(self.last_opcode, self.opcode)
-        if self.last_opcode == 0x00 and self.opcode == 0xFF:
-            #sys.exit()
-            pass
 
     def reset_if(self, b):
         value = self.mmu.read(0xFF0F)
-        new_value = value & (~(1 << b))
+        new_value = (value & (~(1 << b))) | 0xE0
         self.mmu.write(0xFF0F, new_value)
 
     def call_isr(self):
@@ -125,13 +122,10 @@ class CPU:
         return (value_if & value_ie & 0x1F) != 0
 
     def step(self):
-        last_state = self.registers.copy()
-
         if self.ceck_if_ie():
             self.is_halted = False
             if self.ime:
-                self.call_isr()
-                return
+                return self.call_isr()
 
         if not self.is_halted:
             opcode = self.fetch()
@@ -140,14 +134,13 @@ class CPU:
             callback = self.decode(opcode)
             if any([self.ei_pending, self.di_pending]):
                 ticks = callback(self)
-                print(self.registers["pc"], "acabou de resolver o ei pendente")
                 self.check_instruction_interrupt()
             else:
                 ticks = callback(self)
         else:
             self.timer.tick(4)
             ticks = 4
-        #self.debug(opcode, last_state)
+
         self.last_opcode = self.opcode
         return ticks
 
@@ -164,25 +157,7 @@ class CPU:
 
     def fetch(self):
         pc = self.registers["pc"]
-        if pc > 0xFFFF:
-            with open("log.txt", "a") as txt:
-                txt.writelines(self.buffer_opcode)
-                sys.exit()
         opcode = self.mmu.read(pc) & 0xFF
-
-        self.buffer_opcode.append(f"""
-------------------------------------------
-opcode: {opcode:02x}
-A: 0x{self.registers["A"]:02x}
-B: 0x{self.registers["B"]:02x}"
-C: 0x{self.registers["C"]:02x}"
-D: 0x{self.registers["D"]:02x}"
-E: 0x{self.registers["E"]:02x}"
-F: {self.registers["F"]:08b}"
-sp: {self.registers["sp"]}
--------------------------------------------
-""")
-
         self.registers["pc"] += 1
         return opcode
 

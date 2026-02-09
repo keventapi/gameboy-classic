@@ -16,4 +16,4 @@ class INTERRUPT_CONTROLLER:
         self.IE = value & 0x1F
 
     def request_interrupt(self, selector):
-        self.IF = (self.IF | (1 << selector)) & 0xFF
+        self.IF = (self.IF | (1 << selector) | 0xE0) & 0xFF

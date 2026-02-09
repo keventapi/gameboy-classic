@@ -1,42 +1,37 @@
 class JOYPAD:
     def __init__(self):
         self.joyp = 0xC0
-        self.dpad = {
-            "right": 1,
-            "left": 1,
-            "up": 1,
-            "down": 1
-        }
-        self.action = {
-            "A": 1,
-            "B": 1,
-            "select": 1,
-            "start": 1
-        }
+        self.dpad = 0xF
+        self.action = 0xF
+
+    def handle_key_press(self, bit, map):
+        if map == "dpad":
+            not_pressed = (self.dpad >> bit) & 1
+            if not_pressed:
+                self.dpad ^ (1 << bit)
+            else:
+                self.dpad | (1 << bit)
+        else:
+            not_pressed = (self.action >> bit) & 1
+            if not_pressed:
+                self.action ^ (1 << bit)     
+            else:
+                self.action | (1 << bit)
 
     def write(self, value):
         self.joyp = 0xC0 | (value & 0x30)
 
-    def fetch_action_output(self):
-        bit0 = self.action["A"]
-        bit1 = self.action["B"]
-        bit2 = self.action["select"]
-        bit3 = self.action["start"]
-        return (bit3 << 3) | (bit2 << 2) | (bit1 << 1) | bit0
-
-    def fetch_dpad_output(self):
-        bit0 = self.dpad["right"]
-        bit1 = self.dpad["left"]
-        bit2 = self.dpad["up"]
-        bit3 = self.dpad["down"]
-        return (bit3 << 3) | (bit2 << 2) | (bit1 << 1) | bit0
+    def fetch_buttons(self, map):
+        if map == "action":
+            return (self.joyp & 0xF0) | self.action
+        else:
+            return (self.joyp & 0xF0) | self.dpad
 
     def read(self):
-        result = 0xC0
-        result |= (self.joyp & 0x30)
-        button_state_output = 0x0F
-        if not (self.joyp & 0x20):
-            button_state_output &= self.fetch_dpad_output()
+        result = self.joyp
         if not (self.joyp & 0x10):
-            button_state_output &= self.fetch_action_output()
-        return result | button_state_output
+            result = self.fetch_buttons("action")
+        elif not (self.joyp & 0x20):
+            result = self.fetch_buttons("dpad")
+
+        return result

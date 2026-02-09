@@ -5,6 +5,7 @@ class MBC:
         self.ram_enabled = False
         self.mode = 0
         self.mbc_version = mbc_version
+        print(mbc_version)
         self.mbc1_output_pins = [0, 0]
         self.mbc5_lower = 0
         self.mbc5_upper = 0

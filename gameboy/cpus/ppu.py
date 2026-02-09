@@ -277,4 +277,3 @@ class PPU:
         lcd_mode = (self.registers[0] >> 7) & 1
         if self.get_mode() < 2 or not lcd_mode:
             self.oam.write(addrs, value)
-

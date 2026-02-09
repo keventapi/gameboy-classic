@@ -17,7 +17,6 @@ class TIMER:
 
         self.internal_counter = 0
 
-        self.interrupt = False
         self.div_state = 0
 
         self.reload_state = 0
@@ -44,15 +43,12 @@ class TIMER:
 
         if self.counters[1] > 0xFF:
             self.counters[1] = 0
-            self.interrupt = True
+            self.interrupter.request_interrupt(2)
             self.reload_state = 4
 
     def dma_handler(self, ticks):
         if self.ppu.dma_block > 0 and self.ppu.dma_src_addrs is not None:
             for tick in range(ticks):
-                if self.ppu.dma_block > 160:
-                    self.ppu.dma_block -= 1
-                    return
                 data = self.mmu.read((self.ppu.dma_src_addrs + (160 - self.ppu.dma_block) & 0xFFFF), True)
                 self.ppu.oam.write(0xFE00 + (160 - self.ppu.dma_block), data)
                 self.ppu.dma_block -= 1

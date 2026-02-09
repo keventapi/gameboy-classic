@@ -1,4 +1,3 @@
-import time
 import loader
 from gameboy.memory.cartridge import CARTRIDGE
 from gameboy.IO.timer import TIMER
@@ -67,51 +66,54 @@ timer.mmu = mmu
 ppu.mmu = mmu
 cpu = CPU(mmu, timer)
 
+timer.interrupter = interrupt_controller
+
 joypad.interrupter = interrupt_controller
 
-def handle_key(key, bit, map):
-    jp_data = joypad.read()
-    n_value = -1
-    action = (jp_data >> 5) & 1
-    dpad = (jp_data >> 4) & 1
-    if map == "action" and not action:
-        n_value = ~(joypad.action[key])
-        joypad.action[key] = n_value
-        if n_value == 0:
-            joypad.interrupter.request_interrupt(4)
-    if map == "move" and not dpad:
-        n_value = ~(joypad.dpad[key])
-        joypad.dpad[key] = n_value 
-        if n_value == 0:
-            joypad.interrupter.request_interrupt(4)
+
+def handle_key_down(bit, map):
+    joypad.handle_key_press(bit, map)
+
+
+def handle_key_up(bit, map):
+    joypad.handle_key_press(bit, map)
+
 
 controller_map = {
-    "up": lambda: handle_key("up", 2, "move"),
-    "down": lambda: handle_key("down", 3, "move"),
-    "right": lambda: handle_key("right", 0, "move"),
-    "left": lambda: handle_key("left", 1, "move"),
-    "z": lambda: handle_key("A", 0, "action"),
-    "x": lambda: handle_key("B", 1, "action"),
-    "a": lambda: handle_key("start", 2, "action"),
-    "s": lambda: handle_key("select", 3, "action")
+    "up": [2, "dpad"],
+    "down": [3, "dpad"],
+    "right": [0, "dpad"],
+    "left": [1, "dpad"],
+    "q": [0, "action"],
+    "w": [1, "action"],
+    "e": [2, "action"],
+    "r": [3, "action"]
 }
 
-while rodando:
-    start_time = time.perf_counter()
+def handle_event():
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+        if event.type == pygame.KEYDOWN:
             key = pygame.key.name(event.key)
             call = controller_map.get(key)
             if call is not None:
-                call()
+                joypad.handle_key_press(call[0], call[1])
+                joypad.interrupter.request_interrupt(4)
 
-        if event.type == pygame.QUIT:
-            rodando = False
+        elif event.type == pygame.KEYUP:
+            key = pygame.key.name(event.key)
+            call = controller_map.get(key)
+            if call is not None:
+                joypad.handle_key_press(call[0], call[1])
 
+        elif event.type == pygame.QUIT:
+            exit()
+
+
+while rodando:
     tick = cpu.step()
+    handle_event()
     if ppu.start_render:
         renderizar(ppu.display_buffer, screen)
         ppu.start_render = False
-
 
 pygame.quit()

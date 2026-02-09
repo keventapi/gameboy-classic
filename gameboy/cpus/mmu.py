@@ -68,6 +68,7 @@ class MMU:
             if 0xFF80 <= addrs < 0xFFFF:
                 self.hram.write(addrs, value)
             return
+
         if 0xC000 <= addrs < 0xFE00:
             self.ram.write(addrs, value)
         elif 0x0000 <= addrs < 0x8000 or 0xA000 <= addrs < 0xC000:
