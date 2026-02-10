@@ -100,10 +100,12 @@ class CPU:
         value_if = self.mmu.read(0xFF0F)
         value_ie = self.mmu.read(0xFFFF)
         for i in range(5):
-            if ((value_if >> i) & 1) & 1 and ((value_ie >> i) & 1) != 0:
+            if ((value_if >> i) & 1) == 1 and ((value_ie >> i) & 1) != 0:
                 b = i
                 break
         if b != -1:
+            if b != 0:
+                print("listening bit: ", b)
             self.ime = False
             addrs = 0x0040 + (b * 8)
             high = (self.registers["pc"] >> 8) & 0xFF
@@ -129,6 +131,7 @@ class CPU:
 
         if not self.is_halted:
             opcode = self.fetch()
+            #print(f"{opcode:02x}")
             self.opcode = opcode
             self.current_opcode = opcode
             callback = self.decode(opcode)

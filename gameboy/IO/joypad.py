@@ -3,20 +3,21 @@ class JOYPAD:
         self.joyp = 0xC0
         self.dpad = 0xF
         self.action = 0xF
+        self.selector = 3
 
     def handle_key_press(self, bit, map):
         if map == "dpad":
             not_pressed = (self.dpad >> bit) & 1
             if not_pressed:
-                self.dpad ^ (1 << bit)
+                self.dpad ^= (1 << bit)
             else:
-                self.dpad | (1 << bit)
+                self.dpad |= (1 << bit)
         else:
             not_pressed = (self.action >> bit) & 1
             if not_pressed:
-                self.action ^ (1 << bit)     
+                self.action ^= (1 << bit)
             else:
-                self.action | (1 << bit)
+                self.action |= (1 << bit)
 
     def write(self, value):
         self.joyp = 0xC0 | (value & 0x30)
@@ -29,9 +30,11 @@ class JOYPAD:
 
     def read(self):
         result = self.joyp
-        if not (self.joyp & 0x10):
+        if ((self.joyp >> 5) & 1) == 0:
+            #print("action")
             result = self.fetch_buttons("action")
-        elif not (self.joyp & 0x20):
+        elif ((self.joyp >> 4) & 1) == 0:
+            #print("dpad")
             result = self.fetch_buttons("dpad")
-
+        #print(f"buttons {result:08b}")
         return result

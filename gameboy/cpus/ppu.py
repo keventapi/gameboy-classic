@@ -81,11 +81,21 @@ class PPU:
             self.set_stat_checkflag(False)
 
     def increment_ly(self):
+        old_ly = self.registers[4]
+
         self.registers[4] += 1
 
         if self.registers[4] > 153:
             self.registers[4] = 0
+
         self.handle_ly_lyc_collision()
+
+        if self.registers[4] >= 144:
+            self.set_mode(1)
+
+        if self.registers[4] == 144 and old_ly == 143:
+            self.interrupter.request_interrupt(0)
+            self.start_render = True
 
     def handle_white_board(self):
         self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
@@ -192,32 +202,22 @@ class PPU:
         if lcd_mode:
             self.last_display_reset = False
             self.counter += cycles
-            old_ly = self.registers[4]
 
             if self.counter >= 456:
                 self.counter -= 456
                 self.increment_ly()
 
-            if self.registers[4] >= 144:
-                self.set_mode(1)
-
-            else:
+            if self.registers[4] < 144:
                 if self.counter < 80:
                     self.set_mode(2)
                 elif self.counter < 252:
-                    if self.get_mode() != 3:
-                        self.set_mode(3)
+                    self.set_mode(3)
                 else:
                     if self.get_mode() != 0:
                         self.render_scanline()
                     self.set_mode(0)
 
-            if self.registers[4] == 144 and old_ly == 143:
-                self.interrupter.request_interrupt(0)
-                self.start_render = True
-
             self.update_stat_interrupt()
-
     
     def write(self, addrs, value):
         offset = addrs - self.offset_constant
