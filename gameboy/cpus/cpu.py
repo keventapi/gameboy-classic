@@ -131,7 +131,6 @@ class CPU:
 
         if not self.is_halted:
             opcode = self.fetch()
-            #print(f"{opcode:02x}")
             self.opcode = opcode
             self.current_opcode = opcode
             callback = self.decode(opcode)

@@ -28,10 +28,10 @@ class MMU:
 
     def read(self, addrs, dma_mode=False):
         #self.debug("read", addrs)
-        #if self.ppu.dma_block > 0 and dma_mode == False:
-        #    if 0xFF80 <= addrs < 0xFFFF:
-        #        return self.hram.read(addrs)
-        #    return 0xFF
+        if self.ppu.dma_block > 0 and dma_mode == False:
+            if 0xFF80 <= addrs < 0xFFFF:
+                return self.hram.read(addrs)
+            return 0xFF
 
         if 0xC000 <= addrs < 0xFE00:
             return self.ram.read(addrs)
@@ -64,10 +64,10 @@ class MMU:
 
     def write(self, addrs, value, dma_mode=False):
         #self.debug("write", addrs, value)
-        #if self.ppu.dma_block > 0 and dma_mode is False:
-        #    if 0xFF80 <= addrs < 0xFFFF:
-        #        self.hram.write(addrs, value)
-        #    return
+        if self.ppu.dma_block > 0 and dma_mode is False:
+            if 0xFF80 <= addrs < 0xFFFF:
+                self.hram.write(addrs, value)
+            return
 
         if 0xC000 <= addrs < 0xFE00:
             self.ram.write(addrs, value)

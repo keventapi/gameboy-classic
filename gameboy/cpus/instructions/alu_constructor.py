@@ -36,4 +36,3 @@ class ALU:
                     attr_value = getattr(instance, attr_name)
                     if callable(attr_value):
                         setattr(self, attr_name, attr_value)
-        

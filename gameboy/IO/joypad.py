@@ -31,10 +31,7 @@ class JOYPAD:
     def read(self):
         result = self.joyp
         if ((self.joyp >> 5) & 1) == 0:
-            #print("action")
             result = self.fetch_buttons("action")
         elif ((self.joyp >> 4) & 1) == 0:
-            #print("dpad")
             result = self.fetch_buttons("dpad")
-        #print(f"buttons {result:08b}")
         return result

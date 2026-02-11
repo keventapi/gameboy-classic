@@ -19,7 +19,7 @@ def load_rom(file_name):
 
 pygame.init()
 largura, altura = 160, 144
-escala = 4 
+escala = 4
 screen = pygame.display.set_mode((largura * escala, altura * escala))
 clock = pygame.time.Clock()
 
@@ -90,6 +90,7 @@ controller_map = {
     "r": [3, "action"]
 }
 
+
 def handle_event():
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -105,17 +106,15 @@ def handle_event():
             call = controller_map.get(key)
             if call is not None:
                 joypad.handle_key_press(call[0], call[1])
-    
+
         elif event.type == pygame.QUIT:
             exit()
 
 
 while rodando:
     tick = cpu.step()
-    handle_event()
-    if (interrupt_controller.IF >> 4) & 1 == 0 and (interrupt_controller.IE >> 4 & 1 == 1):
-        print(f"{interrupt_controller.IF:08b}")
     if ppu.start_render:
+        handle_event()
         renderizar(ppu.display_buffer, screen)
         ppu.start_render = False
 

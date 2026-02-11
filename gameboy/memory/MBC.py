@@ -14,7 +14,6 @@ class MBC:
     def select_rom_bank(self, bank):
         if bank == 0:
             bank = 1
-        
         self.rom_low_bank = bank
         low_bit = self.mbc1_output_pins[0]
         high_bit = self.mbc1_output_pins[1]
@@ -88,7 +87,6 @@ class MBC:
         elif 0x6000 <= addrs < 0x8000:
             self.mode = value & 1
             self.update_bank()
-
 
     def write_mbc2(self, addrs, value):
         if 0x0000 <= addrs < 0x1FFF and (addrs & 0x0100) == 0:

@@ -8,6 +8,7 @@ from .miscellaneous.nop import NOP
 from .miscellaneous.scf import SCF
 from .miscellaneous.stop import STOP
 
+
 class MISCELLANEOUS:
     def __init__(self, cpu):
         self.ccf = CCF(cpu)
@@ -21,14 +22,14 @@ class MISCELLANEOUS:
         self.stop = STOP(cpu)
 
         instances = [
-            self.ccf ,
-            self.cpl ,
-            self.daa ,
-            self.scf ,
-            self.di ,
-            self.ei ,
+            self.ccf,
+            self.cpl,
+            self.daa,
+            self.scf,
+            self.di,
+            self.ei,
             self.halt,
-            self.nop ,
+            self.nop,
             self.stop
         ]
 
@@ -38,5 +39,3 @@ class MISCELLANEOUS:
                     attr_value = getattr(instance, attr_name)
                     if callable(attr_value):
                         setattr(self, attr_name, attr_value)
-
-

@@ -24,7 +24,8 @@ class SWITCHABLE_RAM:
 
 class SWITCHABLE_ROM:
     def __init__(self, rom_bytes, size=0x4000):
-        self.banks = [rom_bytes[i:i+size] for i in range(0, len(rom_bytes), size)]
+        self.banks = [rom_bytes[i:i+size] for i in range(0,
+                                                         len(rom_bytes), size)]
         print("number of banks:", self.banks[1])
         self.current_bank = 1
         self.bank_size = size
