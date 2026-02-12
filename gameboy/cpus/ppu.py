@@ -7,19 +7,20 @@ class PPU:
 
         self.dma_block = 0
         self.dma_src_addrs = None
-        self.registers = [0x91,  # LCDC
-                            0,  # STAT
-                            0,  # SCY
-                            0,  # SCX
-                            0,  # LY
-                            0,  # LYC
-                            0,  # DMA
-                            0,  # BGP
-                            0,  # OBP0
-                            0,  # OBP1
-                            0,  # WY
-                            0   # WX
-                        ]
+        self.registers = [
+            0x91,  # LCDC
+            0,  # STAT
+            0,  # SCY
+            0,  # SCX
+            0,  # LY
+            0,  # LYC
+            0,  # DMA
+            0,  # BGP
+            0,  # OBP0
+            0,  # OBP1
+            0,  # WY
+            0   # WX
+        ]
 
         self.counter = 0
         self.lcdc_last_state = 1
@@ -28,6 +29,8 @@ class PPU:
         self.start_render = False
         self.stat_line = False
         self.last_display_reset = True
+
+        self.window_counter = 0
 
     def disable_display(self):
         mode = ~(1 << 7)
@@ -87,6 +90,7 @@ class PPU:
 
         if self.registers[4] > 153:
             self.registers[4] = 0
+            self.window_counter = 0
 
         self.handle_ly_lyc_collision()
 
@@ -100,82 +104,161 @@ class PPU:
     def handle_white_board(self):
         self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
 
-    def render_scanline(self):
-        is_unsigned = (self.registers[0] >> 4) & 1
+    def render_bg(self, render_state, tile_row, global_y, global_x):
+        map_selector = (render_state >> 3) & 1
+        tile_map = 0x9C00 if map_selector else 0x9800
+        tile_col = global_x // 8
+        tile_row_start = tile_map + (tile_row * 32)
+        tile_id = self.vram.read(tile_row_start + tile_col)
 
-        background_enable = self.registers[0] & 1
-        if background_enable == 0:
-            self.handle_white_board()
+        if not (render_state >> 4) & 1:
+            tile_id_signed = tile_id
+            if tile_id_signed >= 0x80:
+                tile_id_signed -= 0x100
+            base_addrs = 0x9000 + (tile_id_signed * 16)
+        else:
+            base_addrs = 0x8000 + (tile_id * 16)
 
-        tile_map = 0x9C00 if (self.registers[0] >> 3) & 1 else 0x9800
+        y_inside_tile = global_y % 8
+        line_addrs = base_addrs + (y_inside_tile * 2)
 
-        global_y = (self.registers[4] + self.registers[2]) & 0xFF
+        low_byte = self.vram.read(line_addrs)
+        high_byte = self.vram.read(line_addrs + 1)
+
+        bit_index = 7 - (global_x % 8)
+
+        pixel_color_id = ((high_byte >> bit_index) & 1) << 1
+        pixel_color_id |= (low_byte >> bit_index) & 1
+
+        return pixel_color_id
+
+    def render_window(self, render_state, pixel_x):
+        map_selector = (render_state >> 6) & 1
+        tile_map = 0x9C00 if map_selector else 0x9800
+
+        global_y = self.window_counter
+        global_x = pixel_x - (self.registers[11] - 7)
 
         tile_row = global_y // 8
+        tile_col = global_x // 8
+        tile_row_start = tile_map + (tile_row * 32)
+        tile_id = self.vram.read(tile_row_start + tile_col)
 
-        map_row_start = tile_map + (tile_row * 32)
+        if not (render_state >> 4) & 1:
+            tile_id_signed = tile_id
+            if tile_id_signed >= 0x80:
+                tile_id_signed -= 0x100
+            base_addrs = 0x9000 + (tile_id_signed * 16)
+        else:
+            base_addrs = 0x8000 + (tile_id * 16)
 
-        sprites = self.get_sprites()
-        sprites.sort(key=lambda s: (s[1], s[4]))
+        y_inside_tile = global_y % 8
+        line_addrs = base_addrs + (y_inside_tile * 2)
+
+        low_byte = self.vram.read(line_addrs)
+        high_byte = self.vram.read(line_addrs + 1)
+
+        bit_index = 7 - (global_x % 8)
+
+        pixel_color_id = ((high_byte >> bit_index) & 1) << 1
+        pixel_color_id |= (low_byte >> bit_index) & 1
+
+        return pixel_color_id
+
+    def render_sprite(self, sprite_buffer, render_state, pixel_x, pixel_color_id):
+        pixel_id = 0
+        if len(sprite_buffer) > 0:
+            for sprite in sprite_buffer:
+                relative_x = pixel_x - (sprite[1] - 8)
+                if 0 <= relative_x < 8:
+                    sprite_tile = 0x8000 + (sprite[2] * 16)
+                    sprite_y_tile = (self.registers[4] - (sprite[0] - 16)) % 8
+
+                    flip_y = (sprite[3] >> 6) & 1
+                    if flip_y:
+                        sprite_y_tile = 7 - sprite_y_tile
+
+                    addrs_line = sprite_tile + (sprite_y_tile * 2)
+
+                    sprite_low_byte = self.vram.read(addrs_line)
+                    sprite_high_byte = self.vram.read(addrs_line+1)
+
+                    flip_x = (sprite[3] >> 5) & 1
+                    if flip_x:
+                        sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
+                    else:
+                        relative_x = (7 - relative_x)
+                        sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
+
+                    if (sprite[3] >> 4) & 1:
+                        obp1 = self.registers[9]
+                        id = sprite_color_id * 2
+                        sprite_color_id = (obp1 >> id) & 0x03
+                    else:
+                        obp0 = self.registers[8]
+                        id = sprite_color_id * 2
+                        sprite_color_id = (obp0 >> id) & 0x03
+
+                    if sprite_color_id == 0:
+                        pixel_id = pixel_color_id
+                        continue
+
+                    priority = (sprite[3] >> 7) & 1
+                    if not priority:
+                        real_pixel = sprite_color_id
+                    else:
+                        real_pixel = sprite_color_id if pixel_color_id == 0 else pixel_color_id
+                    pixel_id = real_pixel
+        else:
+            pixel_id = pixel_color_id
+
+        return pixel_id
+
+    def handle_display_buffer(self, pixel_x, pixel_color):
+
+        self.display_buffer[self.registers[4]][pixel_x] = pixel_color
+
+    def render_scanline(self):
+        render_state = self.registers[0]
+        bg_n_window_enabled = render_state & 1
+        if not bg_n_window_enabled:
+            return self.handle_white_board()
+        window_enabled = (render_state >> 5) & 1
+        sprite_enabled = (render_state >> 1) & 1        
+        global_y = (self.registers[4] + self.registers[2]) & 0xFF
+        tile_row = global_y // 8
+        sprite_buffer = self.get_sprites()
+
+        window_rendered = False
 
         for pixel_x in range(160):
             global_x = (pixel_x + self.registers[3]) & 0xFF
-            tile_col = global_x // 8
+            pixel_color = 0
 
-            addrs = map_row_start + tile_col
-            tile_id = self.vram.read(addrs)
+            bg_pixel_color = self.render_bg(render_state, tile_row, global_y, global_x)
+            if bg_pixel_color:
+                pixel_color = bg_pixel_color
 
-            if is_unsigned:
-                base_addrs = 0x8000 + (tile_id * 16)
-            else:
-                tile_id_signed = tile_id if tile_id < 128 else tile_id - 256
-                base_addrs = 0x9000 + (tile_id_signed * 16)
+            trigger = self.registers[11] - 7
+            if window_enabled and self.registers[4] >= self.registers[10] and pixel_x >= trigger:
+                window_pixel_color = self.render_window(render_state, pixel_x)
+                window_rendered = True
+                if window_pixel_color:
+                    pixel_color = window_pixel_color
 
-            y_inside_tile = global_y % 8
-            line_addrs = base_addrs + (y_inside_tile * 2)
+            if sprite_enabled:
+                sprite_pixel = self.render_sprite(sprite_buffer, render_state, pixel_x, pixel_color)
+                if sprite_pixel:
+                    pixel_color = sprite_pixel
+            self.handle_display_buffer(pixel_x, pixel_color)
 
-            byte_low = self.vram.read(line_addrs)
-            byte_high = self.vram.read(line_addrs + 1)
-
-            bit_index = 7 - (global_x % 8)
-
-            pixel_color_id = ((byte_high >> bit_index) & 1) << 1
-            pixel_color_id |= (byte_low >> bit_index) & 1
-            if len(sprites) > 0:
-                for sprite in sprites:
-                    relative_x = pixel_x - (sprite[1] - 8)
-                    if 0 <= relative_x < 8:
-                        sprite_tile = 0x8000 + (sprite[2] * 16)
-                        sprite_y_tile = (self.registers[4] - (sprite[0] - 16)) % 8
-                        flip_y = (sprite[3] >> 6) & 1
-                        if flip_y:
-                            sprite_y_tile = 7 - sprite_y_tile
-
-                        addrs_line = sprite_tile + (sprite_y_tile * 2)
-
-                        sprite_low_byte = self.vram.read(addrs_line)
-                        sprite_high_byte = self.vram.read(addrs_line+1)
-                        flip_x = (sprite[3] >> 5) & 1
-                        if flip_x:
-                            sprite_color_id = ((sprite_high_byte >> (7 - relative_x)) & 1) << 1 | sprite_low_byte >> relative_x & 1
-                        else:  
-                            sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | sprite_low_byte >> relative_x & 1
-                        if sprite_color_id == 0:
-                            self.display_buffer[self.registers[4]][pixel_x] = pixel_color_id
-                            continue
-                        priority = (sprite[3] >> 7) & 1
-                        if not priority:
-                            real_pixel = sprite_color_id
-                        else:
-                            real_pixel = sprite_color_id if pixel_color_id == 0 else pixel_color_id
-                        self.display_buffer[self.registers[4]][pixel_x] = real_pixel 
-            else:
-                self.display_buffer[self.registers[4]][pixel_x] = pixel_color_id
+        if window_rendered:
+            self.window_counter += 1
 
     def get_sprites(self):
         ly = self.registers[4]
         sprite_list = []
-        
+
         for i in range(40):
             if len(sprite_list) >= 10:
                 return sprite_list
@@ -192,7 +275,7 @@ class PPU:
             sprite_data = [y_pos, x_pos, tile_pointer, attributes, i]
             sprite_list.append(sprite_data)
         return sprite_list
-    
+
     def tick(self, cycles):
         lcd_mode = (self.registers[0] >> 7) & 1
 
@@ -218,7 +301,7 @@ class PPU:
                     self.set_mode(0)
 
             self.update_stat_interrupt()
-    
+
     def write(self, addrs, value):
         offset = addrs - self.offset_constant
         if offset == 0:
