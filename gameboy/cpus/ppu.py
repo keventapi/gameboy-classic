@@ -165,57 +165,86 @@ class PPU:
 
         return pixel_color_id
 
+    def handle_8x8_sprite(self, pixel_x, sprite, pixel_color_id):
+        relative_x = pixel_x - (sprite[1] - 8)
+        if 0 <= relative_x < 8:
+            sprite_tile = 0x8000 + (sprite[2] * 16)
+            sprite_y_tile = (self.registers[4] - (sprite[0] - 16)) % 8
+
+            flip_y = (sprite[3] >> 6) & 1
+            if flip_y:
+                sprite_y_tile = 7 - sprite_y_tile
+
+            addrs_line = sprite_tile + (sprite_y_tile * 2)
+            sprite_low_byte = self.vram.read(addrs_line)
+            sprite_high_byte = self.vram.read(addrs_line+1)
+
+            flip_x = (sprite[3] >> 5) & 1
+            if flip_x:
+                sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
+            else:
+                relative_x = (7 - relative_x)
+                sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
+
+            if (sprite[3] >> 4) & 1:
+                obp1 = self.registers[9]
+                id = sprite_color_id * 2
+                sprite_color_id = (obp1 >> id) & 0x03
+            else:
+                obp0 = self.registers[8]
+                id = sprite_color_id * 2
+                sprite_color_id = (obp0 >> id) & 0x03
+
+            if sprite_color_id == 0:
+                return 0
+
+            priority = (sprite[3] >> 7) & 1
+            if not priority:
+                real_pixel = sprite_color_id
+            else:
+                real_pixel = sprite_color_id if pixel_color_id == 0 else pixel_color_id
+            pixel_id = real_pixel
+
+            return pixel_id
+        return 0
+
+    def handle_8x16_sprite(self, pixel_x, sprite, pixel_color_id):
+        ly_relative = self.registers[4] - (sprite[0] - 16)
+        sprite_pos = None
+        flip_y = (sprite[3] >> 6) & 1
+
+        if ly_relative >= 8:
+            sprite[2] |= 0x01
+            sprite_pos = 1
+        else:
+            sprite[2] &= 0xFe
+            sprite_pos = 0
+
+        if flip_y:
+            if sprite_pos == 1:
+                sprite[2] &= 0xFE
+            else:
+                sprite[2] |= 0x01
+
+        return self.handle_8x8_sprite(pixel_x, sprite, pixel_color_id)
+
     def render_sprite(self, sprite_buffer, render_state, pixel_x, pixel_color_id):
         pixel_id = 0
-        if len(sprite_buffer) > 0:
-            for sprite in sprite_buffer:
-                relative_x = pixel_x - (sprite[1] - 8)
-                if 0 <= relative_x < 8:
-                    sprite_tile = 0x8000 + (sprite[2] * 16)
-                    sprite_y_tile = (self.registers[4] - (sprite[0] - 16)) % 8
-
-                    flip_y = (sprite[3] >> 6) & 1
-                    if flip_y:
-                        sprite_y_tile = 7 - sprite_y_tile
-
-                    addrs_line = sprite_tile + (sprite_y_tile * 2)
-
-                    sprite_low_byte = self.vram.read(addrs_line)
-                    sprite_high_byte = self.vram.read(addrs_line+1)
-
-                    flip_x = (sprite[3] >> 5) & 1
-                    if flip_x:
-                        sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
-                    else:
-                        relative_x = (7 - relative_x)
-                        sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
-
-                    if (sprite[3] >> 4) & 1:
-                        obp1 = self.registers[9]
-                        id = sprite_color_id * 2
-                        sprite_color_id = (obp1 >> id) & 0x03
-                    else:
-                        obp0 = self.registers[8]
-                        id = sprite_color_id * 2
-                        sprite_color_id = (obp0 >> id) & 0x03
-
-                    if sprite_color_id == 0:
-                        pixel_id = pixel_color_id
-                        continue
-
-                    priority = (sprite[3] >> 7) & 1
-                    if not priority:
-                        real_pixel = sprite_color_id
-                    else:
-                        real_pixel = sprite_color_id if pixel_color_id == 0 else pixel_color_id
-                    pixel_id = real_pixel
-        else:
-            pixel_id = pixel_color_id
+        obj_type = (render_state >> 2) & 1
+        for sprite in sprite_buffer:
+            if not obj_type:
+                sprite_pixel_id = self.handle_8x8_sprite(pixel_x, sprite, pixel_color_id)
+                if sprite_pixel_id != 0:
+                    pixel_id = sprite_pixel_id
+                    return sprite_pixel_id
+            else:
+                sprite_pixel_id = self.handle_8x16_sprite(pixel_x, sprite, pixel_color_id)
+                if sprite_pixel_id != 0:
+                    return sprite_pixel_id
 
         return pixel_id
 
     def handle_display_buffer(self, pixel_x, pixel_color):
-
         self.display_buffer[self.registers[4]][pixel_x] = pixel_color
 
     def render_scanline(self):
@@ -228,6 +257,8 @@ class PPU:
         global_y = (self.registers[4] + self.registers[2]) & 0xFF
         tile_row = global_y // 8
         sprite_buffer = self.get_sprites()
+
+        sprite_buffer.sort(key=lambda s: (s[1], s[4]))
 
         window_rendered = False
 
@@ -246,10 +277,13 @@ class PPU:
                 if window_pixel_color:
                     pixel_color = window_pixel_color
 
-            if sprite_enabled:
+            if sprite_enabled and len(sprite_buffer) > 0:
                 sprite_pixel = self.render_sprite(sprite_buffer, render_state, pixel_x, pixel_color)
                 if sprite_pixel:
                     pixel_color = sprite_pixel
+                if sprite_pixel is None:
+                    print(sprite_pixel)
+                    continue
             self.handle_display_buffer(pixel_x, pixel_color)
 
         if window_rendered:
@@ -258,13 +292,13 @@ class PPU:
     def get_sprites(self):
         ly = self.registers[4]
         sprite_list = []
-
+        mode = 16 if self.registers[0] >> 2 & 1 else 8
         for i in range(40):
             if len(sprite_list) >= 10:
                 return sprite_list
             base_addrs = 0xFE00 + (i * 4)
             y_pos = self.oam.read(base_addrs)
-            if not (ly + 16 >= y_pos and ly + 16 < y_pos + 8):
+            if not (ly + 16 >= y_pos and ly + 16 < y_pos + mode):
                 continue
             byte1_addrs = base_addrs + 1
             x_pos = self.oam.read(byte1_addrs)
