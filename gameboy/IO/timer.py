@@ -30,12 +30,12 @@ class TIMER:
         self.last_value = self.internal_counter
 
     def check_tima_increment(self):
-        if self.timer_status == 0:
-            return False
         selector = self.frequency_map[self.frequency_selector]
-        current_bit = (self.internal_counter >> selector) & 0b1
-        last_bit = (self.last_value >> selector) & 0b1
-        return True if last_bit == 1 and current_bit == 0 else False
+
+        current_signal = ((self.internal_counter >> selector) & 1) & self.timer_status
+        last_signal = ((self.last_value >> selector) & 1) & self.timer_status
+
+        return last_signal == 1 and current_signal == 0
 
     def update_tima(self):
         if self.check_tima_increment():

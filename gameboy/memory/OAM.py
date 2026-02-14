@@ -11,3 +11,4 @@ class OAM:
         if 0xFE00 <= addrs < 0xFEA0:
             offset = addrs - 0xFE00
             return self.memory[offset]
+        return 0xFF

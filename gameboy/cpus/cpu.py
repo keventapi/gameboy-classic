@@ -104,8 +104,6 @@ class CPU:
                 b = i
                 break
         if b != -1:
-            if b != 0:
-                print("listening bit: ", b)
             self.ime = False
             addrs = 0x0040 + (b * 8)
             high = (self.registers["pc"] >> 8) & 0xFF

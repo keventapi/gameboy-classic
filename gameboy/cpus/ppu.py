@@ -9,17 +9,17 @@ class PPU:
         self.dma_src_addrs = None
         self.registers = [
             0x91,  # LCDC
-            0,  # STAT
-            0,  # SCY
-            0,  # SCX
-            0,  # LY
-            0,  # LYC
-            0,  # DMA
-            0,  # BGP
-            0,  # OBP0
-            0,  # OBP1
-            0,  # WY
-            0   # WX
+            0x00,  # STAT
+            0x00,  # SCY
+            0x00,  # SCX
+            0x00,  # LY
+            0x00,  # LYC
+            0x00,  # DMA
+            0x00,  # BGP
+            0x00,  # OBP0
+            0x00,  # OBP1
+            0x00,  # WY
+            0x00   # WX
         ]
 
         self.counter = 0
@@ -267,12 +267,16 @@ class PPU:
             pixel_color = 0
 
             bg_pixel_color = self.render_bg(render_state, tile_row, global_y, global_x)
+            palette = self.registers[7]
+            bg_pixel_color = (palette >> (bg_pixel_color * 2)) & 0x03
             if bg_pixel_color:
                 pixel_color = bg_pixel_color
 
             trigger = self.registers[11] - 7
             if window_enabled and self.registers[4] >= self.registers[10] and pixel_x >= trigger:
                 window_pixel_color = self.render_window(render_state, pixel_x)
+                palette = self.registers[7]
+                window_pixel_color = (palette >> (window_pixel_color * 2)) & 0x03
                 window_rendered = True
                 if window_pixel_color:
                     pixel_color = window_pixel_color
@@ -282,7 +286,6 @@ class PPU:
                 if sprite_pixel:
                     pixel_color = sprite_pixel
                 if sprite_pixel is None:
-                    print(sprite_pixel)
                     continue
             self.handle_display_buffer(pixel_x, pixel_color)
 

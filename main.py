@@ -97,7 +97,6 @@ def handle_event():
             key = pygame.key.name(event.key)
             call = controller_map.get(key)
             if call is not None:
-                print("entrou no keydown")
                 joypad.handle_key_press(call[0], call[1])
                 joypad.interrupter.request_interrupt(4)
 
@@ -113,8 +112,8 @@ def handle_event():
 
 while rodando:
     tick = cpu.step()
+    handle_event()
     if ppu.start_render:
-        handle_event()
         renderizar(ppu.display_buffer, screen)
         ppu.start_render = False
 
