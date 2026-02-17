@@ -4,7 +4,7 @@ class TIMER:
 
         self.TAC = 0
         self.frequency_selector = 0
-        self.timer_status = 1
+        self.timer_status = 0
         self.frequency_map = [9, 3, 5, 7]
 
         self.offset_const = 0xFF04
@@ -43,31 +43,33 @@ class TIMER:
 
         if self.counters[1] > 0xFF:
             self.counters[1] = 0
-            self.interrupter.request_interrupt(2)
             self.reload_state = 4
+            # self.interrupter.request_interrupt(2)
 
     def dma_handler(self, ticks):
-        if self.ppu.dma_block > 0 and self.ppu.dma_src_addrs is not None:
-            for tick in range(ticks):
+        for _ in range(ticks):
+            if self.ppu.dma_block > 0 and self.ppu.dma_src_addrs is not None:
                 addrs = self.ppu.dma_src_addrs + (160 - self.ppu.dma_block)
                 data = self.mmu.read(addrs, True)
                 self.ppu.oam.write(0xFE00 + (160 - self.ppu.dma_block), data)
                 self.ppu.dma_block -= 1
-        elif self.ppu.dma_src_addrs is not None:
-            self.ppu.dma_src_addrs = None
+            elif self.ppu.dma_src_addrs is not None:
+                self.ppu.dma_src_addrs = None
 
     def tick(self, ticks):
         self.save_last_state()
-        self.dma_handler(ticks)
-        self.ppu.tick(ticks)
         self.internal_counter = (self.internal_counter + ticks) & 0xFFFF
+
         self.update_tima()
+        self.ppu.tick(ticks)
+        # self.dma_handler(ticks)
+
         if self.reload_state > 0:
-            for _ in range(ticks):
-                self.reload_state -= 1
-                if self.reload_state == 0:
-                    self.counters[1] = self.counters[2]
-                    break
+            self.reload_state -= ticks
+            if self.reload_state <= 0:
+                self.counters[1] = self.counters[2]
+                self.reload_state = 0
+                self.interrupter.request_interrupt(2)
 
     def write(self, addrs, value):
         offset = addrs - self.offset_const

@@ -11,42 +11,70 @@ class MMU:
         self.hram = hram
         self.ppu = ppu
         self.interrupt_controller = interrupt_controller
+        self.file = open("mmu_debug.txt", "w")
+        self.debug_buffer = bytearray(0x10000)
+
+    def flush(self):
+        self.file.writelines(self.debug_buffer)
+
+    def debug(self, action, addrs, value):
+        if action == "read":
+            self.debug_buffer.append(f"""
+--------------------------------------------------------------------------------
+action: {action}
+addrs: {addrs:04x}
+return: {value:02x}
+""")
+        else:
+            self.debug_buffer.append(f"""
+--------------------------------------------------------------------------------
+action: {action}
+addrs: {addrs:04x}
+value: {value:02x}
+""")
 
     def read(self, addrs, dma_mode=False):
         if self.ppu.dma_block > 0 and not dma_mode:
             if 0xFF80 <= addrs < 0xFFFF:
-                return self.hram.read(addrs)
-            return 0xFF
+                value = self.hram.read(addrs)
+                return value
+            value = 0xFF
+            return value
 
         if 0x0000 <= addrs < 0x8000 or 0xA000 <= addrs < 0xC000:
-            return self.mbc.handle_read(addrs)
+            value = self.mbc.handle_read(addrs)
 
         elif 0xC000 <= addrs < 0xFE00:
-            return self.ram.read(addrs)
+            value = self.ram.read(addrs)
         
         elif 0xFF40 <= addrs < 0xFF4C:
-            return self.ppu.read(addrs)
+            value = self.ppu.read(addrs)
         elif 0xFE00 <= addrs < 0xFEA0:
-            return self.ppu.read_oam(addrs)
+            value = self.ppu.read_oam(addrs)
         elif 0x8000 <= addrs < 0xA000:
-            return self.ppu.read_vram(addrs)
+            value = self.ppu.read_vram(addrs)
         
         elif 0xFF04 <= addrs < 0xFF08:
-            return self.timer.read(addrs)
+            value = self.timer.read(addrs)
         
         elif 0xFF80 <= addrs < 0xFFFF:
-            return self.hram.read(addrs)
+            value = self.hram.read(addrs)
         elif addrs == 0xFF00:
-            return self.joypad.read()
+            value = self.joypad.read()
         elif addrs == 0xFF0F:
-            return self.interrupt_controller.read_if()
+            value = self.interrupt_controller.read_if()
         elif addrs == 0xFFFF:
-            return self.interrupt_controller.read_ie()
-        
-        else:          
-            return 0xFF
+            value = self.interrupt_controller.read_ie()
+        else:
+            value = 0xFF
+            # print(f"leitura no endereço: {addrs:04x}")
+            value = self.debug_buffer[addrs]
+
+        # self.debug("read", addrs, value)
+        return value
 
     def write(self, addrs, value, dma_mode=False):
+        # self.debug("write", addrs, value)
         if self.ppu.dma_block > 0 and not dma_mode:
             if 0xFF80 <= addrs < 0xFFFF:
                 self.hram.write(addrs, value)
@@ -76,3 +104,8 @@ class MMU:
             self.interrupt_controller.write_if(value)
         elif addrs == 0xFFFF:
             self.interrupt_controller.write_ie(value)
+        else:
+            self.debug_buffer[addrs] = value
+            # print(f"escrita no endereço: {addrs:04x} valor: {value:02x}")
+            return
+            #print(f"escrita em endereço invalido: {addrs:04x} valor: {value:02x}")

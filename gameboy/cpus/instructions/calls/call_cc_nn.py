@@ -14,11 +14,9 @@ class CALL_CC_NN:
         return instructions
 
     def execute_call_cc_nn(self, condiction, ticks):
+        last_state = self.registers.copy()
         addrs = self.cpu.fetch_16bit()
         pc = self.registers["pc"]
-
-        high = (pc >> 8) & 0xFF
-        low = pc & 0xFF
 
         flags = self.registers["F"]
         if "Z" in condiction:
@@ -28,11 +26,11 @@ class CALL_CC_NN:
 
         condiction_met = value == 1 if "N" not in condiction else value == 0
         if condiction_met:
-            self.cpu.push8(high)
-            self.cpu.push8(low)
-
+            self.cpu.push16(pc)
             self.registers["pc"] = addrs
             self.cpu.timer.tick(ticks*2)
+            # self.cpu.debug(last_state, f"CALL condictional {condiction}")
             return ticks * 2
+        # self.cpu.debug(last_state, f"CALL condictional {condiction}")
         self.cpu.timer.tick(ticks)
         return ticks

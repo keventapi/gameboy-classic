@@ -25,12 +25,14 @@ class PPU:
         self.counter = 0
         self.lcdc_last_state = 1
 
-        self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
+        self.display_buffer = bytearray(160*144)
         self.start_render = False
         self.stat_line = False
         self.last_display_reset = True
 
         self.window_counter = 0
+
+        self.wb_count = 0
 
     def disable_display(self):
         mode = ~(1 << 7)
@@ -63,7 +65,7 @@ class PPU:
     def reset_ppu_state(self):
         self.registers[4] = 0x00
         self.set_mode(2)
-        self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
+        self.display_buffer[:] = b"\x00" * (160*144)
         self.counter = 0
         self.last_display_reset = True
 
@@ -85,7 +87,6 @@ class PPU:
 
     def increment_ly(self):
         old_ly = self.registers[4]
-
         self.registers[4] += 1
 
         if self.registers[4] > 153:
@@ -94,7 +95,7 @@ class PPU:
 
         self.handle_ly_lyc_collision()
 
-        if self.registers[4] >= 144:
+        if self.registers[4] == 144:
             self.set_mode(1)
 
         if self.registers[4] == 144 and old_ly == 143:
@@ -102,7 +103,8 @@ class PPU:
             self.start_render = True
 
     def handle_white_board(self):
-        self.display_buffer = [[0 for _ in range(160)] for _ in range(144)]
+        self.display_buffer[:] = b"\x00" * (160*144)
+        self.wb_count += 1
 
     def render_bg(self, render_state, tile_row, global_y, global_x):
         map_selector = (render_state >> 3) & 1
@@ -186,7 +188,7 @@ class PPU:
                 relative_x = (7 - relative_x)
                 sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
 
-            if (sprite[3] >> 4) & 1:
+            if ((sprite[3] >> 4) & 1):
                 obp1 = self.registers[9]
                 id = sprite_color_id * 2
                 sprite_color_id = (obp1 >> id) & 0x03
@@ -196,7 +198,7 @@ class PPU:
                 sprite_color_id = (obp0 >> id) & 0x03
 
             if sprite_color_id == 0:
-                return 0
+                return pixel_color_id
 
             priority = (sprite[3] >> 7) & 1
             if not priority:
@@ -245,7 +247,8 @@ class PPU:
         return pixel_id
 
     def handle_display_buffer(self, pixel_x, pixel_color):
-        self.display_buffer[self.registers[4]][pixel_x] = pixel_color
+        index = (self.registers[4] * 160) + pixel_x
+        self.display_buffer[index] = pixel_color
 
     def render_scanline(self):
         render_state = self.registers[0]
@@ -268,9 +271,8 @@ class PPU:
 
             bg_pixel_color = self.render_bg(render_state, tile_row, global_y, global_x)
             palette = self.registers[7]
-            bg_pixel_color = (palette >> (bg_pixel_color * 2)) & 0x03
-            if bg_pixel_color:
-                pixel_color = bg_pixel_color
+            id = bg_pixel_color * 2
+            pixel_color = (palette >> id) & 0x03
 
             trigger = self.registers[11] - 7
             if window_enabled and self.registers[4] >= self.registers[10] and pixel_x >= trigger:
@@ -278,8 +280,7 @@ class PPU:
                 palette = self.registers[7]
                 window_pixel_color = (palette >> (window_pixel_color * 2)) & 0x03
                 window_rendered = True
-                if window_pixel_color:
-                    pixel_color = window_pixel_color
+                pixel_color = window_pixel_color
 
             if sprite_enabled and len(sprite_buffer) > 0:
                 sprite_pixel = self.render_sprite(sprite_buffer, render_state, pixel_x, pixel_color)
@@ -316,28 +317,37 @@ class PPU:
     def tick(self, cycles):
         lcd_mode = (self.registers[0] >> 7) & 1
 
-        if not lcd_mode and not self.last_display_reset:
-            self.reset_ppu_state()
+        if not lcd_mode:
+            if not self.last_display_reset:
+                self.reset_ppu_state()
+            return
 
-        if lcd_mode:
-            self.last_display_reset = False
-            self.counter += cycles
+        self.last_display_reset = False
+        self.counter += cycles
 
-            if self.counter >= 456:
-                self.counter -= 456
-                self.increment_ly()
+        if self.counter >= 456:
+            self.counter -= 456
+            self.increment_ly()
 
-            if self.registers[4] < 144:
-                if self.counter < 80:
-                    self.set_mode(2)
-                elif self.counter < 252:
-                    self.set_mode(3)
-                else:
-                    if self.get_mode() != 0:
-                        self.render_scanline()
-                    self.set_mode(0)
+        if self.registers[4] < 144:
+            if self.counter < 80:
+                self.set_mode(2)
+            elif self.counter < 252:
+                if self.get_mode() != 3:
+                    self.render_scanline()
+                self.set_mode(3)
+            else:
+                self.set_mode(0)
 
-            self.update_stat_interrupt()
+        self.update_stat_interrupt()
+
+    def handle_insta_dma(self):
+        for i in range(160):
+            if self.dma_block is not None and self.dma_src_addrs is not None:
+                addrs = self.dma_src_addrs + (i)
+                data = self.mmu.read(addrs, True)
+                self.oam.write(0xFE00 + (i), data)
+                self.dma_block -= 1
 
     def write(self, addrs, value):
         offset = addrs - self.offset_constant
@@ -364,8 +374,9 @@ class PPU:
             self.registers[offset] = value
             self.handle_ly_lyc_collision()
         elif offset == 6:
-            self.dma_block = 164
+            self.dma_block = 0
             self.dma_src_addrs = value << 8
+            self.handle_insta_dma()
         else:
             self.registers[offset] = value
 

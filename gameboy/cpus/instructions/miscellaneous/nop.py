@@ -10,4 +10,4 @@ class NOP:
 
     def execute_nop(self, ticks):
         self.cpu.timer.tick(ticks)
-        return ticks
+        return 4

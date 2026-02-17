@@ -16,12 +16,12 @@ class ADD_SP_N:
         if signed_offset > 0x7F:
             signed_offset -= 0x100
 
-        src = self.registers["SP"]
+        src = self.registers["sp"]
         Z = 0
         N = 0
         H = 1 if (src & 0xF) + (imediate & 0xF) > 0xF else 0
         C = 1 if (src & 0xFF) + imediate > 0xFF else 0
         self.cpu.set_flags(Z, N, H, C)
-        self.registers["SP"] = (src + signed_offset) & 0xFFFF
+        self.registers["sp"] = (src + signed_offset) & 0xFFFF
         self.cpu.timer.tick(ticks)
         return ticks

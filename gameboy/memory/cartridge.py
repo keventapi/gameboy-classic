@@ -6,7 +6,7 @@ class CARTRIDGE:
     def __init__(self, rom_bytes):
         self.rom = SWITCHABLE_ROM(rom_bytes)
         header_byte = rom_bytes[0x0147]
-        print("header_byte:", header_byte)
+        print("header_byte:", f"{header_byte:02x}")
 
         self.ram = self.create_ram(rom_bytes)
         self.mbc_version = self.get_mbc(header_byte)
@@ -27,23 +27,19 @@ class CARTRIDGE:
 
     def create_ram(self, rom_bytes):
         ram_size_code = rom_bytes[0x0149]
-        # Mapa oficial do Game Boy
         size_map = {
             0x00: 0,
-            0x01: 2048,    # 2 KB (raro, mas existe)
-            0x02: 8192,    # 8 KB (1 banco)
-            0x03: 32768,   # 32 KB (4 bancos)
-            0x04: 131072,  # 128 KB (16 bancos)
-            0x05: 65536,   # 64 KB (8 bancos)
+            0x02: 0x2000,   # 8 KiB (1 banco)
+            0x03: 0x8000,   # 32 KiB (4 bancos)
+            0x04: 0x20000,  # 128 KiB (16 bancos)
+            0x05: 0x10000,  # 64 KiB (8 bancos)
         }
-        
         total_size = size_map.get(ram_size_code, 0)
-        if total_size == 0:
-            return None # Mas trate isso no MBC para não dar crash!
-        
-        # Crie bytes zerados para a RAM
-        ram_bytes = total_size
-        return SWITCHABLE_RAM(ram_bytes, 0x2000) # Reutilizando sua lógica de fatiar bancos
+        if total_size == 0: return None
+
+        num_banks = total_size // 0x2000
+
+        return SWITCHABLE_RAM(total_banks=num_banks, size=0x2000)
 
     def read(self, addrs):
         return self.mbc.handle_read(addrs)

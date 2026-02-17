@@ -14,10 +14,10 @@ class INC_NN:
 
     def execute_inc_nn(self, r16, ticks):
         if r16 == "SP":
-            self.registers["SP"] = (self.registers["SP"] + 1) & 0xFFFF
+            self.registers["sp"] = (self.registers["sp"] + 1) & 0xFFFF
         else:
             operand = (self.registers[r16[0]] << 8) | self.registers[r16[1]]
-            operand += 1
+            operand = (operand + 1) & 0xFFFF
             self.registers[r16[0]] = (operand >> 8) & 0xFF
             self.registers[r16[1]] = operand & 0xFF
         self.cpu.timer.tick(ticks)

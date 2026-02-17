@@ -20,12 +20,7 @@ class RST_N:
     def execute_rst_n(self, n, ticks):
         pc = self.registers["pc"]
 
-        high = (pc >> 8) & 0xFF
-        low = pc & 0xFF
-
-        self.cpu.push8(high)
-        self.cpu.push8(low)
-
+        self.cpu.push16(pc)
         self.registers["pc"] = n & 0xFFFF
         self.cpu.timer.tick(ticks)
         return ticks

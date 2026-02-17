@@ -1,6 +1,6 @@
 class RAM:
     def __init__(self, size=0x2000):
-        self.memory = [0] * size
+        self.memory = bytearray(size)
 
     def write(self, addrs, value):
         offset = addrs & 0x1FFF
@@ -12,7 +12,7 @@ class RAM:
 
 class HRAM:
     def __init__(self, size=0x7F):
-        self.memory = [0] * size
+        self.memory = bytearray(size)
 
     def write(self, addrs, value):
         if 0xFF80 <= addrs < 0xFFFF:

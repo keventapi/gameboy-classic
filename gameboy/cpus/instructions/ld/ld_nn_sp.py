@@ -17,7 +17,7 @@ class LD_NN_SP:
 
         nn = ((high_byte_addr << 8) | low_byte_addr) & 0xFFFF
 
-        sp_value = self.registers["SP"]
+        sp_value = self.registers["sp"]
 
         low_sp = sp_value & 0xFF
         high_sp = (sp_value >> 8) & 0xFF

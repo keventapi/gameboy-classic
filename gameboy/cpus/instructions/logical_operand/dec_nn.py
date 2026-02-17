@@ -14,7 +14,7 @@ class DEC_NN:
 
     def execute_dec_nn(self, r16, ticks):
         if r16 == "SP":
-            self.registers[r16] = (self.registers[r16] - 1) & 0xFFFF
+            self.registers["sp"] = (self.registers["sp"] - 1) & 0xFFFF
         else:
             operand = (self.registers[r16[0]] << 8) | self.registers[r16[1]]
             operand = (operand - 1) & 0xFFFF

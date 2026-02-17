@@ -18,7 +18,7 @@ class LD_HL_SP_N:
         if n >= 0x80:
             n -= 0x100
 
-        sp = self.registers["SP"]
+        sp = self.registers["sp"]
         addrs = (sp + n) & 0xFFFF
 
         self.registers["H"] = (addrs >> 8) & 0xFF

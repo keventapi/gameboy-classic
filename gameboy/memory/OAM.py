@@ -1,6 +1,6 @@
 class OAM:
     def __init__(self):
-        self.memory = [0] * 0xA0
+        self.memory = bytearray(0xA0)
 
     def write(self, addrs, value):
         if 0xFE00 <= addrs < 0xFEA0:

@@ -14,22 +14,26 @@ class JR_CC_N:
         return instructions
 
     def execute_jr_cc_n(self, condiction, ticks):
+        last_state = self.registers.copy()
+
         flag = self.registers["F"]
         addrs = self.cpu.fetch()
+        #print("entrou no jr")
         if "Z" in condiction:
             value = (flag >> 7) & 1
         else:
             value = (flag >> 4) & 1
 
         condiction_met = value == 1 if "N" not in condiction else value == 0
-
         if condiction_met:
+            
             n = addrs
             if n >= 0x80:
                 n -= 0x100
-            self.registers["pc"] += n
+            self.registers["pc"] = (self.registers["pc"] + n) & 0xFFFF
             self.cpu.timer.tick(ticks+4)
+            # self.cpu.debug(last_state, f"jp {condiction} condictional")
             return ticks + 4
-
+        # self.cpu.debug(last_state, f"jp {condiction} condictional")
         self.cpu.timer.tick(ticks)
         return ticks

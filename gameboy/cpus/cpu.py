@@ -35,14 +35,22 @@ class CPU:
         self.limit = 0xFFFE
         self.assert_instructions()
         self.handle_builder()
-        self.last_opcode = None
+        self.last_opcode = "NOP"
         self.opcode = None
+
+        self.file = open("debug.txt", "w")
+
+        self.debug_buffer = []
+
 
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
 
     def not_implemented(self, obj):
+        self.file.writelines(self.debug_buffer)
+        self.mmu.flush()
         print(f"opcode: {obj.current_opcode:02x}")
+        exit()
 
     def handle_builder(self):
         for i in range(256):
@@ -54,7 +62,7 @@ class CPU:
         self.registers["F"] &= 0xF0
 
     def fetch_16bit(self):
-        return self.fetch() | (self.fetch() << 8)
+        return(self.fetch() | (self.fetch() << 8)) & 0xFFFF
 
     def check_instruction_interrupt(self):
         if self.di_pending:
@@ -63,32 +71,6 @@ class CPU:
         if self.ei_pending:
             self.ime = True
             self.ei_pending = False
-
-    def debug(self, opcode, last_state):
-        print("-"*64)
-        print(f"""opcode: {opcode:02x}
-        A:
-        before: 0x{last_state["A"]:02x}
-        after 0x{self.registers["A"]:02x}
-        B:
-        before: 0x{last_state["B"]:02x}
-        after 0x{self.registers["B"]:02x}"
-        C:
-        before: 0x{last_state["C"]:02x}
-        after 0x{self.registers["C"]:02x}"
-        D:
-        before: 0x{last_state["D"]:02x}
-        after 0x{self.registers["D"]:02x}"
-        E:
-        before: 0x{last_state["E"]:02x}
-        after 0x{self.registers["E"]:02x}"
-        F:
-        before: {last_state["F"]:08b}
-        after {self.registers["F"]:08b}"
-        sp:
-        before: {last_state["sp"]}
-        after {self.registers["sp"]}""")
-        print(self.last_opcode, self.opcode)
 
     def reset_if(self, b):
         value = self.mmu.read(0xFF0F)
@@ -106,14 +88,12 @@ class CPU:
         if b != -1:
             self.ime = False
             addrs = 0x0040 + (b * 8)
-            high = (self.registers["pc"] >> 8) & 0xFF
-            low = self.registers["pc"] & 0xFF
-            self.push8(high)
-            self.push8(low)
+            self.push16(self.registers["pc"])
             self.registers["pc"] = addrs
             self.reset_if(b)
             self.timer.tick(20)
             return 20
+        self.timer.tick(4)
         return 4
 
     def ceck_if_ie(self):
@@ -121,9 +101,33 @@ class CPU:
         value_ie = self.mmu.read(0xFFFF) & 0x1F
         return (value_if & value_ie & 0x1F) != 0
 
+    def debug(self, last_state, opcode):
+        self.debug_buffer.append(f"""
+---------------------------------------------------------------------------------------------------------------------------------
+OPCODE: last: {self.last_opcode} current: {opcode}
+Ra: last:{last_state["A"]:02x} current: {self.registers["A"]:02x}
+Rb: last:{last_state["B"]:02x} current: {self.registers["B"]:02x}
+Rc: last:{last_state["C"]:02x} current: {self.registers["C"]:02x}
+Rd: last:{last_state["D"]:02x} current: {self.registers["D"]:02x}
+Re: last:{last_state["E"]:02x} current: {self.registers["E"]:02x}
+Rh: last:{last_state["H"]:02x} current: {self.registers["H"]:02x}
+Rl: last:{last_state["L"]:02x} current: {self.registers["L"]:02x}
+Rf: last:{last_state["F"]:08b} current: {self.registers["F"]:08b}
+Rsp: last:{last_state["sp"]:04x} current: {self.registers["sp"]:04x}
+Rpc: last:{last_state["pc"]:04x} current: {self.registers["pc"]:04x}
+---------------------------------------------------------------------------------------------------------------------------------
+
+""")
+        self.last_opcode = opcode
+
     def step(self):
+        if len(self.registers) > 10:
+            print(f"registrador novo ta sendo criado em algum local, last opcode: {self.last_opcode:02x} \n {self.registers}")
+        last_state = self.registers.copy()
+
         if self.ceck_if_ie():
-            self.is_halted = False
+            if self.is_halted:
+                self.is_halted = False
             if self.ime:
                 return self.call_isr()
 
@@ -132,7 +136,7 @@ class CPU:
             self.opcode = opcode
             self.current_opcode = opcode
             callback = self.decode(opcode)
-            if any([self.ei_pending, self.di_pending]):
+            if self.ei_pending or self.di_pending:
                 ticks = callback(self)
                 self.check_instruction_interrupt()
             else:
@@ -140,7 +144,7 @@ class CPU:
         else:
             self.timer.tick(4)
             ticks = 4
-
+        # self.debug(last_state, opcode)
         self.last_opcode = self.opcode
         return ticks
 
@@ -149,11 +153,22 @@ class CPU:
         self.registers["sp"] &= 0xFFFF
         self.mmu.write(self.registers["sp"], value & 0xFF)
 
+    def push16(self, value):
+        high = (value >> 8) & 0xFF
+        self.push8(high)
+        low = value & 0xFF
+        self.push8(low)
+
     def pull8(self):
         value = self.mmu.read(self.registers["sp"]) & 0xFF
         self.registers["sp"] += 1
         self.registers["sp"] &= 0xFFFF
         return value
+
+    def pull16(self):
+        low = self.pull8()
+        high = self.pull8()
+        return ((high << 8) | low) & 0xFFFF
 
     def fetch(self):
         pc = self.registers["pc"]

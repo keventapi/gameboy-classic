@@ -12,6 +12,6 @@ class LD_SP_HL:
 
     def execute_ld_sp_hl(self, ticks):
         hl = (self.registers["H"] << 8) | self.registers["L"]
-        self.registers["SP"] = hl
+        self.registers["sp"] = hl
         self.cpu.timer.tick(ticks)
         return ticks

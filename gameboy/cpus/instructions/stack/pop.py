@@ -17,10 +17,12 @@ class POP:
     def execute_pop(self, r16, ticks):
         high = r16[0]
         low = r16[1]
+        val_low = self.pull8()
+        val_high = self.pull8()
         if low == "F":
-            self.registers[low] = self.pull8() & 0xF0
+            self.registers[low] = val_low & 0xF0
         else:
-            self.registers[low] = self.pull8()
-        self.registers[high] = self.pull8()
+            self.registers[low] = val_low
+        self.registers[high] = val_high
         self.cpu.timer.tick(ticks)
         return ticks

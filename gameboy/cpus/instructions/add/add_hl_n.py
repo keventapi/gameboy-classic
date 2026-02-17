@@ -15,7 +15,7 @@ class ADD_HL_N:
 
     def execute_add_hl_n(self, r16, ticks):
         if r16 == "SP":
-            operand = self.registers["SP"]
+            operand = self.registers["sp"]
         else:
             operand = (self.registers[r16[0]] << 8) | self.registers[r16[1]]
         src = ((self.registers["H"] << 8) | self.registers["L"])

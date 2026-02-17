@@ -17,7 +17,7 @@ class LD_N_NN:
     def execute_ld_n_nn(self, r16, ticks):
         nn = self.cpu.fetch_16bit()
         if r16 == "SP":
-            self.registers[r16] = nn & 0xFFFF
+            self.registers["sp"] = nn & 0xFFFF
         else:
             self.registers[r16[0]] = (nn >> 8) & 0xFF
             self.registers[r16[1]] = nn & 0xFF

@@ -1,6 +1,7 @@
 STOP instruction in gameboy/cpu/instructions/miscellaneous --> display to be implemented yet
 
-
+pygame-ce
+numpy
 
 referencias:
 https://gekkio.fi/files/gb-docs/gbctr.pdf

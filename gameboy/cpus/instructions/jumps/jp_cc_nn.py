@@ -14,6 +14,8 @@ class JP_CC_NN:
         return instructions
 
     def execute_jp_cc_nn(self, condiction, ticks):
+        last_state = self.registers.copy()
+
         addrs = self.cpu.fetch_16bit()
         flags = self.registers["F"]
         if "Z" in condiction:
@@ -25,7 +27,8 @@ class JP_CC_NN:
         if condiction_met:
             self.registers["pc"] = addrs & 0xFFFF
             self.cpu.timer.tick(ticks+4)
+            # self.cpu.debug(last_state, f"jp condictional {condiction}")
             return ticks + 4
-
+        # self.cpu.debug(last_state, f"jp condictional {condiction}")
         self.cpu.timer.tick(ticks)
         return ticks

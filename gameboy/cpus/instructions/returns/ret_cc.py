@@ -14,6 +14,7 @@ class RET_CC:
         return instructions
 
     def execute_ret_cc(self, condiction, ticks):
+        last_state = self.registers.copy()
         flag = self.registers["F"]
         if "Z" in condiction:
             value = (flag >> 7) & 1
@@ -22,11 +23,11 @@ class RET_CC:
 
         condiction_met = value == 1 if "N" not in condiction else value == 0
         if condiction_met:
-            low = self.cpu.pull8()
-            high = self.cpu.pull8()
-            new_pc = (high << 8) | low
+            new_pc = self.cpu.pull16()
             self.registers["pc"] = new_pc & 0xFFFF
             self.cpu.timer.tick(ticks+12)
+            # self.cpu.debug(last_state, f"ret condictional {condiction}")
             return ticks + 12
+        # self.cpu.debug(last_state, f"ret condictional {condiction}")
         self.cpu.timer.tick(ticks)
         return ticks

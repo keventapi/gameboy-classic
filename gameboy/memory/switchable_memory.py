@@ -1,6 +1,6 @@
 class SWITCHABLE_RAM:
     def __init__(self, total_banks=4, size=0x2000):
-        self.banks = [[0]*size for _ in range(total_banks)]
+        self.banks = [bytearray(size) for _ in range(total_banks)]
         self.current_bank = 0
         self.bank_size = size
 
@@ -25,16 +25,17 @@ class SWITCHABLE_RAM:
         if 0 <= new_bank < len(self.banks):
             self.current_bank = new_bank
         else:
-            self.current_bank = new_bank % len(self.banks)
-
+            try:
+                self.current_bank = new_bank % len(self.banks)
+            except:
+                self.current_bank = 0
 
 class SWITCHABLE_ROM:
     def __init__(self, rom_bytes, size=0x4000):
-        self.banks = [rom_bytes[i:i+size] for i in range(0,
-                                                         len(rom_bytes), size)]
+        self.banks = [bytes(rom_bytes[i:i+size]) for i in range(0, len(rom_bytes), size)]
         print("number of banks:", len(self.banks))
         self.current_bank = 1
-        self.mode_1_bank = 0
+        self.bank_zero = 0
         self.bank_size = size
         self.update_banks()
 
@@ -44,15 +45,12 @@ class SWITCHABLE_ROM:
                 self.banks[i] += bytes([0xFF] * (self.bank_size - len(bank)))
 
     def switch_bank(self, new_bank):
-        if 0 <= new_bank < len(self.banks):
-            self.current_bank = new_bank
-        else:
-            self.current_bank = new_bank % len(self.banks)
+        self.current_bank = new_bank % self.num_banks
 
-    def read(self, addrs, mode, bank_zero=0):
+    def read(self, addrs, mode):
         if 0x0000 <= addrs < 0x4000:
             if mode == 1:
-                return self.banks[bank_zero % len(self.banks)][addrs]
+                return self.banks[self.bank_zero % len(self.banks)][addrs]
             else:
                 return self.banks[0][addrs]
 

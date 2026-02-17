@@ -1,7 +1,6 @@
 class ADD_A_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.pull8 = self.cpu.pull8
         self.fetch = self.cpu.fetch
         self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
