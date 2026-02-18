@@ -188,27 +188,40 @@ class PPU:
                 relative_x = (7 - relative_x)
                 sprite_color_id = ((sprite_high_byte >> relative_x) & 1) << 1 | (sprite_low_byte >> relative_x) & 1
 
-            if ((sprite[3] >> 4) & 1):
-                obp1 = self.registers[9]
-                id = sprite_color_id * 2
-                sprite_color_id = (obp1 >> id) & 0x03
-            else:
-                obp0 = self.registers[8]
-                id = sprite_color_id * 2
-                sprite_color_id = (obp0 >> id) & 0x03
+            sprite_config = sprite[3]
 
-            if sprite_color_id == 0:
-                return pixel_color_id
+            return sprite_color_id, sprite_config
+        return 0, None
 
-            priority = (sprite[3] >> 7) & 1
-            if not priority:
-                real_pixel = sprite_color_id
-            else:
-                real_pixel = sprite_color_id if pixel_color_id == 0 else pixel_color_id
-            pixel_id = real_pixel
+    def handle_priority(self, bg_pixel, bg_pallet, w_pixel, w_rendered, sprite_pixel, sprite_config):
+        bg_w_pixel = bg_pixel
+        id = bg_pixel * 2
+        non_sprite_pixel = (bg_pallet >> id) & 0x03
 
-            return pixel_id
-        return 0
+        if w_rendered:
+            bg_w_pixel = w_pixel
+            id = w_pixel * 2
+            non_sprite_pixel = (bg_pallet >> id) & 0x03
+
+        if sprite_pixel is None or sprite_config is None or sprite_pixel == 0:
+            return non_sprite_pixel
+
+        if ((sprite_config >> 4) & 1):
+            obp1 = self.registers[9]
+            id = sprite_pixel * 2
+            s_color = (obp1 >> id) & 0x03
+        else:
+            obp0 = self.registers[8]
+            id = sprite_pixel * 2
+            s_color = (obp0 >> id) & 0x03
+
+        priority = (sprite_config >> 7) & 1
+        if not priority:
+            real_pixel = s_color
+        else:
+            real_pixel = s_color if bg_w_pixel == 0 else non_sprite_pixel
+
+        return real_pixel
 
     def handle_8x16_sprite(self, pixel_x, sprite, pixel_color_id):
         ly_relative = self.registers[4] - (sprite[0] - 16)
@@ -235,16 +248,16 @@ class PPU:
         obj_type = (render_state >> 2) & 1
         for sprite in sprite_buffer:
             if not obj_type:
-                sprite_pixel_id = self.handle_8x8_sprite(pixel_x, sprite, pixel_color_id)
-                if sprite_pixel_id != 0:
+                sprite_pixel_id, sprite_config = self.handle_8x8_sprite(pixel_x, sprite, pixel_color_id)
+                if sprite_pixel_id != 0 and sprite_config is not None:
                     pixel_id = sprite_pixel_id
-                    return sprite_pixel_id
+                    return sprite_pixel_id, sprite_config
             else:
-                sprite_pixel_id = self.handle_8x16_sprite(pixel_x, sprite, pixel_color_id)
-                if sprite_pixel_id != 0:
-                    return sprite_pixel_id
+                sprite_pixel_id, sprite_config = self.handle_8x16_sprite(pixel_x, sprite, pixel_color_id)
+                if sprite_pixel_id != 0 and sprite_config is not None:
+                    return sprite_pixel_id, sprite_config
 
-        return pixel_id
+        return pixel_id, None
 
     def handle_display_buffer(self, pixel_x, pixel_color):
         index = (self.registers[4] * 160) + pixel_x
@@ -264,30 +277,26 @@ class PPU:
         sprite_buffer.sort(key=lambda s: (s[1], s[4]))
 
         window_rendered = False
+        w_pixel_color = 0
 
+        bg_pallet = self.registers[7]
+
+        sprite_pixel_color, sprite_config = None, None
         for pixel_x in range(160):
             global_x = (pixel_x + self.registers[3]) & 0xFF
             pixel_color = 0
 
             bg_pixel_color = self.render_bg(render_state, tile_row, global_y, global_x)
-            palette = self.registers[7]
-            id = bg_pixel_color * 2
-            pixel_color = (palette >> id) & 0x03
 
             trigger = self.registers[11] - 7
             if window_enabled and self.registers[4] >= self.registers[10] and pixel_x >= trigger:
-                window_pixel_color = self.render_window(render_state, pixel_x)
-                palette = self.registers[7]
-                window_pixel_color = (palette >> (window_pixel_color * 2)) & 0x03
+                w_pixel_color = self.render_window(render_state, pixel_x)
                 window_rendered = True
-                pixel_color = window_pixel_color
 
             if sprite_enabled and len(sprite_buffer) > 0:
-                sprite_pixel = self.render_sprite(sprite_buffer, render_state, pixel_x, pixel_color)
-                if sprite_pixel:
-                    pixel_color = sprite_pixel
-                if sprite_pixel is None:
-                    continue
+                sprite_pixel_color, sprite_config = self.render_sprite(sprite_buffer, render_state, pixel_x, pixel_color)
+
+            pixel_color = self.handle_priority(bg_pixel_color, bg_pallet, w_pixel_color, window_rendered, sprite_pixel_color, sprite_config)
             self.handle_display_buffer(pixel_x, pixel_color)
 
         if window_rendered:

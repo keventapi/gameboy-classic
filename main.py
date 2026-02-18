@@ -26,10 +26,10 @@ class PROCESS:
         self.scaled_size = (self.largura * self.escala, self.altura * self.escala)
 
         self.np_paleta = np.array([
-            [155, 188, 15],
-            [139, 172, 15],
-            [48, 98, 48],
-            [15, 56, 15]
+            [255, 255, 255],
+            [170, 170, 170],
+            [85, 85, 85],
+            [0, 0, 0]
         ], dtype=np.uint8)
 
         self.controller_map = {
