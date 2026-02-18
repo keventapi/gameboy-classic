@@ -57,19 +57,24 @@ class TIMER:
                 self.ppu.dma_src_addrs = None
 
     def tick(self, ticks):
-        self.save_last_state()
-        self.internal_counter = (self.internal_counter + ticks) & 0xFFFF
+        for _ in range(ticks):
+            self.last_value = self.internal_counter
+            self.internal_counter = (self.internal_counter + 1) & 0xFFFF
 
-        self.update_tima()
+            if self.check_tima_increment():
+                self.counters[1] += 1
+                if self.counters[1] > 0xFF:
+                    self.counters[1] = 0
+                    self.interrupter.request_interrupt(2)
+                    self.reload_state = 4
+
+            if self.reload_state > 0:
+                self.reload_state -= 1
+                if self.reload_state == 0:
+                    self.counters[1] = self.counters[2]
+
+        #  self.dma_handler(ticks)
         self.ppu.tick(ticks)
-        # self.dma_handler(ticks)
-
-        if self.reload_state > 0:
-            self.reload_state -= ticks
-            if self.reload_state <= 0:
-                self.counters[1] = self.counters[2]
-                self.reload_state = 0
-                self.interrupter.request_interrupt(2)
 
     def write(self, addrs, value):
         offset = addrs - self.offset_const

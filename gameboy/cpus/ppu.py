@@ -343,11 +343,9 @@ class PPU:
 
     def handle_insta_dma(self):
         for i in range(160):
-            if self.dma_block is not None and self.dma_src_addrs is not None:
-                addrs = self.dma_src_addrs + (i)
-                data = self.mmu.read(addrs, True)
-                self.oam.write(0xFE00 + (i), data)
-                self.dma_block -= 1
+            addrs = self.dma_src_addrs + (i)
+            data = self.mmu.read(addrs, True)
+            self.oam.write(0xFE00 + (i), data)
 
     def write(self, addrs, value):
         offset = addrs - self.offset_constant

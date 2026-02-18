@@ -12,7 +12,7 @@ class MMU:
         self.ppu = ppu
         self.interrupt_controller = interrupt_controller
         self.file = open("mmu_debug.txt", "w")
-        self.debug_buffer = bytearray(0x10000)
+        self.debug_buffer = bytearray(0xFFFF)
 
     def flush(self):
         self.file.writelines(self.debug_buffer)
@@ -67,8 +67,6 @@ value: {value:02x}
             value = self.interrupt_controller.read_ie()
         else:
             value = 0xFF
-            # print(f"leitura no endereço: {addrs:04x}")
-            value = self.debug_buffer[addrs]
 
         # self.debug("read", addrs, value)
         return value
@@ -105,7 +103,5 @@ value: {value:02x}
         elif addrs == 0xFFFF:
             self.interrupt_controller.write_ie(value)
         else:
-            self.debug_buffer[addrs] = value
-            # print(f"escrita no endereço: {addrs:04x} valor: {value:02x}")
             return
             #print(f"escrita em endereço invalido: {addrs:04x} valor: {value:02x}")

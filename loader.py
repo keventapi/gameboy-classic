@@ -1,27 +1,26 @@
 import os
-
-
-def get_games():
-    pasta = "games"
-    arquivos = []
-    nomes = []
-    for nome_arquivo in os.listdir(pasta):
-        caminho_completo = os.path.join(pasta, nome_arquivo)
-        if os.path.isfile(caminho_completo):
-            arquivos.append(caminho_completo)
-            nomes.append(nome_arquivo)
-    return arquivos, nomes
+import tkinter as tk
+from tkinter import filedialog
 
 
 def choose_game():
-    try:
-        arquivos, nomes = get_games()
-        for i, nome in enumerate(nomes):
-            print(i+1, ":", nome)
+    root = tk.Tk()
+    root.withdraw()
 
-        escolha = int(input("digite o indice do jogo que quer jogar: "))
-        return arquivos[escolha-1]
+    initial_dir = os.path.join(os.getcwd(), ".")
+    if not os.path.exists(initial_dir):
+        os.makedirs(initial_dir)
 
-    except Exception:
-        print("crie uma pasta games e adicione as roms la")
+    arquivo_selecionado = filedialog.askopenfilename(
+        initialdir=initial_dir,
+        title="Selecione a ROM do Game Boy",
+        filetypes=[("Game Boy ROMs", "*.gb *.gbc"), ("Todos os arquivos", "*.*")]
+    )
+
+    root.destroy()
+
+    if arquivo_selecionado:
+        return arquivo_selecionado
+    else:
+        print("Nenhuma ROM selecionada. Encerrando o emulador.")
         exit()
