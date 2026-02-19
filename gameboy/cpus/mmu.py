@@ -13,6 +13,7 @@ class MMU:
         self.interrupt_controller = interrupt_controller
         self.file = open("mmu_debug.txt", "w")
         self.debug_buffer = bytearray(0xFFFF)
+        self.boot_rom_enabled = True
 
     def flush(self):
         self.file.writelines(self.debug_buffer)
@@ -34,6 +35,9 @@ value: {value:02x}
 """)
 
     def read(self, addrs, dma_mode=False):
+        if self.boot_rom_enabled and addrs < 0x100:
+            return self.boot_rom[addrs]
+
         if self.ppu.dma_block > 0 and not dma_mode:
             if 0xFF80 <= addrs < 0xFFFF:
                 value = self.hram.read(addrs)
@@ -72,6 +76,9 @@ value: {value:02x}
         return value
 
     def write(self, addrs, value, dma_mode=False):
+        if addrs == 0xFF50:
+            self.boot_rom_enabled = False
+
         # self.debug("write", addrs, value)
         if self.ppu.dma_block > 0 and not dma_mode:
             if 0xFF80 <= addrs < 0xFFFF:

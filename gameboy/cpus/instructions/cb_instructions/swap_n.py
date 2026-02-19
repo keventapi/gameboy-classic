@@ -18,11 +18,14 @@ class SWAP_N:
         return instructions
 
     def execute_swap_n(self, r, ticks):
+        self.cpu.timer.tick(4)
         if len(r) > 1:
             addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
             value = self.mmu.read(addrs)
+            self.cpu.timer.tick(4)
             result = ((value & 0xF) << 4) | (value >> 4) & 0xF
             self.mmu.write(addrs, result & 0xFF)
+            self.cpu.timer.tick(4)
         else:
             value = self.registers[r]
             result = ((value & 0xF) << 4) | ((value >> 4) & 0xF)
@@ -30,5 +33,5 @@ class SWAP_N:
 
         Z = 1 if (result & 0xFF) == 0 else 0
         self.cpu.set_flags(Z, 0, 0, 0)
-        self.cpu.timer.tick(ticks)
+        self.cpu.timer.tick(4)
         return ticks

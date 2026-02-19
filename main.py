@@ -26,11 +26,18 @@ class PROCESS:
         self.scaled_size = (self.largura * self.escala, self.altura * self.escala)
 
         self.np_paleta = np.array([
-            [255, 255, 255],
-            [170, 170, 170],
-            [85, 85, 85],
-            [0, 0, 0]
+            [155, 188, 15],
+            [139, 172, 15],
+            [48, 98, 48],
+            [15, 56, 15]
         ], dtype=np.uint8)
+
+        #self.np_paleta = np.array([
+        #    [15, 56, 15],
+        #    [48, 98, 48],
+        #    [139, 172, 15],
+        #    [155, 188, 15]
+        #], dtype=np.uint8)
 
         self.controller_map = {
             "up": [2, "dpad"],
@@ -43,6 +50,11 @@ class PROCESS:
             "r": [3, "action"]
         }
         self.start_gameboy()
+
+    def get_boot_rom(self):
+        with open("dmg_boot.bin", "rb") as boot:
+            content = boot.read()
+            return bytearray(content)
 
     def start_gameboy(self):
         self.rodando = True
@@ -58,6 +70,8 @@ class PROCESS:
         self.joypad = JOYPAD()
         self.hram = HRAM()
         self.mmu = MMU(self.ram, self.cartucho.mbc, self.timer, self.hram, self.joypad, self.interrupt_controller,self.ppu)
+        
+        self.mmu.boot_rom = self.get_boot_rom()
         self.timer.mmu = self.mmu
         self.ppu.mmu = self.mmu
         self.cpu = CPU(self.mmu, self.timer)
@@ -103,8 +117,7 @@ class PROCESS:
                 exit()
 
     def run(self):
-        event_counter = 0 
-
+        event_counter = 0
         while self.rodando:
             tick = self.cpu.step()
             event_counter += tick

@@ -84,14 +84,18 @@ class LD_R1_R2:
         if r2 == "HL":
             hl = (self.registers["H"] << 8) | self.registers["L"]
             self.registers[r1] = self.mmu.read(hl) & 0xFF
+            self.cpu.timer.tick(4)
         elif r1 == "HL" and r2 != "N":
             hl = (self.registers["H"] << 8) | self.registers["L"]
             self.mmu.write(hl, self.registers[r2])
+            self.cpu.timer.tick(4)
         elif r1 == "HL" and r2 == "N":
             hl = (self.registers["H"] << 8) | self.registers["L"]
             n = self.cpu.fetch()
+            self.cpu.timer.tick(4)
             self.mmu.write(hl, n)
+            self.cpu.timer.tick(4)
         else:
             self.registers[r1] = self.registers[r2] & 0xFF
-        self.cpu.timer.tick(ticks)
+        self.cpu.timer.tick(4)
         return ticks

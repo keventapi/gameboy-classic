@@ -14,10 +14,14 @@ class LD_A_FF00_N:
 
     def execute_ld_a_ff00_n(self, update_a, ticks):
         value = self.fetch()
+        self.cpu.timer.tick(4)
         target_addrs = value | 0xFF00
         if update_a:
             self.registers["A"] = self.mmu.read(target_addrs) & 0xFF
+            self.cpu.timer.tick(4)
         else:
             self.mmu.write(target_addrs, self.registers["A"])
-        self.cpu.timer.tick(ticks)
+            self.cpu.timer.tick(4)
+
+        self.cpu.timer.tick(4)
         return ticks

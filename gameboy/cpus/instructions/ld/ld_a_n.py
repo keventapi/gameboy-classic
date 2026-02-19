@@ -20,24 +20,31 @@ class LD_A_N:
     def ld_n_a(self, r1, r2, ticks):
         if r1 == "nn":
             immediate = self.cpu.fetch_16bit()
+            self.cpu.timer.tick(8)
             self.mmu.write(immediate, self.registers[r2])
+            self.cpu.timer.tick(4)
         else:
             high, low = r1[0], r1[1]
             immediate = (self.registers[high] << 8) | self.registers[low]
             self.mmu.write(immediate, self.registers[r2])
-        self.cpu.timer.tick(ticks)
+            self.cpu.timer.tick(4)
+        self.cpu.timer.tick(4)
         return ticks
 
     def ld_a_n(self, r1, r2, ticks):
         if r2 == "nn":
             immediate = self.cpu.fetch_16bit()
+            self.cpu.timer.tick(8)
             self.registers[r1] = self.mmu.read(immediate) & 0xFF
+            self.cpu.timer.tick(4)
         elif r2 == "#":
             immediate = self.fetch() & 0xFF
+            self.cpu.timer.tick(4)
             self.registers[r1] = immediate & 0xFF
         else:
             high, low = r2[0], r2[1]
             immediate = (self.registers[high] << 8) | self.registers[low]
             self.registers[r1] = self.mmu.read(immediate & 0xFFFF) & 0xFF
-        self.cpu.timer.tick(ticks)
+            self.cpu.timer.tick(4)
+        self.cpu.timer.tick(4)
         return ticks
