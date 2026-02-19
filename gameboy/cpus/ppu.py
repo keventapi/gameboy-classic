@@ -366,7 +366,7 @@ class PPU:
             elif lcd_status == 1 and self.lcdc_last_state == 0:
                 self.registers[4] = 0x00
                 self.set_mode(2)
-                self.counter = 0
+                self.counter = 4
             self.lcdc_last_state = (value >> 7) & 1
 
         elif offset == 4:
