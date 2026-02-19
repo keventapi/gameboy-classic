@@ -77,9 +77,12 @@ class BIT_B_R:
         flag = self.registers["F"]
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
+            self.cpu.timer.tick(4)
             value = self.mmu.read(addrs)
+            self.cpu.timer.tick(4)
         else:
             value = self.registers[r]
+            self.cpu.timer.tick(4)
 
         bitx = (value >> b) & 1
         Z = 1 if bitx == 0 else 0
@@ -89,5 +92,5 @@ class BIT_B_R:
 
         self.cpu.set_flags(Z, N, H, C)
 
-        self.cpu.timer.tick(ticks)
+        self.cpu.timer.tick(4)
         return ticks

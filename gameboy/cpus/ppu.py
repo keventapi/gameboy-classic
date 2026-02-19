@@ -15,9 +15,9 @@ class PPU:
             0x00,  # LY
             0x00,  # LYC
             0x00,  # DMA
-            0x00,  # BGP
-            0x00,  # OBP0
-            0x00,  # OBP1
+            0xFC,  # BGP
+            0xFF,  # OBP0
+            0xFF,  # OBP1
             0x00,  # WY
             0x00   # WX
         ]
@@ -269,7 +269,7 @@ class PPU:
         if not bg_n_window_enabled:
             return self.handle_white_board()
         window_enabled = (render_state >> 5) & 1
-        sprite_enabled = (render_state >> 1) & 1        
+        sprite_enabled = (render_state >> 1) & 1
         global_y = (self.registers[4] + self.registers[2]) & 0xFF
         tile_row = global_y // 8
         sprite_buffer = self.get_sprites()

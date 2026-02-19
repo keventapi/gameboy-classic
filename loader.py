@@ -23,4 +23,4 @@ def choose_game():
         return arquivo_selecionado
     else:
         print("Nenhuma ROM selecionada. Encerrando o emulador.")
-        exit()
+        return 0

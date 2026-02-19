@@ -26,7 +26,7 @@ class CPU:
             0b111: "A", 0b110: "HL"
         }
 
-        self.registers = {"pc": 0x100, "sp": 0xFFFE,
+        self.registers = {"pc": 0, "sp": 0xFFFE,
                           "A": 0, "F": 0,
                           "B": 0, "C": 0,
                           "D": 0, "E": 0,
@@ -62,7 +62,7 @@ class CPU:
         self.registers["F"] &= 0xF0
 
     def fetch_16bit(self):
-        return(self.fetch() | (self.fetch() << 8)) & 0xFFFF
+        return (self.fetch() | (self.fetch() << 8)) & 0xFFFF
 
     def check_instruction_interrupt(self):
         if self.di_pending:

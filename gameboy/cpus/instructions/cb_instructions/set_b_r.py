@@ -74,9 +74,11 @@ class SET_B_R:
         return instructions
 
     def execute_set_b_r(self, b, r, ticks):
+        self.cpu.timer.tick(4)
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
             value = self.mmu.read(addrs)
+            self.cpu.timer.tick(4)
         else:
             value = self.registers[r]
 
@@ -84,8 +86,9 @@ class SET_B_R:
         value &= 0xFF
         if r == "HL":
             self.mmu.write(addrs, value)
+            self.cpu.timer.tick(4)
         else:
             self.registers[r] = value
 
-        self.cpu.timer.tick(ticks)
+        self.cpu.timer.tick(4)
         return ticks

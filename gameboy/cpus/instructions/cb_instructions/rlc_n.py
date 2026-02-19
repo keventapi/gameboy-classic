@@ -18,9 +18,11 @@ class RLC_N:
         return instructions
 
     def execute_rlc_n(self, r, ticks):
+        self.cpu.timer.tick(4)
         if r == "HL":
             addrs = (self.registers["H"] << 8) | self.registers["L"]
             value = self.mmu.read(addrs)
+            self.cpu.timer.tick(4)
         else:
             value = self.registers[r]
 
@@ -34,9 +36,10 @@ class RLC_N:
 
         if r == "HL":
             self.mmu.write(addrs, value)
+            self.cpu.timer.tick(4)
         else:
             self.registers[r] = value
 
         self.cpu.set_flags(Z, N, H, C)
-        self.cpu.timer.tick(ticks)
+        self.cpu.timer.tick(4)
         return ticks

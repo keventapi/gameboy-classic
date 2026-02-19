@@ -21,7 +21,9 @@ class INC_N:
         if len(r) > 1:
             addrs = self.registers[r[0]] << 8 | self.registers[r[1]]
             value = self.mmu.read(addrs & 0xFFFF)
+            self.cpu.timer.tick(4)
             self.mmu.write(addrs, value+1 & 0xFF)
+            self.cpu.timer.tick(4)
         else:
             value = self.registers[r]
             self.registers[r] = (self.registers[r] + 1) & 0xFF
@@ -32,5 +34,5 @@ class INC_N:
         C = (self.registers["F"] >> 4) & 1
 
         self.cpu.set_flags(Z, N, H, C)
-        self.cpu.timer.tick(ticks)
+        self.cpu.timer.tick(4)
         return ticks
