@@ -406,12 +406,23 @@ class PPU:
             self.vram.write(addrs, value)
 
     def read_oam(self, addrs):
-        lcd_mode = (self.registers[0] >> 7) & 1
-        if self.get_mode() < 2 or not lcd_mode:
+        lcd_on = (self.registers[0] >> 7) & 1
+        if not lcd_on:
             return self.oam.read(addrs)
-        return 0xFF
+
+        mode = self.get_mode()
+        if mode >= 2:
+            return 0xFF
+
+        return self.oam.read(addrs)
 
     def write_oam(self, addrs, value):
-        lcd_mode = (self.registers[0] >> 7) & 1
-        if self.get_mode() < 2 or not lcd_mode:
+        lcd_on = (self.registers[0] >> 7) & 1
+        if not lcd_on:
             self.oam.write(addrs, value)
+
+        mode = self.get_mode()
+        if mode >= 2:
+            return
+
+        self.oam.write(addrs, value)

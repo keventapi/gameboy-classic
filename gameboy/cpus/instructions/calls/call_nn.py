@@ -11,13 +11,13 @@ class CALL_NN:
         return instructions
 
     def execute_call_nn(self, ticks):
-        last_state = self.registers.copy()
         addrs = self.cpu.fetch_16bit()
+        self.cpu.timer.tick(8)
         pc = self.registers["pc"]
 
         self.cpu.push16(pc)
+        self.cpu.timer.tick(8)
 
         self.registers["pc"] = addrs
-        self.cpu.timer.tick(ticks)
-        # self.cpu.debug(last_state, f"CALL non condictional")
+        self.cpu.timer.tick(8)
         return ticks
