@@ -4,7 +4,7 @@ from gameboy.IO.timer import TIMER
 from gameboy.IO.joypad import JOYPAD
 from gameboy.cpus.cpu import CPU
 from gameboy.cpus.interrupt_controller import INTERRUPT_CONTROLLER
-from gameboy.cpus.mmu import MMU
+from gameboy.memory.mmu import MMU
 from gameboy.memory.RAM import RAM, VRAM, HRAM
 from gameboy.cpus.ppu import PPU
 from gameboy.memory.OAM import OAM

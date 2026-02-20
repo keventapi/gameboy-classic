@@ -28,7 +28,7 @@ class HRAM:
 
 class VRAM:
     def __init__(self, size=0x2000):
-        self.memory = [0]*size
+        self.memory = bytearray(size)
 
     def write(self, addrs, value):
         if 0x8000 <= addrs < 0xA000:

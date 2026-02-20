@@ -6,4 +6,5 @@ class STOP:
     def execute_stop(self, ticks):
         self.cpu.is_halted = True
         self.cpu.timer.ppu.disable_display()
+        self.cpu.timer.tick(ticks)
         return ticks
