@@ -2,7 +2,7 @@ class POP:
     def __init__(self, cpu):
         self.cpu = cpu
         self.pull8 = self.cpu.pull8
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def pop_instructions(self):
@@ -20,9 +20,9 @@ class POP:
         val_low = self.pull8()
         val_high = self.pull8()
         if low == "F":
-            self.registers[low] = val_low & 0xF0
+            self.cpu.registers[low] = val_low & 0xF0
         else:
-            self.registers[low] = val_low
-        self.registers[high] = val_high
+            self.cpu.registers[low] = val_low
+        self.cpu.registers[high] = val_high
         self.cpu.timer.tick(ticks)
         return ticks

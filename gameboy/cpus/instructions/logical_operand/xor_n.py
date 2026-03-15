@@ -3,7 +3,7 @@ class XOR_N:
         self.cpu = cpu
         self.fetch = self.cpu.fetch
         self.mmu = self.cpu.mmu
-        self.registers = self.cpu.registers
+        
 
     def xor_n_instructions(self):
         instructions = {
@@ -20,19 +20,19 @@ class XOR_N:
         return instructions
 
     def execute_xor_n(self, r, ticks):
-        result = self.registers["A"]
+        result = self.cpu.registers["A"]
         if len(r) > 1:
-            addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
+            addrs = (self.cpu.registers[r[0]] << 8) | self.cpu.registers[r[1]]
             result ^= self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             imediate = self.fetch()
             result ^= imediate
         else:
-            result ^= self.registers[r]
+            result ^= self.cpu.registers[r]
 
         Z = 1 if (result & 0xFF) == 0 else 0
 
         self.cpu.set_flags(Z, 0, 0, 0)
-        self.registers["A"] = result & 0xFF
+        self.cpu.registers["A"] = result & 0xFF
         self.cpu.timer.tick(ticks)
         return ticks

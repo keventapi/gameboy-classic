@@ -1,7 +1,7 @@
 class SCF:  # Flags podem ser otimizadas para nn precisar tocar no Z
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
 
     def instructions_scf(self):
         instructions = {
@@ -10,7 +10,7 @@ class SCF:  # Flags podem ser otimizadas para nn precisar tocar no Z
         return instructions
 
     def execute_scf(self, ticks):
-        flag = self.registers["F"]
+        flag = self.cpu.registers["F"]
         Z = (flag >> 7) & 1
         N = 0
         H = 0

@@ -1,7 +1,7 @@
 class RST_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def rst_n_instructions(self):
@@ -18,9 +18,9 @@ class RST_N:
         return instructions
 
     def execute_rst_n(self, n, ticks):
-        pc = self.registers["pc"]
+        pc = self.cpu.registers["pc"]
 
         self.cpu.push16(pc)
-        self.registers["pc"] = n & 0xFFFF
+        self.cpu.registers["pc"] = n & 0xFFFF
         self.cpu.timer.tick(ticks)
         return ticks

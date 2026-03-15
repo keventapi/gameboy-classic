@@ -3,12 +3,14 @@ __pycache__/
 *.pyc
 *.pyo
 
+
 # ambientes virtuais
 venv/
 .env/
 
 # arquivos temporários de IDEs
 .vscode/
+.spyproject/
 .idea/
 *.swp
 *.swo
@@ -25,9 +27,13 @@ dist/
 # roms e saves
 *.gb
 *.sav
+*.bin
+*.txt
 
 # screenshots ou saídas da PPU
 output/
 
 # pasta de jogos
 games/
+games__/
+games--old/

@@ -2,7 +2,6 @@ class ADD_A_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
 
     def add_a_n_instructions(self):
@@ -24,19 +23,19 @@ class ADD_A_N:
             if r == "#":
                 n = self.fetch()
             else:
-                addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
+                addrs = (self.cpu.registers[r[0]] << 8) | self.cpu.registers[r[1]]
                 n = self.mmu.read(addrs & 0xFFFF)
         else:
-            n = self.registers[r]
+            n = self.cpu.registers[r]
 
-        sum = n + self.registers["A"]
+        sum = n + self.cpu.registers["A"]
 
         Z = 1 if sum & 0xFF == 0 else 0
         N = 0
-        H = 1 if ((self.registers["A"] & 0xF) + (n & 0xF)) > 0xF else 0
+        H = 1 if ((self.cpu.registers["A"] & 0xF) + (n & 0xF)) > 0xF else 0
         C = 1 if sum > 0xFF else 0
 
-        self.registers["A"] = sum & 0xFF
+        self.cpu.registers["A"] = sum & 0xFF
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
         return ticks

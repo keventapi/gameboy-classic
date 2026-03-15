@@ -2,7 +2,7 @@ class LD_NN_SP:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ld_nn_sp_instructions(self):
@@ -17,7 +17,7 @@ class LD_NN_SP:
 
         nn = ((high_byte_addr << 8) | low_byte_addr) & 0xFFFF
 
-        sp_value = self.registers["sp"]
+        sp_value = self.cpu.registers["sp"]
 
         low_sp = sp_value & 0xFF
         high_sp = (sp_value >> 8) & 0xFF

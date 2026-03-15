@@ -11,6 +11,7 @@ from gameboy.memory.OAM import OAM
 import pygame
 import numpy as np
 
+
 class PROCESS:
     def __init__(self):
         self.frame_count = 0
@@ -47,7 +48,9 @@ class PROCESS:
             "q": [0, "action"],
             "w": [1, "action"],
             "e": [2, "action"],
-            "r": [3, "action"]
+            "r": [3, "action"],
+            "s": [4, "state"],
+            "a": [5, "state"]
         }
         self.start_gameboy()
 
@@ -62,6 +65,11 @@ class PROCESS:
         self.rom_bytes = self.load_rom(self.game)
         self.ram = RAM()
         self.cartucho = CARTRIDGE(self.rom_bytes)
+
+        if self.cartucho.ram is not None:
+            if self.cartucho.ram.save_ram:
+                self.cartucho.ram.load_ram_from_disk("pokemon fire")
+
         self.interrupt_controller = INTERRUPT_CONTROLLER()
         self.vram = VRAM()
         self.oam = OAM()
@@ -70,13 +78,14 @@ class PROCESS:
         self.joypad = JOYPAD()
         self.hram = HRAM()
         self.mmu = MMU(self.ram, self.cartucho.mbc, self.timer, self.hram, self.joypad, self.interrupt_controller,self.ppu)
-        
+
         self.mmu.boot_rom = self.get_boot_rom()
         self.timer.mmu = self.mmu
         self.ppu.mmu = self.mmu
         self.cpu = CPU(self.mmu, self.timer)
         self.timer.interrupter = self.interrupt_controller
         self.joypad.interrupter = self.interrupt_controller
+
         self.run()
 
     def load_rom(self, file_name):
@@ -104,8 +113,9 @@ class PROCESS:
                 key = pygame.key.name(event.key)
                 call = self.controller_map.get(key)
                 if call is not None:
-                    self.joypad.handle_key_press(call[0], call[1])
-                    self.joypad.interrupter.request_interrupt(4)
+                    if call[1] != "state":
+                        self.joypad.handle_key_press(call[0], call[1])
+                        self.joypad.interrupter.request_interrupt(4)
 
             elif event.type == pygame.KEYUP:
                 key = pygame.key.name(event.key)
@@ -114,6 +124,7 @@ class PROCESS:
                     self.joypad.handle_key_press(call[0], call[1])
 
             elif event.type == pygame.QUIT:
+                self.cartucho.ram.save_ram_on_disk("pokemon fire")
                 exit()
 
     def run(self):

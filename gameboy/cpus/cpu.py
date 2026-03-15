@@ -42,13 +42,10 @@ class CPU:
 
         self.debug_buffer = []
 
-
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
 
     def not_implemented(self, obj):
-        self.file.writelines(self.debug_buffer)
-        self.mmu.flush()
         print(f"opcode: {obj.current_opcode:02x}")
         exit()
 

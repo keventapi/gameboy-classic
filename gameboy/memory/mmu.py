@@ -15,9 +15,6 @@ class MMU:
         self.debug_buffer = bytearray(0xFFFF)
         self.boot_rom_enabled = True
 
-    def flush(self):
-        self.file.writelines(self.debug_buffer)
-
     def debug(self, action, addrs, value):
         if action == "read":
             self.debug_buffer.append(f"""

@@ -1,7 +1,7 @@
 class LD_SP_HL:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ld_sp_hl_instructions(self):
@@ -11,7 +11,7 @@ class LD_SP_HL:
         return instructions
 
     def execute_ld_sp_hl(self, ticks):
-        hl = (self.registers["H"] << 8) | self.registers["L"]
-        self.registers["sp"] = hl
+        hl = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
+        self.cpu.registers["sp"] = hl
         self.cpu.timer.tick(ticks)
         return ticks

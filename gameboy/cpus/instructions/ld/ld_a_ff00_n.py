@@ -2,7 +2,7 @@ class LD_A_FF00_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ld_a_ff00_n_instructions(self):
@@ -17,10 +17,10 @@ class LD_A_FF00_N:
         self.cpu.timer.tick(4)
         target_addrs = value | 0xFF00
         if update_a:
-            self.registers["A"] = self.mmu.read(target_addrs) & 0xFF
+            self.cpu.registers["A"] = self.mmu.read(target_addrs) & 0xFF
             self.cpu.timer.tick(4)
         else:
-            self.mmu.write(target_addrs, self.registers["A"])
+            self.mmu.write(target_addrs, self.cpu.registers["A"])
             self.cpu.timer.tick(4)
 
         self.cpu.timer.tick(4)

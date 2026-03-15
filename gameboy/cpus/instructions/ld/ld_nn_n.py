@@ -2,7 +2,7 @@ class LD_NN_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ld_nn_n_instructions(self):
@@ -18,6 +18,6 @@ class LD_NN_N:
 
     def ld_n_nn(self, register, ticks):
         nn = self.fetch()
-        self.registers[register] = nn
+        self.cpu.registers[register] = nn
         self.cpu.timer.tick(ticks)
         return ticks

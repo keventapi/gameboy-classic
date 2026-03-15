@@ -1,7 +1,7 @@
 class DAA:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
 
     def daa_instructions(self):
         instructions = {
@@ -10,8 +10,8 @@ class DAA:
         return instructions
 
     def execute_daa(self, ticks):
-        value = self.registers["A"] & 0xFF
-        flag = self.registers["F"]
+        value = self.cpu.registers["A"] & 0xFF
+        flag = self.cpu.registers["F"]
         old_N = (flag >> 6) & 1
         old_H = (flag >> 5) & 1
         old_C = (flag >> 4) & 1
@@ -38,6 +38,6 @@ class DAA:
         H = 0
 
         self.cpu.set_flags(Z, N, H, C)
-        self.registers["A"] = new_value & 0xFF
+        self.cpu.registers["A"] = new_value & 0xFF
         self.cpu.timer.tick(ticks)
         return ticks

@@ -1,7 +1,7 @@
 class RET:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ret_instructions(self):
@@ -12,10 +12,10 @@ class RET:
         return instructions
 
     def execute_ret(self, enable_interrupt, ticks):
-        last_state = self.registers.copy()
+        last_state = self.cpu.registers.copy()
         new_pc = self.cpu.pull16()
 
-        self.registers["pc"] = new_pc & 0xFFFF
+        self.cpu.registers["pc"] = new_pc & 0xFFFF
         if enable_interrupt:
             self.cpu.ime = True
         self.cpu.timer.tick(ticks)

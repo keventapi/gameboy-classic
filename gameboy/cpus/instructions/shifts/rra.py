@@ -1,7 +1,7 @@
 class RRA:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
 
     def rra_instructions(self):
         instructions = {
@@ -10,8 +10,8 @@ class RRA:
         return instructions
 
     def execute_rra(self, ticks):
-        value = self.registers["A"]
-        flag = self.registers["F"]
+        value = self.cpu.registers["A"]
+        flag = self.cpu.registers["F"]
         old_C = (flag >> 4) & 1
         bit0 = value & 1
         value = ((value & 0xFF) >> 1) | (old_C << 7)
@@ -20,7 +20,7 @@ class RRA:
         Z = 0
         N = 0
         H = 0
-        self.registers["A"] = value
+        self.cpu.registers["A"] = value
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
         return ticks

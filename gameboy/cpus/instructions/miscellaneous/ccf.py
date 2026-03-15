@@ -1,7 +1,7 @@
 class CCF:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
 
     def instructions_ccf(self):
         instructions = {
@@ -10,7 +10,7 @@ class CCF:
         return instructions
 
     def execute_ccf(self, ticks):
-        flag = self.registers["F"]
+        flag = self.cpu.registers["F"]
         Z = (flag >> 7) & 1
         N = 0
         H = 0

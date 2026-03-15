@@ -1,7 +1,7 @@
 class AND_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
         self.fetch = self.cpu.fetch
 
@@ -20,20 +20,20 @@ class AND_N:
         return instructions
 
     def execute_and_n(self, r, ticks):
-        result = self.registers["A"]
+        result = self.cpu.registers["A"]
         if len(r) > 1:
-            addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
+            addrs = (self.cpu.registers[r[0]] << 8) | self.cpu.registers[r[1]]
             result &= self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             imediate = self.cpu.fetch()
             result &= imediate
         else:
-            result &= self.registers[r]
+            result &= self.cpu.registers[r]
 
         Z = 1 if (result & 0xFF) == 0 else 0
         H = 1
 
         self.cpu.set_flags(Z, 0, H, 0)
-        self.registers["A"] = result & 0xFF
+        self.cpu.registers["A"] = result & 0xFF
         self.cpu.timer.tick(ticks)
         return ticks

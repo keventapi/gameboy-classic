@@ -2,7 +2,6 @@ class ADC_A_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
 
     def adc_a_n_instructions(self):
@@ -21,22 +20,22 @@ class ADC_A_N:
 
     def execute_adc_a_n(self, r, ticks):
         if r == "HL":
-            addrs = (self.registers["H"] << 8) | self.registers["L"]
+            addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             n = self.mmu.read(addrs & 0xFFFF)
         elif r == "#":
             n = self.fetch()
         else:
-            n = self.registers[r]
+            n = self.cpu.registers[r]
 
-        carry_flag = (self.registers["F"] >> 4) & 1
-        sum = n + carry_flag + self.registers["A"]
+        carry_flag = (self.cpu.registers["F"] >> 4) & 1
+        sum = n + carry_flag + self.cpu.registers["A"]
 
         Z = 1 if sum & 0xFF == 0 else 0
         N = 0
-        H = 1 if ((self.registers["A"] & 0xF) + (n & 0xF) + carry_flag) > 0xF else 0
+        H = 1 if ((self.cpu.registers["A"] & 0xF) + (n & 0xF) + carry_flag) > 0xF else 0
         C = 1 if sum > 0xFF else 0
 
-        self.registers["A"] = sum & 0xFF
+        self.cpu.registers["A"] = sum & 0xFF
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
         return ticks
