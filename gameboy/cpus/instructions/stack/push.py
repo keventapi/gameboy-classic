@@ -1,7 +1,7 @@
 class PUSH:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def push_instructions(self):
@@ -14,8 +14,8 @@ class PUSH:
         return instructions
 
     def execute_push(self, r16, ticks):
-        high = self.registers[r16[0]]
-        low = self.registers[r16[1]]
+        high = self.cpu.registers[r16[0]]
+        low = self.cpu.registers[r16[1]]
         addrs = (high << 8) | low
         self.cpu.push16(addrs)
         self.cpu.timer.tick(ticks)

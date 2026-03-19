@@ -2,7 +2,7 @@ class RLC_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.mmu = self.cpu.mmu
-        self.registers = self.cpu.registers
+        
 
     def rlc_n_instructions(self):
         instructions = {
@@ -20,11 +20,11 @@ class RLC_N:
     def execute_rlc_n(self, r, ticks):
         self.cpu.timer.tick(4)
         if r == "HL":
-            addrs = (self.registers["H"] << 8) | self.registers["L"]
+            addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             value = self.mmu.read(addrs)
             self.cpu.timer.tick(4)
         else:
-            value = self.registers[r]
+            value = self.cpu.registers[r]
 
         bit7 = (value >> 7) & 1
         value = (value << 1) & 0xFF
@@ -38,7 +38,7 @@ class RLC_N:
             self.mmu.write(addrs, value)
             self.cpu.timer.tick(4)
         else:
-            self.registers[r] = value
+            self.cpu.registers[r] = value
 
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(4)

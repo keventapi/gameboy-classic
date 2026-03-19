@@ -1,8 +1,45 @@
+import pickle
+
+
 class SWITCHABLE_RAM:
-    def __init__(self, total_banks=4, size=0x2000):
+    def __init__(self, total_banks=4, size=0x2000, save_ram=False):
         self.banks = [bytearray(size) for _ in range(total_banks)]
         self.current_bank = 0
         self.bank_size = size
+        self.save_ram = save_ram
+
+    def load_ram_from_disk(self, name):
+        print("load_ram foi executado")
+        try:
+            f = open(f"{name}.sav", "rb")
+            print("primeiro try foi")
+            try:
+                self.state = pickle.load(f)
+                self.banks = self.state["memory_banks"]
+                print("Estado reconstruído com sucesso.")
+            except (pickle.UnpicklingError, EOFError) as e:
+                print(f"Arquivo corrompido ou inválido: {e}")
+            except Exception as e:
+                print(e)
+            finally:
+                f.close()
+        except FileNotFoundError:
+            print("Nenhum save encontrado para carregar.")
+
+    def save_ram_on_disk(self, name):
+        f = open(f"{name}.sav", "wb")
+        try:
+            self.state = {
+                "memory_banks": self.banks
+            }
+            pickle.dump(self.state, f)
+            f.flush()
+            print("arquivo salvo com sucesso")
+        except Exception as e:
+            print(f"Erro ao serializar: {e}")
+        finally:
+            f.close()
+            print("Arquivo de estado fechado.")
 
     def read(self, addrs):
         if 0xA000 <= addrs < 0xC000:
@@ -45,7 +82,7 @@ class SWITCHABLE_ROM:
                 self.banks[i] += bytes([0xFF] * (self.bank_size - len(bank)))
 
     def switch_bank(self, new_bank):
-        self.current_bank = new_bank % self.num_banks
+        self.current_bank = new_bank % len(self.banks)
 
     def read(self, addrs, mode):
         if 0x0000 <= addrs < 0x4000:

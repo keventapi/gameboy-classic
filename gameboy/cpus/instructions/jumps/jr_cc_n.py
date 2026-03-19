@@ -1,7 +1,7 @@
 class JR_CC_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def jr_cc_n_instructions(self):
@@ -14,9 +14,9 @@ class JR_CC_N:
         return instructions
 
     def execute_jr_cc_n(self, condiction, ticks):
-        last_state = self.registers.copy()
+        last_state = self.cpu.registers.copy()
 
-        flag = self.registers["F"]
+        flag = self.cpu.registers["F"]
         addrs = self.cpu.fetch()
         #print("entrou no jr")
         if "Z" in condiction:
@@ -30,7 +30,7 @@ class JR_CC_N:
             n = addrs
             if n >= 0x80:
                 n -= 0x100
-            self.registers["pc"] = (self.registers["pc"] + n) & 0xFFFF
+            self.cpu.registers["pc"] = (self.cpu.registers["pc"] + n) & 0xFFFF
             self.cpu.timer.tick(ticks+4)
             # self.cpu.debug(last_state, f"jp {condiction} condictional")
             return ticks + 4

@@ -1,7 +1,6 @@
 class CALL_CC_NN:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
         self.mmu = self.cpu.mmu
 
     def call_cc_nn_instructions(self):
@@ -14,11 +13,11 @@ class CALL_CC_NN:
         return instructions
 
     def execute_call_cc_nn(self, condiction, ticks):
-        last_state = self.registers.copy()
+        last_state = self.cpu.registers.copy()
         addrs = self.cpu.fetch_16bit()
-        pc = self.registers["pc"]
+        pc = self.cpu.registers["pc"]
 
-        flags = self.registers["F"]
+        flags = self.cpu.registers["F"]
         if "Z" in condiction:
             value = (flags >> 7) & 1
         else:
@@ -27,10 +26,9 @@ class CALL_CC_NN:
         condiction_met = value == 1 if "N" not in condiction else value == 0
         if condiction_met:
             self.cpu.push16(pc)
-            self.registers["pc"] = addrs
+            self.cpu.registers["pc"] = addrs
             self.cpu.timer.tick(ticks*2)
-            # self.cpu.debug(last_state, f"CALL condictional {condiction}")
             return ticks * 2
-        # self.cpu.debug(last_state, f"CALL condictional {condiction}")
+
         self.cpu.timer.tick(ticks)
         return ticks

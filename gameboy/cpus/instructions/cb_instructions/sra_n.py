@@ -1,7 +1,7 @@
 class SRA_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def sra_n_instructions(self):
@@ -20,11 +20,11 @@ class SRA_N:
     def execute_sra_n(self, r, ticks):
         self.cpu.timer.tick(4)
         if r == "HL":
-            addrs = (self.registers["H"] << 8) | self.registers["L"]
+            addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             value = self.mmu.read(addrs)
             self.cpu.timer.tick(4)
         else:
-            value = self.registers[r]
+            value = self.cpu.registers[r]
         bit7 = (value >> 7) & 1
         C = value & 1
         value = (value >> 1) & 0xFF
@@ -38,7 +38,7 @@ class SRA_N:
             self.mmu.write(addrs, value)
             self.cpu.timer.tick(4)
         else:
-            self.registers[r] = value
+            self.cpu.registers[r] = value
 
         self.cpu.timer.tick(4)
         return ticks

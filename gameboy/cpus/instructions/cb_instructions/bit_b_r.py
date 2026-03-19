@@ -1,7 +1,7 @@
 class BIT_B_R:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def bit_b_r_instructions(self):
@@ -74,14 +74,14 @@ class BIT_B_R:
         return instructions
 
     def execute_bit_b_r(self, b, r, ticks):
-        flag = self.registers["F"]
+        flag = self.cpu.registers["F"]
         if r == "HL":
-            addrs = (self.registers["H"] << 8) | self.registers["L"]
+            addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
             self.cpu.timer.tick(4)
             value = self.mmu.read(addrs)
             self.cpu.timer.tick(4)
         else:
-            value = self.registers[r]
+            value = self.cpu.registers[r]
             self.cpu.timer.tick(4)
 
         bitx = (value >> b) & 1

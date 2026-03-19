@@ -1,7 +1,7 @@
 class JP_NN:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def jp_nn_instructions(self):
@@ -12,12 +12,12 @@ class JP_NN:
         return instructions
 
     def execute_jp_nn(self, r, ticks):
-        last_state = self.registers.copy()
+        last_state = self.cpu.registers.copy()
         if r == "#":
             addrs = self.cpu.fetch_16bit()
         elif r == "HL":
-            addrs = (self.registers["H"] << 8) | self.registers["L"]
-        self.registers["pc"] = addrs & 0xFFFF
+            addrs = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
+        self.cpu.registers["pc"] = addrs & 0xFFFF
         self.cpu.timer.tick(ticks)
         # self.cpu.debug(last_state, f"jp {r} non condictional")
         return ticks

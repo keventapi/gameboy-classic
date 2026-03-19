@@ -2,7 +2,7 @@ class LD_HL_SP_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ld_hl_sp_n_instructions(self):
@@ -18,11 +18,11 @@ class LD_HL_SP_N:
         if n >= 0x80:
             n -= 0x100
 
-        sp = self.registers["sp"]
+        sp = self.cpu.registers["sp"]
         addrs = (sp + n) & 0xFFFF
 
-        self.registers["H"] = (addrs >> 8) & 0xFF
-        self.registers["L"] = (addrs & 0xFF)
+        self.cpu.registers["H"] = (addrs >> 8) & 0xFF
+        self.cpu.registers["L"] = (addrs & 0xFF)
 
         H = 1 if ((sp & 0xF) + (fetch & 0xF)) > 0xF else 0
         C = 1 if ((sp & 0xFF) + fetch) > 0xFF else 0

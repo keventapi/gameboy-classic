@@ -8,7 +8,7 @@ class CARTRIDGE:
         header_byte = rom_bytes[0x0147]
         print("header_byte:", f"{header_byte:02x}")
 
-        self.ram = self.create_ram(rom_bytes)
+        self.ram = self.create_ram(rom_bytes, header_byte)
         self.mbc_version = self.get_mbc(header_byte)
 
         self.mbc = MBC(self.ram, self.rom, self.mbc_version)
@@ -25,7 +25,7 @@ class CARTRIDGE:
         elif header_byte == 0x00:
             return 0
 
-    def create_ram(self, rom_bytes):
+    def create_ram(self, rom_bytes, header_byte):
         ram_size_code = rom_bytes[0x0149]
         size_map = {
             0x00: 0,
@@ -38,8 +38,13 @@ class CARTRIDGE:
         if total_size == 0: return None
 
         num_banks = total_size // 0x2000
+        if header_byte == [0x13]:
+            save_ram = True
+        else:
+            save_ram = False
 
-        return SWITCHABLE_RAM(total_banks=num_banks, size=0x2000)
+        switchable_ram = SWITCHABLE_RAM(total_banks=num_banks, size=0x2000, save_ram=True)
+        return switchable_ram
 
     def read(self, addrs):
         return self.mbc.handle_read(addrs)

@@ -1,7 +1,7 @@
 class JR_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def jr_n_instructions(self):
@@ -11,12 +11,12 @@ class JR_N:
         return instructions
 
     def execute_jr_n(self, ticks):
-        last_state = self.registers.copy()
+        last_state = self.cpu.registers.copy()
         addrs = self.cpu.fetch()
         n = addrs
         if n >= 0x80:
             n -= 0x100
-        self.registers["pc"] = (self.registers["pc"] + n) & 0xFFFF
+        self.cpu.registers["pc"] = (self.cpu.registers["pc"] + n) & 0xFFFF
         # self.cpu.debug(last_state, f"jr {n}")
         self.cpu.timer.tick(ticks)
         return ticks

@@ -1,7 +1,7 @@
 class LD_A_FF00_C:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def ld_a_ff00_c_instructions(self):
@@ -12,10 +12,10 @@ class LD_A_FF00_C:
         return instructions
 
     def execute_ld_a_FF00_C(self, read_a: bool, ticks):
-        addrs = 0xFF00 + (self.registers["C"] & 0xFF)
+        addrs = 0xFF00 + (self.cpu.registers["C"] & 0xFF)
         if read_a:
-            self.registers["A"] = (self.mmu.read(addrs) & 0xFF)
+            self.cpu.registers["A"] = (self.mmu.read(addrs) & 0xFF)
         else:
-            self.mmu.write(addrs & 0xFFFF, self.registers["A"] & 0xFF)
+            self.mmu.write(addrs & 0xFFFF, self.cpu.registers["A"] & 0xFF)
         self.cpu.timer.tick(ticks)
         return ticks

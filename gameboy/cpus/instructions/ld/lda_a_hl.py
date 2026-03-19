@@ -1,7 +1,7 @@
 class LDACTION_A_HL:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def lda_a_hl_instruction(self):
@@ -14,33 +14,33 @@ class LDACTION_A_HL:
         return instructions
 
     def execute_ldd(self, read_hl, ticks):
-        hl = (self.registers["H"] << 8) | self.registers["L"]
+        hl = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
         if read_hl:
-            self.registers["A"] = self.mmu.read(hl & 0xFFFF)
+            self.cpu.registers["A"] = self.mmu.read(hl & 0xFFFF)
         else:
-            self.mmu.write(hl, self.registers["A"])
+            self.mmu.write(hl, self.cpu.registers["A"])
 
         hl -= 1
         hl &= 0xFFFF
         h = (hl >> 8) & 0xFF
         l = hl & 0xFF
-        self.registers["H"] = h
-        self.registers["L"] = l
+        self.cpu.registers["H"] = h
+        self.cpu.registers["L"] = l
         self.cpu.timer.tick(ticks)
         return ticks
 
     def execute_ldi(self, read_hl, ticks):
-        hl = (self.registers["H"] << 8) | self.registers["L"]
+        hl = (self.cpu.registers["H"] << 8) | self.cpu.registers["L"]
         if read_hl:
-            self.registers["A"] = self.mmu.read(hl & 0xFFFF)
+            self.cpu.registers["A"] = self.mmu.read(hl & 0xFFFF)
         else:
-            self.mmu.write(hl, self.registers["A"])
+            self.mmu.write(hl, self.cpu.registers["A"])
 
         hl += 1
         hl &= 0xFFFF
         h = (hl >> 8) & 0xFF
         l = hl & 0xFF
-        self.registers["H"] = h
-        self.registers["L"] = l
+        self.cpu.registers["H"] = h
+        self.cpu.registers["L"] = l
         self.cpu.timer.tick(ticks)
         return ticks

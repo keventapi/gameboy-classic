@@ -1,7 +1,6 @@
 class ADD_SP_N:
     def __init__(self, cpu):
         self.cpu = cpu
-        self.registers = self.cpu.registers
         self.fetch = self.cpu.fetch
 
     def instructions_add_sp_n(self):
@@ -16,12 +15,12 @@ class ADD_SP_N:
         if signed_offset > 0x7F:
             signed_offset -= 0x100
 
-        src = self.registers["sp"]
+        src = self.cpu.registers["sp"]
         Z = 0
         N = 0
         H = 1 if (src & 0xF) + (imediate & 0xF) > 0xF else 0
         C = 1 if (src & 0xFF) + imediate > 0xFF else 0
         self.cpu.set_flags(Z, N, H, C)
-        self.registers["sp"] = (src + signed_offset) & 0xFFFF
+        self.cpu.registers["sp"] = (src + signed_offset) & 0xFFFF
         self.cpu.timer.tick(ticks)
         return ticks

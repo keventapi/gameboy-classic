@@ -37,7 +37,7 @@ class MBC:
         elif self.mbc_version == 2:
             raise NotImplementedError(f"mbc version: {self.mbc_version} not implemented yet")
         elif self.mbc_version == 3:
-            raise NotImplementedError(f"mbc version: {self.mbc_version} not implemented yet")
+            return self.read_mbc3(addrs)
         elif self.mbc_version == 5:
             raise NotImplementedError(f"mbc version: {self.mbc_version} not implemented yet")
         elif self.mbc_version == 0:
@@ -77,3 +77,33 @@ class MBC:
 
         if 0x0000 <= addrs < 0x8000:
             return self.rom.read(addrs, self.mode)
+
+    def write_mbc3(self, addrs, value):
+        if 0x2000 <= addrs < 0x4000:
+            self.bank = value & 0x7F if value != 0 else 1
+            self.rom.switch_bank(self.bank)
+
+        elif 0x0000 <= addrs < 0x2000:
+            self.ram_enabled = (value & 0x0F) == 0x0A
+
+        elif 0x4000 <= addrs < 0x6000:
+            if value <= 0x07:
+                if self.ram is not None:
+                    self.ram_bank = value & (len(self.ram.banks) - 1)
+                    self.ram.switch_bank(self.ram_bank)
+            else:
+                raise NotImplementedError("RTC NOT IMPLEMENTED YET")
+
+        elif 0xA000 <= addrs < 0xC000:
+            if self.ram_enabled and self.ram is not None:
+                self.ram.write(addrs, value)
+
+    def read_mbc3(self, addrs):
+        if 0x0000 <= addrs < 0x8000:
+            return self.rom.read(addrs, 0)
+
+        elif 0xA000 <= addrs < 0xC000:
+            if self.ram_enabled:
+                return self.ram.read(addrs)
+
+        return 0xFF

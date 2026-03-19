@@ -2,7 +2,7 @@ class CP_N:
     def __init__(self, cpu):
         self.cpu = cpu
         self.fetch = self.cpu.fetch
-        self.registers = self.cpu.registers
+        
         self.mmu = self.cpu.mmu
 
     def cp_n_instructions(self):
@@ -20,22 +20,22 @@ class CP_N:
         return instructions
 
     def execute_cp_n(self, r, ticks):
-        result = self.registers["A"]
+        result = self.cpu.registers["A"]
         if len(r) > 1:
-            addrs = (self.registers[r[0]] << 8) | self.registers[r[1]]
+            addrs = (self.cpu.registers[r[0]] << 8) | self.cpu.registers[r[1]]
             operand = self.mmu.read(addrs & 0xFFFF)
             result -= operand
         elif r == "#":
             operand = self.fetch()
             result -= operand
         else:
-            operand = self.registers[r]
+            operand = self.cpu.registers[r]
             result -= operand
 
         Z = 1 if (result & 0xFF) == 0 else 0
         N = 1
-        H = 1 if (self.registers["A"] & 0xF) < (operand & 0xF) else 0
-        C = 1 if (self.registers["A"] & 0xFF) < (operand & 0xFF) else 0
+        H = 1 if (self.cpu.registers["A"] & 0xF) < (operand & 0xF) else 0
+        C = 1 if (self.cpu.registers["A"] & 0xFF) < (operand & 0xFF) else 0
 
         self.cpu.set_flags(Z, N, H, C)
         self.cpu.timer.tick(ticks)
