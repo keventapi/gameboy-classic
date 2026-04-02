@@ -59,13 +59,7 @@ class SWITCHABLE_RAM:
             self.banks[self.current_bank][offset] = value
 
     def switch_bank(self, new_bank):
-        if 0 <= new_bank < len(self.banks):
-            self.current_bank = new_bank
-        else:
-            try:
-                self.current_bank = new_bank % len(self.banks)
-            except:
-                self.current_bank = 0
+        self.current_bank = new_bank % len(self.banks)
 
 class SWITCHABLE_ROM:
     def __init__(self, rom_bytes, size=0x4000):
@@ -82,16 +76,23 @@ class SWITCHABLE_ROM:
                 self.banks[i] += bytes([0xFF] * (self.bank_size - len(bank)))
 
     def switch_bank(self, new_bank):
-        self.current_bank = new_bank % len(self.banks)
+        self.current_bank = new_bank
 
-    def read(self, addrs, mode):
-        if 0x0000 <= addrs < 0x4000:
-            if mode == 1:
-                return self.banks[self.bank_zero % len(self.banks)][addrs]
-            else:
+    def read(self, addrs, mode, mbc5=False):
+        if not mbc5:
+            if 0x0000 <= addrs < 0x4000:
+                if mode == 1:
+                    return self.banks[self.bank_zero % len(self.banks)][addrs]
+                else:
+                    return self.banks[0][addrs]
+
+            elif 0x4000 <= addrs < 0x8000:
+                offset = addrs - 0x4000
+                return self.banks[self.current_bank][offset]
+        else:
+            if 0x0000 <= addrs < 0x4000:
                 return self.banks[0][addrs]
-
-        elif 0x4000 <= addrs < 0x8000:
-            offset = addrs - 0x4000
-            return self.banks[self.current_bank][offset]
+            else:
+                offset = addrs - 0x4000
+                return self.banks[self.current_bank][offset]
         return 0xFF

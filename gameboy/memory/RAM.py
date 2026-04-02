@@ -3,11 +3,20 @@ class RAM:
         self.memory = bytearray(size)
 
     def write(self, addrs, value):
-        offset = addrs & 0x1FFF
-        self.memory[offset] = value
+        if 0xC000 <= addrs < 0xE000:
+            offset = addrs - 0xC000
+            self.memory[offset] = value
+        else:
+            offset = addrs - 0xE000
+            self.memory[offset] = value
 
     def read(self, addrs):
-        return self.memory[addrs & 0x1FFF]
+        if 0xC000 <= addrs < 0xE000:
+            offset = addrs - 0xC000
+            return self.memory[offset]
+        else:
+            offset = addrs - 0xE000
+            return self.memory[offset]
 
 
 class HRAM:

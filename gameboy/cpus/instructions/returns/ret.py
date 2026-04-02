@@ -12,12 +12,10 @@ class RET:
         return instructions
 
     def execute_ret(self, enable_interrupt, ticks):
-        last_state = self.cpu.registers.copy()
         new_pc = self.cpu.pull16()
 
         self.cpu.registers["pc"] = new_pc & 0xFFFF
         if enable_interrupt:
             self.cpu.ime = True
         self.cpu.timer.tick(ticks)
-        # self.cpu.debug(last_state, f"ret [enable interrupt: {enable_interrupt}]")
         return ticks

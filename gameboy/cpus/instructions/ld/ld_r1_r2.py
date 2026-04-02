@@ -96,6 +96,6 @@ class LD_R1_R2:
             self.mmu.write(hl, n)
             self.cpu.timer.tick(4)
         else:
-            self.cpu.registers[r1] = self.cpu.registers[r2] & 0xFF
+            self.cpu.registers[r1] = self.cpu.registers[r2]
         self.cpu.timer.tick(4)
         return ticks

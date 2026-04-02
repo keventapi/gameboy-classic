@@ -18,6 +18,8 @@ class LD_NN_N:
 
     def ld_n_nn(self, register, ticks):
         nn = self.fetch()
+        if register == "C" and nn == 30:
+            print("chegou")
         self.cpu.registers[register] = nn
         self.cpu.timer.tick(ticks)
         return ticks

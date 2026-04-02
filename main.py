@@ -14,6 +14,8 @@ import numpy as np
 
 class PROCESS:
     def __init__(self):
+        self.pause = False
+
         self.frame_count = 0
         self.last_time = pygame.time.get_ticks()
 
@@ -116,12 +118,18 @@ class PROCESS:
                     if call[1] != "state":
                         self.joypad.handle_key_press(call[0], call[1])
                         self.joypad.interrupter.request_interrupt(4)
+                    elif call[1] == "state":
+                        if call[0] == 5:
+                            self.cpu.print_opcode = not self.cpu.print_opcode
+                        if call[0] == 4:
+                            self.pause = not self.pause
 
             elif event.type == pygame.KEYUP:
                 key = pygame.key.name(event.key)
                 call = self.controller_map.get(key)
                 if call is not None:
-                    self.joypad.handle_key_press(call[0], call[1])
+                    if call[1] != "state":
+                        self.joypad.handle_key_press(call[0], call[1])
 
             elif event.type == pygame.QUIT:
                 self.cartucho.ram.save_ram_on_disk("pokemon fire")
@@ -130,7 +138,10 @@ class PROCESS:
     def run(self):
         event_counter = 0
         while self.rodando:
-            tick = self.cpu.step()
+            if not self.pause:
+                tick = self.cpu.step()
+            else:
+                tick = 4
             event_counter += tick
             if event_counter > 1000:
                 self.handle_event()

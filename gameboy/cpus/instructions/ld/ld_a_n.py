@@ -35,16 +35,16 @@ class LD_A_N:
         if r2 == "nn":
             immediate = self.cpu.fetch_16bit()
             self.cpu.timer.tick(8)
-            self.cpu.registers[r1] = self.mmu.read(immediate) & 0xFF
+            self.cpu.registers[r1] = self.mmu.read(immediate)
             self.cpu.timer.tick(4)
         elif r2 == "#":
-            immediate = self.fetch() & 0xFF
+            immediate = self.fetch()
             self.cpu.timer.tick(4)
-            self.cpu.registers[r1] = immediate & 0xFF
+            self.cpu.registers[r1] = immediate
         else:
             high, low = r2[0], r2[1]
             immediate = (self.cpu.registers[high] << 8) | self.cpu.registers[low]
-            self.cpu.registers[r1] = self.mmu.read(immediate & 0xFFFF) & 0xFF
+            self.cpu.registers[r1] = self.mmu.read(immediate & 0xFFFF)
             self.cpu.timer.tick(4)
         self.cpu.timer.tick(4)
         return ticks

@@ -30,7 +30,7 @@ class DEC_N:
 
         Z = 1 if ((value - 1) & 0xFF) == 0 else 0
         N = 1
-        H = 1 if ((value & 0xF) < (1 & 0xF)) else 0
+        H = 1 if (value & 0x0F) == 0 else 0
         C = (self.cpu.registers["F"] >> 4) & 1
 
         self.cpu.set_flags(Z, N, H, C)

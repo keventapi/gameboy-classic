@@ -44,7 +44,7 @@ class TIMER:
         if self.counters[1] > 0xFF:
             self.counters[1] = 0
             self.reload_state = 4
-            # self.interrupter.request_interrupt(2)
+            self.interrupter.request_interrupt(2)
 
     def dma_handler(self, ticks):
         for _ in range(ticks):
@@ -57,7 +57,9 @@ class TIMER:
                 self.ppu.dma_src_addrs = None
 
     def tick(self, ticks):
+        dma_counter = 0
         for _ in range(ticks):
+            dma_counter += 1
             self.last_value = self.internal_counter
             self.internal_counter = (self.internal_counter + 1) & 0xFFFF
 
@@ -72,8 +74,9 @@ class TIMER:
                 self.reload_state -= 1
                 if self.reload_state == 0:
                     self.counters[1] = self.counters[2]
-
-        #  self.dma_handler(ticks)
+            if dma_counter == 4:
+                dma_counter = 0
+                self.dma_handler(ticks)
         self.ppu.tick(ticks)
 
     def write(self, addrs, value):

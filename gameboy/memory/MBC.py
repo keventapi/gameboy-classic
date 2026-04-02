@@ -7,6 +7,8 @@ class MBC:
         self.mbc_version = mbc_version
         self.bank_lower_bits = 1
         self.ram_bank = 0
+        self.lsb_bank = 0
+        self.msb_bank = 0
         self.bank_high_bits = 0
 
     def select_rom_bank(self):
@@ -39,7 +41,7 @@ class MBC:
         elif self.mbc_version == 3:
             return self.read_mbc3(addrs)
         elif self.mbc_version == 5:
-            raise NotImplementedError(f"mbc version: {self.mbc_version} not implemented yet")
+            return self.read_mbc5(addrs)
         elif self.mbc_version == 0:
             return self.rom.read(addrs, 0)
         return 0xFF
@@ -98,6 +100,24 @@ class MBC:
             if self.ram_enabled and self.ram is not None:
                 self.ram.write(addrs, value)
 
+    def write_mbc5(self, addr, value):
+        if 0x0000 <= addr < 0x2000:
+            self.ram_enabled = (value & 0x0F) == 0x0A
+
+        elif 0x2000 <= addr < 0x3000:
+            self.lsb_bank = value
+            self.bank = (self.msb_bank << 8) | self.lsb_bank
+            self.rom.switch_bank(self.bank)
+        elif 0x3000 <= addr < 0x4000:
+            self.msb_bank = value & 0x01
+            self.bank = (self.msb_bank << 8) | self.lsb_bank
+            self.rom.switch_bank(self.bank)
+        elif 0x4000 <= addr < 0x6000:
+            if self.ram: self.ram.switch_bank(value & 0x0F)
+        elif 0xA000 <= addr < 0xC000:
+            if self.ram_enabled and self.ram:
+                self.ram.write(addr, value)
+
     def read_mbc3(self, addrs):
         if 0x0000 <= addrs < 0x8000:
             return self.rom.read(addrs, 0)
@@ -106,4 +126,12 @@ class MBC:
             if self.ram_enabled:
                 return self.ram.read(addrs)
 
+        return 0xFF
+
+    def read_mbc5(self, addrs):
+        if 0x0000 <= addrs < 0x8000:
+            return self.rom.read(addrs, 0, True)
+        elif 0xA000 <= addrs < 0xC000:
+            if self.ram_enabled:
+                return self.ram.read(addrs)
         return 0xFF

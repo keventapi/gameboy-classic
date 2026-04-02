@@ -6,7 +6,6 @@ class CPU:
     def __init__(self, mmu, timer):
         self.read_value = 0
         self.value = 0x00
-        self.buffer_opcode = []
 
         self.is_halted = False
         self.di_pending = False
@@ -32,15 +31,9 @@ class CPU:
                           "D": 0, "E": 0,
                           "H": 0, "L": 0}
 
-        self.limit = 0xFFFE
         self.assert_instructions()
         self.handle_builder()
-        self.last_opcode = "NOP"
-        self.opcode = None
-
-        self.file = open("debug.txt", "w")
-
-        self.debug_buffer = []
+        self.print_opcode = False
 
     def assert_instructions(self):
         self.instructions = INSTRUCTIONS(self)
@@ -98,29 +91,9 @@ class CPU:
         value_ie = self.mmu.read(0xFFFF) & 0x1F
         return (value_if & value_ie & 0x1F) != 0
 
-    def debug(self, last_state, opcode):
-        self.debug_buffer.append(f"""
----------------------------------------------------------------------------------------------------------------------------------
-OPCODE: last: {self.last_opcode} current: {opcode}
-Ra: last:{last_state["A"]:02x} current: {self.registers["A"]:02x}
-Rb: last:{last_state["B"]:02x} current: {self.registers["B"]:02x}
-Rc: last:{last_state["C"]:02x} current: {self.registers["C"]:02x}
-Rd: last:{last_state["D"]:02x} current: {self.registers["D"]:02x}
-Re: last:{last_state["E"]:02x} current: {self.registers["E"]:02x}
-Rh: last:{last_state["H"]:02x} current: {self.registers["H"]:02x}
-Rl: last:{last_state["L"]:02x} current: {self.registers["L"]:02x}
-Rf: last:{last_state["F"]:08b} current: {self.registers["F"]:08b}
-Rsp: last:{last_state["sp"]:04x} current: {self.registers["sp"]:04x}
-Rpc: last:{last_state["pc"]:04x} current: {self.registers["pc"]:04x}
----------------------------------------------------------------------------------------------------------------------------------
-
-""")
-        self.last_opcode = opcode
 
     def step(self):
-        if len(self.registers) > 10:
-            print(f"registrador novo ta sendo criado em algum local, last opcode: {self.last_opcode:02x} \n {self.registers}")
-        last_state = self.registers.copy()
+        opcode = 0
 
         if self.ceck_if_ie():
             if self.is_halted:
@@ -130,8 +103,6 @@ Rpc: last:{last_state["pc"]:04x} current: {self.registers["pc"]:04x}
 
         if not self.is_halted:
             opcode = self.fetch()
-            self.opcode = opcode
-            self.current_opcode = opcode
             callback = self.decode(opcode)
             if self.ei_pending or self.di_pending:
                 ticks = callback(self)
@@ -141,8 +112,8 @@ Rpc: last:{last_state["pc"]:04x} current: {self.registers["pc"]:04x}
         else:
             self.timer.tick(4)
             ticks = 4
-        # self.debug(last_state, opcode)
-        self.last_opcode = self.opcode
+        if self.print_opcode:
+            print(f"opcode: {opcode:02x}")
         return ticks
 
     def push8(self, value):

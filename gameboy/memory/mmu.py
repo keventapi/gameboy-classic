@@ -11,28 +11,14 @@ class MMU:
         self.hram = hram
         self.ppu = ppu
         self.interrupt_controller = interrupt_controller
-        self.file = open("mmu_debug.txt", "w")
-        self.debug_buffer = bytearray(0xFFFF)
+        self.last_mbc = 0
         self.boot_rom_enabled = True
-
-    def debug(self, action, addrs, value):
-        if action == "read":
-            self.debug_buffer.append(f"""
---------------------------------------------------------------------------------
-action: {action}
-addrs: {addrs:04x}
-return: {value:02x}
-""")
-        else:
-            self.debug_buffer.append(f"""
---------------------------------------------------------------------------------
-action: {action}
-addrs: {addrs:04x}
-value: {value:02x}
-""")
 
     def read(self, addrs, dma_mode=False):
         if self.boot_rom_enabled and addrs < 0x100:
+            if self.last_mbc == 0:
+                self.last_mbc = self.mbc.mbc_version
+                self.mbc.mbc_version = 0
             return self.boot_rom[addrs]
 
         if self.ppu.dma_block > 0 and not dma_mode:
@@ -42,16 +28,20 @@ value: {value:02x}
             value = 0xFF
             return value
 
+        
         if 0x0000 <= addrs < 0x8000 or 0xA000 <= addrs < 0xC000:
             value = self.mbc.handle_read(addrs)
 
+
         elif 0xC000 <= addrs < 0xFE00:
             value = self.ram.read(addrs)
-        
-        elif 0xFF40 <= addrs < 0xFF4C:
-            value = self.ppu.read(addrs)
+
         elif 0xFE00 <= addrs < 0xFEA0:
             value = self.ppu.read_oam(addrs)
+
+        elif 0xFF40 <= addrs < 0xFF4C:
+            value = self.ppu.read(addrs)
+        
         elif 0x8000 <= addrs < 0xA000:
             value = self.ppu.read_vram(addrs)
         
@@ -68,15 +58,14 @@ value: {value:02x}
             value = self.interrupt_controller.read_ie()
         else:
             value = 0xFF
-
-        # self.debug("read", addrs, value)
         return value
 
     def write(self, addrs, value, dma_mode=False):
+        # print(f"{addrs:04x}: {value:02x}")
         if addrs == 0xFF50:
             self.boot_rom_enabled = False
+            self.mbc.mbc_version = self.last_mbc
 
-        # self.debug("write", addrs, value)
         if self.ppu.dma_block > 0 and not dma_mode:
             if 0xFF80 <= addrs < 0xFFFF:
                 self.hram.write(addrs, value)
@@ -84,6 +73,9 @@ value: {value:02x}
 
         if 0x0000 <= addrs < 0x8000 or 0xA000 <= addrs < 0xC000:
             self.mbc.handle_write(addrs, value)
+
+        elif 0xC000 <= addrs < 0xFE00:
+            self.ram.write(addrs, value)
 
         elif 0xFF40 <= addrs < 0xFF4C:
             self.ppu.write(addrs, value)
@@ -95,8 +87,7 @@ value: {value:02x}
         elif 0xFF04 <= addrs < 0xFF08:
             self.timer.write(addrs, value)
 
-        elif 0xC000 <= addrs < 0xFE00:
-            self.ram.write(addrs, value)
+        
  
         elif 0xFF80 <= addrs < 0xFFFF:
             self.hram.write(addrs, value)
@@ -108,4 +99,3 @@ value: {value:02x}
             self.interrupt_controller.write_ie(value)
         else:
             return
-            #print(f"escrita em endereço invalido: {addrs:04x} valor: {value:02x}")

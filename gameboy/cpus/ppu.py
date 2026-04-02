@@ -266,8 +266,6 @@ class PPU:
     def render_scanline(self):
         render_state = self.registers[0]
         bg_n_window_enabled = render_state & 1
-        if not bg_n_window_enabled:
-            return self.handle_white_board()
         window_enabled = (render_state >> 5) & 1
         sprite_enabled = (render_state >> 1) & 1
         global_y = (self.registers[4] + self.registers[2]) & 0xFF
@@ -285,11 +283,12 @@ class PPU:
         for pixel_x in range(160):
             global_x = (pixel_x + self.registers[3]) & 0xFF
             pixel_color = 0
-
-            bg_pixel_color = self.render_bg(render_state, tile_row, global_y, global_x)
-
+            bg_pixel_color = 0
+            if bg_n_window_enabled:
+                bg_pixel_color = self.render_bg(render_state, tile_row, global_y, global_x)
+            
             trigger = self.registers[11] - 7
-            if window_enabled and self.registers[4] >= self.registers[10] and pixel_x >= trigger:
+            if bg_n_window_enabled and window_enabled and self.registers[4] >= self.registers[10] and pixel_x >= trigger:
                 w_pixel_color = self.render_window(render_state, pixel_x)
                 window_rendered = True
 
