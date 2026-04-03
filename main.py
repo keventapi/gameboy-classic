@@ -8,6 +8,7 @@ from gameboy.memory.mmu import MMU
 from gameboy.memory.RAM import RAM, VRAM, HRAM
 from gameboy.cpus.ppu import PPU
 from gameboy.memory.OAM import OAM
+from gameboy.IO.apu import APU
 import pygame
 import numpy as np
 
@@ -79,7 +80,8 @@ class PROCESS:
         self.timer = TIMER(self.ppu)
         self.joypad = JOYPAD()
         self.hram = HRAM()
-        self.mmu = MMU(self.ram, self.cartucho.mbc, self.timer, self.hram, self.joypad, self.interrupt_controller,self.ppu)
+        self.apu = APU()
+        self.mmu = MMU(self.ram, self.cartucho.mbc, self.timer, self.hram, self.joypad, self.interrupt_controller,self.ppu, self.apu)
 
         self.mmu.boot_rom = self.get_boot_rom()
         self.timer.mmu = self.mmu
@@ -121,7 +123,7 @@ class PROCESS:
                     elif call[1] == "state":
                         if call[0] == 5:
                             self.cpu.print_opcode = not self.cpu.print_opcode
-                        if call[0] == 4:
+                        elif call[0] == 4:
                             self.pause = not self.pause
 
             elif event.type == pygame.KEYUP:

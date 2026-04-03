@@ -3,13 +3,14 @@ import sys
 class MMU:
     def __init__(self, ram, mbc, timer,
                  hram, joypad, interrupt_controller,
-                 ppu):
+                 ppu, apu):
         self.ram = ram
         self.mbc = mbc
         self.timer = timer
         self.joypad = joypad
         self.hram = hram
         self.ppu = ppu
+        self.apu = apu
         self.interrupt_controller = interrupt_controller
         self.last_mbc = 0
         self.boot_rom_enabled = True
@@ -32,9 +33,11 @@ class MMU:
         if 0x0000 <= addrs < 0x8000 or 0xA000 <= addrs < 0xC000:
             value = self.mbc.handle_read(addrs)
 
-
         elif 0xC000 <= addrs < 0xFE00:
             value = self.ram.read(addrs)
+
+        elif 0xFF10 <= addrs < 0xff40 and addrs != 0xFF15:
+            value = self.apu.read(addrs)
 
         elif 0xFE00 <= addrs < 0xFEA0:
             value = self.ppu.read_oam(addrs)
@@ -76,6 +79,9 @@ class MMU:
 
         elif 0xC000 <= addrs < 0xFE00:
             self.ram.write(addrs, value)
+
+        elif 0xFF10 <= addrs < 0xff40 and addrs != 0xFF15:
+            self.apu.write(addrs, value)
 
         elif 0xFF40 <= addrs < 0xFF4C:
             self.ppu.write(addrs, value)
